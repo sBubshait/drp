@@ -73,4 +73,30 @@ public class FeedService {
         return null; // or throw an exception if item type is unknown
     }
   }
+
+  public boolean voteOnPoll(Long pollId, Integer optionIndex) {
+    try {
+      Poll poll = pollRepository.findById(pollId).orElse(null);
+
+      if (poll == null) {
+        return false;
+      }
+
+      // Validate option index
+      if (optionIndex < 0 || optionIndex >= poll.getOptions().size()) {
+        return false;
+      }
+
+      // Use the existing addResponse method from Poll entity
+      poll.addResponse(optionIndex);
+
+      // Save the updated poll
+      pollRepository.save(poll);
+
+      return true;
+    } catch (Exception e) {
+      System.err.println("Error voting on poll: " + e.getMessage());
+      return false;
+    }
+  }
 }

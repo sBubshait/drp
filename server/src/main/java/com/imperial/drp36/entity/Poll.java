@@ -4,17 +4,19 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "polls")
 @DiscriminatorValue("poll")
 public class Poll extends FeedItem {
-  @Column(name = "options", columnDefinition = "JSON")
-  @Convert(converter = StringListConverter.class)
+  @Column(name = "options")
+  @JdbcTypeCode(SqlTypes.JSON)
   private List<String> options = new ArrayList<>();
 
-  @Column(name = "response_counts", columnDefinition = "JSON")
-  @Convert(converter = LongListConverter.class)
+  @Column(name = "response_counts")
+  @JdbcTypeCode(SqlTypes.JSON)
   private List<Long> responseCounts = new ArrayList<>();
 
   @Column(name = "total_responses")
