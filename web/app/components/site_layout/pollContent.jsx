@@ -14,7 +14,7 @@ export default function PollContent({content}) {
   
   async function onSelectOption(index) {
     try {
-      const response = await fetch(`http://drp-api.saleh.host/vote?pollId=${id}&optionIndex=${index}`, {
+      const response = await fetch(`https://drp-api.saleh.host/vote?pollId=${id}&optionIndex=${index}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
