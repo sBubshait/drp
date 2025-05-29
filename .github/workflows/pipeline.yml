@@ -20,7 +20,7 @@ jobs:
       - name: Docker Compose Build
         run: docker compose build
 
-   build-and-push:
+  build_and_push:
     name: Build and Push Docker Images
     runs-on: ubuntu-latest
     environment: production
