@@ -1,64 +1,86 @@
 package com.imperial.drp36.entity;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "questions")
-public class Question {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+@DiscriminatorValue("QUESTION")
+public class Question extends FeedItem {
+  @Column(name = "options", columnDefinition = "JSON")
+  @Convert(converter = StringListConverter.class)
+  private List<String> options = new ArrayList<>();
 
-  @Column(nullable = false, length = 500)
-  private String title;
+  @Column(name = "correct_answer_index")
+  private Integer correctAnswerIndex;
 
-  @Column(columnDefinition = "TEXT")
-  private String context;
+  @Column(name = "is_correctable")
+  private Boolean isCorrectable = false;
 
-  @Column(nullable = false, length = 200)
-  private String option1;
+  @Column(name = "has_answer")
+  private Boolean hasAnswer = false;
 
-  @Column(nullable = false, length = 200)
-  private String option2;
+  @Column(name = "correct_feedback", columnDefinition = "TEXT")
+  private String correctFeedback;
 
-  @Column(nullable = false, length = 200)
-  private String option3;
+  @Column(name = "incorrect_feedback", columnDefinition = "TEXT")
+  private String incorrectFeedback;
 
-  @Column(nullable = false, length = 200)
-  private String option4;
+  @Column(name = "general_answer", columnDefinition = "TEXT")
+  private String generalAnswer;
 
-  // Default constructor
-  public Question() {}
+  // Constructors
+  public Question() {
+    super();
+  }
 
-  // Constructor
-  public Question(String title, String option1, String option2, String option3, String option4, String context) {
-    this.title = title;
-    this.option1 = option1;
-    this.option2 = option2;
-    this.option3 = option3;
-    this.option4 = option4;
-    this.context = context;
+  public Question(String title, String context, String createdBy,
+      List<String> options, Boolean isCorrectable) {
+    super(title, context, createdBy);
+    this.options = options != null ? new ArrayList<>(options) : new ArrayList<>();
+    this.isCorrectable = isCorrectable;
   }
 
   // Getters and Setters
-  public Long getId() { return id; }
-  public void setId(Long id) { this.id = id; }
+  public List<String> getOptions() { return options; }
+  public void setOptions(List<String> options) {
+    this.options = options != null ? new ArrayList<>(options) : new ArrayList<>();
+  }
 
-  public String getTitle() { return title; }
-  public void setTitle(String title) { this.title = title; }
+  public Integer getCorrectAnswerIndex() { return correctAnswerIndex; }
+  public void setCorrectAnswerIndex(Integer correctAnswerIndex) {
+    this.correctAnswerIndex = correctAnswerIndex;
+  }
 
-  public String getOption1() { return option1; }
-  public void setOption1(String option1) { this.option1 = option1; }
+  public Boolean getIsCorrectable() { return isCorrectable; }
+  public void setIsCorrectable(Boolean isCorrectable) { this.isCorrectable = isCorrectable; }
 
-  public String getOption2() { return option2; }
-  public void setOption2(String option2) { this.option2 = option2; }
+  public Boolean getHasAnswer() { return hasAnswer; }
+  public void setHasAnswer(Boolean hasAnswer) { this.hasAnswer = hasAnswer; }
 
-  public String getOption3() { return option3; }
-  public void setOption3(String option3) { this.option3 = option3; }
+  public String getCorrectFeedback() { return correctFeedback; }
+  public void setCorrectFeedback(String correctFeedback) { this.correctFeedback = correctFeedback; }
 
-  public String getOption4() { return option4; }
-  public void setOption4(String option4) { this.option4 = option4; }
+  public String getIncorrectFeedback() { return incorrectFeedback; }
+  public void setIncorrectFeedback(String incorrectFeedback) { this.incorrectFeedback = incorrectFeedback; }
 
-  public String getContext() { return context; }
-  public void setContext(String context) { this.context = context; }
+  public String getGeneralAnswer() { return generalAnswer; }
+  public void setGeneralAnswer(String generalAnswer) { this.generalAnswer = generalAnswer; }
+
+  // Helper methods
+  public String getCorrectAnswer() {
+    if (correctAnswerIndex != null && correctAnswerIndex >= 0 && correctAnswerIndex < options.size()) {
+      return options.get(correctAnswerIndex);
+    }
+    return null;
+  }
+
+  public boolean isCorrectAnswer(int index) {
+    return correctAnswerIndex != null && correctAnswerIndex.equals(index);
+  }
+
+  public void addOption(String option) {
+    this.options.add(option);
+  }
 }
