@@ -1,18 +1,18 @@
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 import QuestionHeader from "../components/question_elements/questionHeader.jsx";
 import QuestionContent from "../components/site_layout/questionContent.jsx";
 import PollContent from "../components/site_layout/pollContent.jsx";
 
 export function QuestionPage() {
   const [fetchedQuestion, setFetchedQuestion] = useState();
-  
+
   function capitalise(s) {
     return s && String(s[0]).toUpperCase() + String(s).slice(1);
   }
 
   // Function to fetch question by ID
   const fetchQuestion = (id) => {
-    const url = id ? `http://drp-api.saleh.host/getFeed?id=${id}` : 'http://drp-api.saleh.host/getFeed';
+    const url = id ? `https://drp-api.saleh.host/getFeed?id=${id}` : 'https://drp-api.saleh.host/getFeed';
     fetch(url)
       .then(response => {
         if (!response.ok) {
@@ -71,7 +71,7 @@ export function QuestionPage() {
         <QuestionContent content={fetchedQuestion?.content || {}} />
       )}
       {(fetchedQuestion?.content.type === "poll") && (
-        <PollContent content={fetchedQuestion?.content || {}}/>
+        <PollContent content={fetchedQuestion?.content || {}} />
       )}
     </div>
   );
