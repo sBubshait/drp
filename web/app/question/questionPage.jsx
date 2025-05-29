@@ -10,9 +10,7 @@ export function QuestionPage() {
   }
 
   useEffect(() => {
-    console.log("hello !!!");
-    /*
-    fetch('http://localhost:8080/getFeed')
+    fetch('http://drp-api.saleh.host/getFeed')
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -21,12 +19,11 @@ export function QuestionPage() {
       })
       .then(data => {
         setFetchedQuestion(data);
+        console.log(data);
       })
       .catch(error => {
         console.error('Fetch error:', error);
       });
-    */
-    setFetchedQuestion({"status":200,"prev":0,"next":2,"articleIndex":1,"content":{"type":"question","id":1,"context":"lorem fakldjsfad sjkl; fdsajkldf sajklads fjkl;fjds kalkljsd af;ljkdsaf fdkasjl jkldsf ajklfdas lkjfd as","type":"question","title":"How much do you think Harvard's endowment is actually worth?","options":["Option 1","Option 2","Option33","Option 4"],"answer":1,"hasAnswer":null,"correctAnswerFeedback":"Correct Answer!","wrongAnswerFeedback":"Incorrect idiot","generalAnswer":"Hmmm...?"},"createdAt":"2025-05-29T16:41:52.259170","source":""});
   }, []);  // Run once on page load, subsequent ones use a specific id
 
   const handleOptionClick = (option) => {
@@ -34,10 +31,18 @@ export function QuestionPage() {
   };
 
   //TODO: Handle loading data time rather than just potential nulls
-  return (
-    <div className="w-full bg-gray-200 flex flex-col">
-      <QuestionHeader questionNumber={fetchedQuestion?.content.id} totalQuestions={fetchedQuestion?.articleIndex} taskType={capitalise(fetchedQuestion?.content.type)} />
-      <QuestionContent content={fetchedQuestion?.content || null} />
-    </div>
-  );
+return (
+  <div className="w-full bg-gray-200 flex flex-col">
+    <QuestionHeader
+      questionNumber={fetchedQuestion?.content.id}
+      totalQuestions={fetchedQuestion?.articleIndex}
+      taskType={capitalise(fetchedQuestion?.content.type)}
+    />
+
+    {/* TODO: Handle polls */}
+    {(fetchedQuestion?.content.type === "question") && (
+      <QuestionContent content={fetchedQuestion?.content || {}} />
+    )}
+  </div>
+);
 }
