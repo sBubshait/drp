@@ -39,7 +39,7 @@ public class FeedController {
     else if (id < 1)
       id = 1L;
     else if (id > feedService.getTotalFeedItemCount())
-      id = feedService.getTotalFeedItemCount() - 1;
+      id = feedService.getTotalFeedItemCount();
 
     FeedItem feedItem = feedService.getFeedItemById(id);
     System.out.println("Feed item: " + feedItem);
