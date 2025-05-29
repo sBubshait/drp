@@ -28,3 +28,11 @@ services:
       - db
     ports:
       - 8080:8080
+
+  server:
+    restart: unless-stopped
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "8084:8080"
