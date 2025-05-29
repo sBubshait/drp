@@ -1,9 +1,11 @@
 package com.imperial.drp36.services;
 
 import com.imperial.drp36.entity.FeedItem;
+import com.imperial.drp36.entity.Poll;
 import com.imperial.drp36.model.FeedContentResponse;
 import com.imperial.drp36.model.QuestionContentResponse;
 import com.imperial.drp36.repository.FeedItemRepository;
+import com.imperial.drp36.repository.PollRepository;
 import com.imperial.drp36.repository.QuestionRepository;
 import jakarta.transaction.Transactional;
 import java.util.List;
@@ -20,6 +22,9 @@ public class FeedService {
 
   @Autowired
   private QuestionRepository questionRepository;
+
+  @Autowired
+  private PollRepository pollRepository;
 
   public FeedItem getFeedItemById(Long id) {
     return feedItemRepository.findByIdOptional(id).orElse(null);
@@ -58,20 +63,13 @@ public class FeedService {
   public FeedContentResponse getFeedContentResponse(FeedItem feedItem) {
     switch (feedItem.getItemType()) {
       case "question":
-        return questionRepository.findById(feedItem.getId())
-          .map(question -> new QuestionContentResponse(
-            question.getId(),
-            question.getContext(),
-            question.getTitle(),
-            question.getOptions(),
-            question.getCorrectAnswerIndex(),
-            question.getIsCorrectable(),
-            question.getCorrectFeedback(),
-            question.getIncorrectFeedback(),
-            question.getGeneralAnswer()
-          )).orElse(null);
+        return FeedContentResponse.fromQuestion(questionRepository.findById(feedItem.getId()).orElse(null));
+
+      case "poll":
+        return FeedContentResponse.fromPoll(pollRepository.findById(feedItem.getId()).orElse(null));
 
       default:
+        System.err.println("Unknown item type: " + feedItem.getItemType());
         return null; // or throw an exception if item type is unknown
     }
   }

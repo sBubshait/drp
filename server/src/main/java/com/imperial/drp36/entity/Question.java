@@ -6,7 +6,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "questions")
-@DiscriminatorValue("not null")
+@DiscriminatorValue("question")
 public class Question extends FeedItem {
   @Column(name = "options", columnDefinition = "JSON")
   @Convert(converter = StringListConverter.class)

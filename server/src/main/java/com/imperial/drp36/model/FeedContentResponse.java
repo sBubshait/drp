@@ -2,6 +2,9 @@ package com.imperial.drp36.model;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.imperial.drp36.entity.Poll;
+import com.imperial.drp36.entity.Question;
+import java.util.Optional;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
@@ -33,4 +36,39 @@ public abstract class FeedContentResponse {
   public void setContext(String context) { this.context = context; }
   public void setType(String type) { this.type = type; }
   public void setTitle(String title) { this.title = title; }
+
+
+  // factory methods
+  public static FeedContentResponse fromQuestion(Question question) {
+    if (question == null)
+          return null;
+
+    return new QuestionContentResponse(
+          question.getId(),
+          question.getContext(),
+          question.getTitle(),
+          question.getOptions(),
+          question.getCorrectAnswerIndex(),
+          question.getIsCorrectable(),
+          question.getCorrectFeedback(),
+          question.getIncorrectFeedback(),
+          question.getGeneralAnswer()
+      );
+  }
+
+  public static FeedContentResponse fromPoll(Poll poll) {
+    if (poll == null) {
+      return null;
+    }
+
+    return new PollContentResponse(
+        poll.getId(),
+        poll.getContext(),
+        poll.getTitle(),
+        poll.getOptions(),
+        poll.getResponseCounts(),
+        poll.getTotalResponses(),
+        poll.getAllowsMultipleSelection()
+    );
+  }
 }

@@ -28,20 +28,6 @@ public class QuestionContentResponse extends FeedContentResponse {
     this.generalAnswer = generalAnswer;
   }
 
-  public static QuestionContentResponse fromQuestion(Question question) {
-    return new QuestionContentResponse(
-        question.getId(),
-        question.getContext(),
-        question.getTitle(),
-        question.getOptions(),
-        question.getCorrectAnswerIndex(),
-        question.getHasAnswer(),
-        question.getCorrectFeedback(),
-        question.getIncorrectFeedback(),
-        question.getGeneralAnswer()
-    );
-  }
-
   // Getters
   public List<String> getOptions() { return options; }
   public Integer getAnswer() { return answer; }
