@@ -7,6 +7,7 @@ export function QuestionPage() {
 
   useEffect(() => {
     console.log("hello !!!");
+    /*
     fetch('http://localhost:8080/getFeed')
       .then(response => {
         if (!response.ok) {
@@ -20,6 +21,8 @@ export function QuestionPage() {
       .catch(error => {
         console.error('Fetch error:', error);
       });
+    */
+    setFetchedQuestion({"status":200,"prev":0,"next":2,"articleIndex":1,"content":{"type":"question","id":1,"context":"lorem fakldjsfad sjkl; fdsajkldf sajklads fjkl;fjds kalkljsd af;ljkdsaf fdkasjl jkldsf ajklfdas lkjfd as","type":"question","title":"How much do you think Harvard's endowment is actually worth?","options":["Option 1","Option 2","Option33","Option 4"],"answer":1,"hasAnswer":null,"correctAnswerFeedback":"Correct Answer!","wrongAnswerFeedback":"Incorrect idiot","generalAnswer":"Hmmm...?"},"createdAt":"2025-05-29T16:41:52.259170","source":""});
   }, []);  // Run once on page load, subsequent ones use a specific id
 
   const handleOptionClick = (option) => {
