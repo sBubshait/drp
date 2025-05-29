@@ -1,4 +1,4 @@
-import { Welcome } from "../welcome/welcome";
+import { QuestionPage } from "../question/questionPage";
 
 export function meta() {
   return [
@@ -8,5 +8,5 @@ export function meta() {
 }
 
 export default function Home() {
-  return <Welcome />;
+  return <QuestionPage />;
 }

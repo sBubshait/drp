@@ -32,7 +32,9 @@ export function Layout({ children }) {
         <Links />
       </head>
       <body>
-        {children}
+        <div className="mobile-view">
+          {children}
+        </div>
         <ScrollRestoration />
         <Scripts />
       </body>
