@@ -1,0 +1,8 @@
+services:
+  web:
+    image: drp-web
+    build:
+       context: ./web
+       dockerfile: Dockerfile
+    ports:
+      - "8082:3000"
