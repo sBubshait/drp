@@ -30,7 +30,6 @@ public class FeedController {
     return ResponseEntity.ok(response);
   }
 
-  @CrossOrigin(origins = "*")
   @GetMapping("/getFeed")
   public ResponseEntity<FeedResponse> getFeed(@RequestParam(required = false) Long id) {
     // Sequential Scheduler (TODO: Improve as a real scheduler)
