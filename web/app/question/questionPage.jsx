@@ -5,13 +5,15 @@ import PollContent from "../components/site_layout/pollContent.jsx";
 
 export function QuestionPage() {
   const [fetchedQuestion, setFetchedQuestion] = useState();
-  function capitalise(s)
-  {
+  
+  function capitalise(s) {
     return s && String(s[0]).toUpperCase() + String(s).slice(1);
   }
 
-  useEffect(() => {
-    fetch('http://drp-api.saleh.host/getFeed?id=2')
+  // Function to fetch question by ID
+  const fetchQuestion = (id) => {
+    const url = id ? `http://drp-api.saleh.host/getFeed?id=${id}` : 'http://drp-api.saleh.host/getFeed';
+    fetch(url)
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -20,34 +22,57 @@ export function QuestionPage() {
       })
       .then(data => {
         setFetchedQuestion(data);
-        console.log(data);
       })
       .catch(error => {
         console.error('Fetch error:', error);
       });
-  }, []);  // Run once on page load, subsequent ones use a specific id
+  };
+
+  // Initial fetch on component mount
+  useEffect(() => {
+    fetchQuestion(); // No ID parameter for initial load
+  }, []);
+
+  // Keyboard event handler
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (!fetchedQuestion) return;
+
+      if (event.key === 'ArrowRight' && fetchedQuestion.next) {
+        fetchQuestion(fetchedQuestion.next);
+      } else if (event.key === 'ArrowLeft' && fetchedQuestion.prev) {
+        fetchQuestion(fetchedQuestion.prev);
+      }
+    };
+
+    // Add event listener
+    window.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup function to remove event listener
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [fetchedQuestion]); // Re-run when fetchedQuestion changes
 
   const handleOptionClick = (option) => {
     alert(`Selected option: ${option}`);
   };
 
   //TODO: Handle loading data time rather than just potential nulls
-return (
-  <div className="w-full bg-gray-200 flex flex-col">
-    <QuestionHeader
-      questionNumber={fetchedQuestion?.content.id}
-      totalQuestions={fetchedQuestion?.articleIndex}
-      taskType={capitalise(fetchedQuestion?.content.type)}
-    />
-
-    {/* TODO: Handle polls */}
-    {(fetchedQuestion?.content.type === "question") && (
-      <QuestionContent content={fetchedQuestion?.content || {}} />
-    )}
-
-    {(fetchedQuestion?.content.type === "poll") && (
-      <PollContent content={fetchedQuestion?.content || {}}/>
-    )}
-  </div>
-);
+  return (
+    <div className="w-full bg-gray-200 flex flex-col">
+      <QuestionHeader
+        questionNumber={fetchedQuestion?.content.id}
+        totalQuestions={fetchedQuestion?.articleIndex}
+        taskType={capitalise(fetchedQuestion?.content.type)}
+      />
+      {/* TODO: Handle polls */}
+      {(fetchedQuestion?.content.type === "question") && (
+        <QuestionContent content={fetchedQuestion?.content || {}} />
+      )}
+      {(fetchedQuestion?.content.type === "poll") && (
+        <PollContent content={fetchedQuestion?.content || {}}/>
+      )}
+    </div>
+  );
 }

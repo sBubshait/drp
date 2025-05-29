@@ -11,12 +11,10 @@ export default function PollContent({content}) {
   const [showResults, setShowResults] = useState(false);
 
   function resultsClickHandler() {
-    console.log("You view the results");
     setShowResults(true);
   }
 
   function onSelectOption(index) {
-    console.log(index);
     setShowResults(true);
   }
   
