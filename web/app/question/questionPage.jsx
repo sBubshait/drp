@@ -1,6 +1,7 @@
 import {useEffect, useState} from 'react';
 import QuestionHeader from "../components/question_elements/questionHeader.jsx";
 import QuestionContent from "../components/site_layout/questionContent.jsx";
+import PollContent from "../components/site_layout/pollContent.jsx";
 
 export function QuestionPage() {
   const [fetchedQuestion, setFetchedQuestion] = useState();
@@ -10,7 +11,7 @@ export function QuestionPage() {
   }
 
   useEffect(() => {
-    fetch('http://drp-api.saleh.host/getFeed')
+    fetch('http://drp-api.saleh.host/getFeed?id=2')
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -42,6 +43,10 @@ return (
     {/* TODO: Handle polls */}
     {(fetchedQuestion?.content.type === "question") && (
       <QuestionContent content={fetchedQuestion?.content || {}} />
+    )}
+
+    {(fetchedQuestion?.content.type === "poll") && (
+      <PollContent content={fetchedQuestion?.content || {}}/>
     )}
   </div>
 );
