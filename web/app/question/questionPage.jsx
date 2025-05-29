@@ -1,4 +1,5 @@
 import QuestionHeader from "../components/questionHeader.jsx";
+import ContextBox from "../components/contextBox.jsx";
 
 export function QuestionPage() {
   const handleOptionClick = (option) => {
@@ -6,18 +7,13 @@ export function QuestionPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gray-200 flex flex-col">
+    <div className="w-full bg-gray-200 flex flex-col">
 
       <QuestionHeader questionNumber={1} totalQuestions={5} taskType={"Question"} />
 
       {/* Context Section - From Top */}
       <div className="flex-1 p-6">
-        <div className="flex">
-          <div className="w-1 bg-gray-800 mr-4 flex-shrink-0"></div>
-          <div className="text-gray-700 leading-relaxed text-2xl">
-            President Trump wants to cut all federal grant money to that was supposed to go for scientific and engineering research at Harvard. He called Harvard as "radicalised", "lunatics", and "troublemakers" who don't deserve taxpayer cash. Instead, they can use the "ridiculous" endowments they have.
-          </div>
-        </div>
+        <ContextBox text={'Trump wants to cut all federal grant money to that was supposed to go for scientific and engineering research at Harvard. He called Harvard as "radicalised", "lunatics", and "troublemakers" who don\'t deserve taxpayer cash. Instead, they can use the "ridiculous" endowments they have.'} />
       </div>
 
       {/* Options - At Bottom */}
