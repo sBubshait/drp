@@ -8,6 +8,7 @@ import {
 } from "react-router";
 
 import "./app.css";
+import PhoneScreenWrapper from "./components/PhoneScreenWrapper.jsx"
 
 export const links = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -33,7 +34,9 @@ export function Layout({ children }) {
       </head>
       <body>
         <div className="mobile-view">
-          {children}
+          <PhoneScreenWrapper>
+            {children}
+          </PhoneScreenWrapper>
         </div>
         <ScrollRestoration />
         <Scripts />

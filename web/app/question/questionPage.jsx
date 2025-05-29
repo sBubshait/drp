@@ -1,3 +1,4 @@
+import QuestionHeader from "../components/questionHeader.jsx";
 
 export function QuestionPage() {
   const handleOptionClick = (option) => {
@@ -6,10 +7,8 @@ export function QuestionPage() {
 
   return (
     <div className="min-h-screen w-full bg-gray-200 flex flex-col">
-      {/* Header */}
-      <div className="bg-gray-800 text-white p-4 text-center font-semibold text-lg">
-        1/1 | Question
-      </div>
+
+      <QuestionHeader questionNumber={1} totalQuestions={5} taskType={"Question"} />
 
       {/* Context Section - From Top */}
       <div className="flex-1 p-6">
