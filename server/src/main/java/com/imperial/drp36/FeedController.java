@@ -26,7 +26,7 @@ public class FeedController {
 
   @GetMapping("/")
   public ResponseEntity<StatusResponse> getStatus() {
-    StatusResponse response = new StatusResponse(200, "API is fully operational");
+    StatusResponse response = new StatusResponse(200, "API fully operational");
     return ResponseEntity.ok(response);
   }
 
