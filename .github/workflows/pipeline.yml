@@ -36,11 +36,11 @@ jobs:
       - name: Deploy Project Artifacts to Vercel
         run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
 
-deploy-main:
+  deploy_main:
     needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-    
+    environment: production
     steps:
     - name: Deploy to Server
       uses: appleboy/ssh-action@v0.1.5
@@ -51,7 +51,7 @@ deploy-main:
         port: ${{ secrets.SERVER_PORT }}
         script: |
           whoami
-          
+
           cd /home/drp/prod
           
           git pull origin main
