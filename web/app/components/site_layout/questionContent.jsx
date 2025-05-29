@@ -18,7 +18,7 @@ export default function QuestionContent({content}) {
   const {title, options, context, hasAnswer, answer, correctAnswerFeedback, wrongAnswerFeedback, generalAnswer} = content;
 
   function handleOptionClick(index) {
-    if (!hasAnswer) {
+    if (hasAnswer) {
       if (index === answer) {
         setFeedbackTitle("Correct!");
         setFeedbackBody(correctAnswerFeedback);
