@@ -7,7 +7,7 @@ import {useState} from 'react';
 
 export default function PollContent({content}) {
 
-  const {context, options} = content;
+  const {context, title, options} = content;
   const [showResults, setShowResults] = useState(false);
 
   function resultsClickHandler() {
@@ -24,6 +24,12 @@ export default function PollContent({content}) {
     <>
       <div className="flex-1 p-6">
         <ContextBox text={context} />
+      </div>
+
+      <div className="mb-6">
+        <div className="text-3xl font-medium text-gray-800 text-center mb-24">
+          {title}
+        </div>
       </div>
 
       {showResults ? (
