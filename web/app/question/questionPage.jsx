@@ -1,5 +1,6 @@
 import QuestionHeader from "../components/questionHeader.jsx";
 import ContextBox from "../components/contextBox.jsx";
+import MultipleChoiceQuestion from "../components/multipleChoiceQuestion.jsx";
 
 export function QuestionPage() {
   const handleOptionClick = (option) => {
@@ -17,43 +18,11 @@ export function QuestionPage() {
       </div>
 
       {/* Options - At Bottom */}
-      <div className="p-6">
-        <div className="mb-6">
-          <div className="text-3xl font-medium text-gray-800 text-center mb-24">
-            What is the main reason Trump gives for cutting Harvard's federal grants?
-          </div>
-        </div>
-
-        <div className="flex flex-col space-y-4">
-          <button
-            onClick={() => handleOptionClick('A')}
-            className="bg-cyan-600 text-white py-4 px-6 rounded-lg text-lg font-medium hover:bg-cyan-700 active:bg-cyan-800 transition-colors"
-          >
-            $5 Billion
-          </button>
-
-          <button
-            onClick={() => handleOptionClick('B')}
-            className="bg-cyan-600 text-white py-4 px-6 rounded-lg text-lg font-medium hover:bg-cyan-700 active:bg-cyan-800 transition-colors"
-          >
-            $15 Billion
-          </button>
-
-          <button
-            onClick={() => handleOptionClick('C')}
-            className="bg-cyan-600 text-white py-4 px-6 rounded-lg text-lg font-medium hover:bg-cyan-700 active:bg-cyan-800 transition-colors"
-          >
-            $35 Billion
-          </button>
-
-          <button
-            onClick={() => handleOptionClick('D')}
-            className="bg-cyan-600 text-white py-4 px-6 rounded-lg text-lg font-medium hover:bg-cyan-700 active:bg-cyan-800 transition-colors"
-          >
-            $53 Billion
-          </button>
-        </div>
-      </div>
+      <MultipleChoiceQuestion
+        questionText="What is the main reason Trump gives for cutting Harvard's federal grants?"
+        options={["$5 Billion", "$15 Billion", "$35 Billion", "$53 Billion"]}
+        onSelectOption={(index) => console.log("Selected option index:", index)}
+      />
     </div>
   );
 }
