@@ -1,6 +1,6 @@
-import QuestionHeader from "../components/questionHeader.jsx";
-import ContextBox from "../components/contextBox.jsx";
-import MultipleChoiceQuestion from "../components/multipleChoiceQuestion.jsx";
+import QuestionHeader from "../components/question_elements/questionHeader.jsx";
+import ContextBox from "../components/question_elements/contextBox.jsx";
+import MultipleChoiceQuestion from "../components/question_elements/multipleChoiceQuestion.jsx";
 
 export function QuestionPage() {
   const handleOptionClick = (option) => {
