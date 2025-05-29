@@ -16,7 +16,7 @@ export function QuestionPage() {
         <div className="flex">
           <div className="w-1 bg-gray-800 mr-4 flex-shrink-0"></div>
           <div className="text-gray-700 leading-relaxed text-2xl">
-            Trump wants to cut all federal grant money to that was supposed to go for scientific and engineering research at Harvard. He called Harvard as "radicalised", "lunatics", and "troublemakers" who don't deserve taxpayer cash. Instead, they can use the "ridiculous" endowments they have.
+            President Trump wants to cut all federal grant money to that was supposed to go for scientific and engineering research at Harvard. He called Harvard as "radicalised", "lunatics", and "troublemakers" who don't deserve taxpayer cash. Instead, they can use the "ridiculous" endowments they have.
           </div>
         </div>
       </div>
