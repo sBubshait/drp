@@ -1,10 +1,19 @@
-export default function PollResults({ content}){
+import {useEffect, useState} from 'react';
+
+export default function PollResults({ content }) {
   const { options, responseCounts, totalResponses } = content;
+  const [animate, setAnimate] = useState(false);
   
   const getPercentage = (count) => {
     if (totalResponses === 0) return 0;
     return Math.round((count / totalResponses) * 100);
   };
+
+  // Auto-animate on mount
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimate(true), 200);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="space-y-3 px-6">
@@ -18,10 +27,10 @@ export default function PollResults({ content}){
             >
               {/* Background fill that represents the percentage */}
               <div 
-                className="absolute left-0 top-0 h-full rounded-lg"
+                className="absolute left-0 top-0 h-full rounded-lg transition-all duration-1000 ease-out"
                 style={{ 
                   backgroundColor: '#F08FB3',
-                  width: `${percentage}%`
+                  width: animate ? `${percentage}%` : '0%'
                 }}
               />
               
@@ -40,4 +49,4 @@ export default function PollResults({ content}){
       })}
     </div>
   );
-};
+}
