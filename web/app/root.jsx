@@ -8,7 +8,7 @@ import {
 } from "react-router";
 
 import "./app.css";
-import PhoneScreenWrapper from "./components/PhoneScreenWrapper.jsx"
+import PhoneScreenWrapper from "./components/site_layout/PhoneScreenWrapper.jsx"
 
 export const links = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
