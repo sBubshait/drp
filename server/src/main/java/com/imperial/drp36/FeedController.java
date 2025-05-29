@@ -1,5 +1,7 @@
 package com.imperial.drp36;
 
+import com.imperial.drp36.model.FeedContentResponse;
+import com.imperial.drp36.services.FeedService;
 import com.imperial.drp36.entity.FeedItem;
 import com.imperial.drp36.model.FeedResponse;
 import com.imperial.drp36.model.QuestionContentResponse;
@@ -18,40 +20,43 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/")
 public class FeedController {
+
+@Autowired
+  private FeedService feedService;
+
   @GetMapping("/")
   public ResponseEntity<StatusResponse> getStatus() {
     StatusResponse response = new StatusResponse(200, "API is fully operational");
     return ResponseEntity.ok(response);
   }
 
-  @GetMapping("/getFeed")
   @CrossOrigin(origins = "*")
+  @GetMapping("/getFeed")
   public ResponseEntity<FeedResponse> getFeed(@RequestParam(required = false) Long id) {
-    if (id == null || id == 1) {
-      FeedResponse response = new FeedResponse(
-          200,
-          1L,
-          1L,
-          1,
-          new QuestionContentResponse(
-              1L,
-              "context",
-              "Sample Question",
-              List.of("Option A", "Option B", "Option C"),
-              1,
-              true,
-              "Correct answer feedback",
-              "Wrong answer feedback",
-              "General answer"
-          ),
-          LocalDateTime.now().toString(),
-          ""
-      );
+    // Sequential Scheduler (TODO: Improve as a real scheduler)
+    if (id == null)
+      id = 1L;
+    else if (id < 1)
+      id = 1L;
+    else if (id > feedService.getTotalFeedItemCount())
+      id = 1L;
 
-      return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
+    FeedItem feedItem = feedService.getFeedItemById(id);
+    System.out.println("Feed item: " + feedItem);
+    if (feedItem == null)
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new FeedResponse(404));
 
-    return ResponseEntity.status(HttpStatus.NOT_FOUND)
-        .body(new FeedResponse(404));
+    FeedContentResponse contentResopnse = feedService.getFeedContentResponse(feedItem);
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(new FeedResponse(
+            200,
+            id - 1,
+            id + 1,
+            1,
+            contentResopnse,
+            feedItem.getCreatedAt().toString(),
+            ""
+        ));
   }
 }
