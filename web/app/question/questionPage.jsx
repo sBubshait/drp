@@ -33,6 +33,7 @@ export function QuestionPage() {
     alert(`Selected option: ${option}`);
   };
 
+  //TODO: Handle loading data time rather than just potential nulls
   return (
     <div className="w-full bg-gray-200 flex flex-col">
       <QuestionHeader questionNumber={fetchedQuestion?.content.id} totalQuestions={fetchedQuestion?.articleIndex} taskType={capitalise(fetchedQuestion?.content.type)} />
