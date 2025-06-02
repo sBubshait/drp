@@ -4,16 +4,41 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.imperial.drp36.entity.Poll;
 import com.imperial.drp36.entity.Question;
+import io.swagger.v3.oas.annotations.media.DiscriminatorMapping;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Optional;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = QuestionContentResponse.class, name = "question"),
+    @JsonSubTypes.Type(value = PollContentResponse.class, name = "poll")
 })
 public abstract class FeedContentResponse {
+  @Schema(
+      description = "Unique identifier for the feed content",
+      example = "12",
+      requiredMode = Schema.RequiredMode.REQUIRED
+  )
   private Long id;
-  private String context;
+
+  @Schema(
+      description = "Type of feed content, e.g., 'question', 'poll' etc. See allowed types below",
+      example = "question",
+      requiredMode = Schema.RequiredMode.REQUIRED
+  )
   private String type;
+
+  @Schema(
+      description = "Context for the feed content, typically a short summary of an article",
+      example = "harvard-endowment"
+  )
+  private String context;
+
+  @Schema(
+      description = "Title of the feed content, typically a question or prompt",
+      example = "How much is Harvard's endowment worth?",
+      requiredMode = Schema.RequiredMode.REQUIRED
+  )
   private String title;
 
   public FeedContentResponse() {}

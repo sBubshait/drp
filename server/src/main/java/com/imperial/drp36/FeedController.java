@@ -6,6 +6,13 @@ import com.imperial.drp36.entity.FeedItem;
 import com.imperial.drp36.model.FeedResponse;
 import com.imperial.drp36.model.QuestionContentResponse;
 import com.imperial.drp36.model.StatusResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,12 +32,54 @@ public class FeedController {
 @Autowired
   private FeedService feedService;
 
+  @Operation(
+      summary = "Check API Status",
+      description = "Returns the current status of the API to verify it's operational"
+  )
+  @ApiResponses(value = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "API is operational",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(implementation = StatusResponse.class)
+          )
+      )
+  })
+
+  @Tag(name = "Status")
   @GetMapping("/")
   public ResponseEntity<StatusResponse> getStatus() {
     StatusResponse response = new StatusResponse(200, "API fully operational");
     return ResponseEntity.ok(response);
   }
 
+  @Operation(
+      summary = "Get Feed Item",
+      description = "Retrieves a feed item by ID. If no ID is provided, returns the first item."
+  )
+  @ApiResponses(value = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "Feed item retrieved successfully",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(implementation = FeedResponse.class)
+          )
+      ),
+      @ApiResponse(
+          responseCode = "404",
+          description = "Feed item not found",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(implementation = FeedResponse.class),
+              examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
+                  name = "Not Found Response",
+                  value = "{\"status\": 404, \"message\": \"Feed item not found\"}"
+          ))
+      )
+  })
+  @Tag(name = "Feed")
   @GetMapping("/getFeed")
   public ResponseEntity<FeedResponse> getFeed(@RequestParam(required = false) Long id) {
     // Sequential Scheduler (TODO: Improve as a real scheduler)
@@ -60,9 +109,46 @@ public class FeedController {
         ));
   }
 
+  @Operation(
+      summary = "Vote on Poll",
+      description = "Submit a vote for a specific poll option"
+  )
+  @ApiResponses(value = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "Vote recorded successfully",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(implementation = StatusResponse.class)
+          )
+      ),
+      @ApiResponse(
+          responseCode = "404",
+          description = "Poll not found or invalid option index",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(implementation = StatusResponse.class),
+              examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
+                  value = "{\"status\": 404, \"message\": \"Poll not found or invalid option index\"}"
+              )
+          )
+      )}
+  )
+  @Tag(name = "Feed")
   @PostMapping("/vote")
   public ResponseEntity<StatusResponse> votePoll(
+      @Parameter(
+          description = "ID of the poll to vote on",
+          required = true,
+          example = "1"
+      )
       @RequestParam Long pollId,
+
+      @Parameter(
+          description = "Index of the option to vote for (0-based)",
+          required = true,
+          example = "0"
+      )
       @RequestParam Integer optionIndex) {
 
     try {
