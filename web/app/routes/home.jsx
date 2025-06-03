@@ -1,4 +1,4 @@
-import { QuestionPage } from "../question/questionPage";
+import { QuestionPage } from "../pages/questionPage";
 
 export function meta() {
   return [
