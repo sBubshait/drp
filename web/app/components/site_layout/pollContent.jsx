@@ -2,25 +2,25 @@ import ContextBox from "../question_elements/contextBox.jsx";
 import ChoicesButtons from "../question_elements/choicesButtons.jsx";
 import ViewResultsButton from "../question_elements/viewResultsButton.jsx";
 import PollResults from "../question_elements/pollResults.jsx";
-import {useState} from 'react';
+import { useState } from 'react';
 
-export default function PollContent({content}) {
-  const {context, title, options, id} = content;
+export default function PollContent({ content }) {
+  const { context, title, options, id } = content;
   const [showResults, setShowResults] = useState(false);
-  
+
   function resultsClickHandler() {
     setShowResults(true);
   }
-  
+
   async function onSelectOption(index) {
     try {
-      const response = await fetch(`https://drp-api.saleh.host/vote?pollId=${id}&optionIndex=${index}`, {
+      const response = await fetch(`https://api.saleh.host/vote?pollId=${id}&optionIndex=${index}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (!response.ok) {
         console.error('Failed to submit vote:', response.status);
       } else {
@@ -31,10 +31,10 @@ export default function PollContent({content}) {
     } catch (error) {
       console.error('Error submitting vote:', error);
     }
-    
+
     setShowResults(true);
   }
-  
+
   return (
     <>
       <div className="flex-1 p-6">

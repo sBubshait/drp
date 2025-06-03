@@ -12,7 +12,7 @@ export function QuestionPage() {
 
   // Function to fetch question by ID
   const fetchQuestion = (id) => {
-    const url = id ? `https://drp-api.saleh.host/getFeed?id=${id}` : 'https://drp-api.saleh.host/getFeed';
+    const url = id ? `https://api.saleh.host/getFeed?id=${id}` : 'https://api.saleh.host/getFeed';
     fetch(url)
       .then(response => {
         if (!response.ok) {
