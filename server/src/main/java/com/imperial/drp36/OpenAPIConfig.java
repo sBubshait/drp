@@ -32,7 +32,7 @@ public class OpenAPIConfig {
                 .name("MIT License")
                 .url("https://opensource.org/licenses/MIT")))
         .servers(List.of(
-            new Server().url("https://drp-api.saleh.host").description("Production Server"),
+            new Server().url("https://api.saleh.host").description("Production Server"),
     new Server().url("http://localhost:8080").description("Development Server")
         )).tags(List.of(
             new Tag().name("Status").description("API status and health check endpoints"),
