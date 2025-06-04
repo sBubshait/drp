@@ -10,6 +10,19 @@ export function ArticlePage() {
   const [fetchedArticle, setFetchedArticle] = useState();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showTip, setShowTip] = useState(true);
+
+  useEffect(() => {
+    const tipDismissed = localStorage.getItem('tipDismissed');
+    if (tipDismissed === 'true') {
+      setShowTip(false);
+    }
+  }, []);
+
+  const handleCloseTip = () => {
+    setShowTip(false);
+    localStorage.setItem('tipDismissed', 'true');
+  };
 
   // Get article ID from URL params, null if not provided
   const articleId = params.id ? parseInt(params.id, 10) : null;
@@ -18,14 +31,14 @@ export function ArticlePage() {
   const fetchArticle = async (id) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const data = await ApiService.getArticle(id);
       setFetchedArticle(data);
     } catch (error) {
       console.error('Error fetching article:', error);
       setError(error.message);
-      
+
       // Fallback to a basic article structure on error
       const fallbackArticle = {
         status: 200,
@@ -39,7 +52,7 @@ export function ArticlePage() {
           segments: []
         }
       };
-      
+
       setFetchedArticle(fallbackArticle);
     } finally {
       setLoading(false);
@@ -61,10 +74,10 @@ export function ArticlePage() {
 
   // Navigation function for swipe to questions
   const goToQuestions = () => {
-    const questionUrl = articleId 
+    const questionUrl = articleId
       ? `/articles/${articleId}/questions`
       : `/articles/${fetchedArticle.article.id}/questions`;
-      
+
     navigate(questionUrl, {
       state: {
         segments: fetchedArticle.article.segments,
@@ -113,7 +126,7 @@ export function ArticlePage() {
       <div className="w-full bg-gray-200 flex flex-col min-h-screen items-center justify-center">
         <p className="text-gray-600">Loading article...</p>
         <p className="text-gray-500 text-sm mt-2">
-          {articleId 
+          {articleId
             ? `Fetching article ${articleId} from API...`
             : `Fetching default article from API...`
           }
@@ -127,7 +140,7 @@ export function ArticlePage() {
       <div className="w-full bg-gray-200 flex flex-col min-h-screen items-center justify-center">
         <p className="text-red-600 font-semibold">Error loading article</p>
         <p className="text-gray-500 text-sm mt-2">{error}</p>
-        <button 
+        <button
           onClick={() => fetchArticle(articleId)}
           className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
@@ -147,45 +160,53 @@ export function ArticlePage() {
 
   return (
     <div {...handlers} className="w-full bg-gray-200 flex flex-col min-h-screen">
-      <QuestionHeader
-        questionNumber={fetchedArticle.article.id}
-        totalQuestions={fetchedArticle.article.segments?.length || 0}
-        taskType="Article Summary"
-      />
-      
-      <div className="flex-1 p-6">
-        <div className="bg-white rounded-lg shadow-md p-6 h-full">
-          <h1 className="text-3xl font-bold text-gray-800 mb-6">
+      {/* Header */}
+      <div className="flex">
+        <div className="bg-gray-800 px-6 py-3 text-white font-bold text-lg flex-1">
+          PoliticoApp
+        </div>
+      </div>
+
+      <div className="flex-1 flex flex-col justify-center items-center px-6">
+        <div className="text-center space-y-4 max-w-md">
+          {/* Category Tag */}
+          <div>
+            <span className="inline-block px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wide text-white" style={{ backgroundColor: '#00ADB5' }}>
+              {fetchedArticle.article.category}
+            </span>
+          </div>
+
+          {/* Main Headline */}
+          <h1 className="text-3xl font-bold text-gray-800 leading-tight">
             {fetchedArticle.article.content}
           </h1>
-          
-          {fetchedArticle.article.category && (
-            <div className="mb-4">
-              <span className="inline-block bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
-                {fetchedArticle.article.category}
-              </span>
-            </div>
-          )}
-          
-          <div className="mt-8 space-y-4">
-            {fetchedArticle.article.segments?.length > 0 && (
-              <div className="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400">
-                <p className="text-blue-800 font-medium">
-                  💡 Tip: Swipe left to proceed to {fetchedArticle.article.segments.length} question{fetchedArticle.article.segments.length !== 1 ? 's' : ''} about this article
-                </p>
-              </div>
-            )}
-            
-            {(!fetchedArticle.article.segments || fetchedArticle.article.segments.length === 0) && (
-              <div className="p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-400">
-                <p className="text-yellow-800 font-medium">
-                  ℹ️ No questions available for this article
-                </p>
-              </div>
-            )}
+
+          {/* Date */}
+          <div className="text-gray-600 text-sm font-medium">
+            Today at 12:00 PM
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Closeable Tip Box */}
+      {
+        showTip && (
+          <div className="p-6">
+            <div className="bg-blue-50 rounded-lg border-l-4 border-blue-400 p-4 relative">
+              <button
+                onClick={handleCloseTip}
+                className="absolute top-2 right-2 text-blue-600 hover:text-blue-800 font-bold text-lg"
+              >
+                ×
+              </button>
+              <p className="text-blue-800 font-medium pr-6">
+                💡 Tip: {fetchedArticle.article.segments.length} interactive segment{fetchedArticle.article.segments.length !== 1 ? 's' : ''} available for this article. Swipe left!
+                Swipe up and down to move between articles!
+              </p>
+            </div>
+          </div>
+        )
+      }
+    </div >
   );
 }
