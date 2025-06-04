@@ -1,66 +1,81 @@
 import { useEffect, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router';
 import { useSwipeable } from 'react-swipeable';
 import QuestionHeader from "../components/question_elements/questionHeader.jsx";
 import QuestionContent from "../components/site_layout/questionContent.jsx";
 import PollContent from "../components/site_layout/pollContent.jsx";
 
 export function QuestionPage() {
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [fetchedQuestion, setFetchedQuestion] = useState();
-
+  const location = useLocation();
+  const navigate = useNavigate();
+  const params = useParams();
+  
+  // Get segments from location state
+  const segments = location.state?.segments || [];
+  const articleId = params.id;
+  
   function capitalise(s) {
     return s && String(s[0]).toUpperCase() + String(s).slice(1);
   }
 
-  // Function to fetch question by ID
-  const fetchQuestion = (id) => {
-    const url = id ? `https://api.saleh.host/getFeed?id=${id}` : 'https://api.saleh.host/getFeed';
-    fetch(url)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then(data => {
-        setFetchedQuestion(data);
-      })
-      .catch(error => {
-        console.error('Fetch error:', error);
+  // Set question based on current index using actual segment data
+  useEffect(() => {
+    if (segments.length > 0 && currentIndex < segments.length) {
+      const currentSegment = segments[currentIndex];
+      // Use the segment data directly as the question
+      setFetchedQuestion({
+        content: currentSegment,
+        articleIndex: segments.length,
+        segmentIndex: currentIndex + 1
       });
-  };
+    }
+  }, [currentIndex, segments]);
 
   // Navigation functions
   const goToNext = () => {
-    if (fetchedQuestion?.next) {
-      fetchQuestion(fetchedQuestion.next);
+    if (currentIndex < segments.length - 1) {
+      setCurrentIndex(currentIndex + 1);
     }
   };
 
   const goToPrev = () => {
-    if (fetchedQuestion?.prev) {
-      fetchQuestion(fetchedQuestion.prev);
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    } else {
+      // Navigate back to article page if on first question
+      navigate(`/article`, {
+        state: {
+          articleId: articleId
+        }
+      });
     }
   };
 
-  // Function to fetch a new random question
-  const fetchNewQuestion = () => {
-    fetchQuestion(); // No ID parameter for random question
+  // Function to go to random segment (swipe up)
+  const goToRandomSegment = () => {
+    if (segments.length > 0) {
+      const randomIndex = Math.floor(Math.random() * segments.length);
+      setCurrentIndex(randomIndex);
+    }
   };
 
   // Swipe handlers
   const handlers = useSwipeable({
-    onSwipedLeft: goToNext,     // Swipe left to go to next
-    onSwipedRight: goToPrev,    // Swipe right to go to previous
-    onSwipedUp: fetchNewQuestion, // Swipe up to fetch new random question
+    onSwipedLeft: goToNext,        // Swipe left to go to next question
+    onSwipedRight: goToPrev,       // Swipe right to go to previous question or back to article
+    onSwipedUp: goToRandomSegment, // Swipe up to go to random question
     swipeDuration: 500,
     preventScrollOnSwipe: true,
     trackMouse: true // This enables mouse dragging for testing on desktop
   });
 
-  // Initial fetch on component mount
   useEffect(() => {
-    fetchQuestion(); // No ID parameter for initial load
-  }, []);
+    if (segments.length > 0) {
+      setCurrentIndex(0);
+    } 
+  }, [segments]);
 
   // Keyboard event handler
   useEffect(() => {
@@ -81,26 +96,47 @@ export function QuestionPage() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [fetchedQuestion]); // Re-run when fetchedQuestion changes
+  }, [fetchedQuestion, currentIndex]); // Re-run when fetchedQuestion or currentIndex changes
 
-  const handleOptionClick = (option) => {
-    alert(`Selected option: ${option}`);
-  };
+  // Loading state
+  if (segments.length === 0 && !fetchedQuestion) {
+    return (
+      <div className="w-full bg-gray-200 flex flex-col min-h-screen items-center justify-center">
+        <p className="text-gray-600">Loading questions...</p>
+      </div>
+    );
+  }
+
+  // No segments available
+  if (segments.length === 0) {
+    return (
+      <div className="w-full bg-gray-200 flex flex-col min-h-screen items-center justify-center">
+        <p className="text-gray-600">No article segments found. Please start from an article.</p>
+        <button 
+          onClick={() => navigate('/article')}
+          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Go to Article
+        </button>
+      </div>
+    );
+  }
 
   //TODO: Handle loading data time rather than just potential nulls
   return (
     <div {...handlers} className="w-full bg-gray-200 flex flex-col">
       <QuestionHeader
-        questionNumber={fetchedQuestion?.content.id}
-        totalQuestions={fetchedQuestion?.articleIndex}
-        taskType={capitalise(fetchedQuestion?.content.type)}
+        questionNumber={currentIndex + 1}
+        totalQuestions={segments.length}
+        taskType={capitalise(segments[currentIndex]?.content.type)}
       />
-      {/* TODO: Handle polls */}
-      {(fetchedQuestion?.content.type === "question") && (
-        <QuestionContent content={fetchedQuestion?.content || {}} />
+      
+      {/* Render based on content type */}
+      {(segments[currentIndex]?.content.type === "question") && (
+        <QuestionContent content={segments[currentIndex]?.content || {}} />
       )}
-      {(fetchedQuestion?.content.type === "poll") && (
-        <PollContent content={fetchedQuestion?.content || {}} />
+      {(segments[currentIndex]?.content.type === "poll") && (
+        <PollContent content={segments[currentIndex]?.content || {}} />
       )}
     </div>
   );
