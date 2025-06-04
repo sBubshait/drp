@@ -5,6 +5,14 @@ import QuestionHeader from "../components/question_elements/questionHeader.jsx";
 import QuestionContent from "../components/site_layout/questionContent.jsx";
 import PollContent from "../components/site_layout/pollContent.jsx";
 import DiscussionContent from "../components/site_layout/discussionContent.jsx";
+import ApiService from '../services/api.js';
+
+// Component map for different content types
+const CONTENT_COMPONENTS = {
+  question: QuestionContent,
+  poll: PollContent,
+  discussion: DiscussionContent,
+};
 
 export function QuestionPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -14,10 +22,7 @@ export function QuestionPage() {
   const params = useParams();
   const location = useLocation();
   
-  // Get article ID from URL params
   const articleId = params.id ? parseInt(params.id, 10) : null;
-  
-  // Get next article ID from navigation state
   const nextArticleId = location.state?.nextArticleId;
   
   function capitalise(s) {
@@ -27,39 +32,22 @@ export function QuestionPage() {
   // Initialize segments from navigation state or fetch from API as fallback
   useEffect(() => {
     if (location.state?.segments) {
-      // Use segments passed from ArticlePage
       setSegments(location.state.segments);
       setLoading(false);
     } else if (articleId) {
-      // Fallback: fetch article data if no segments in state (direct navigation)
       fetchArticleData(articleId);
     } else {
-      // No article ID and no state
       setLoading(false);
     }
     
-    // Reset to first question when segments change
     setCurrentIndex(0);
   }, [location.state, articleId]);
 
-  // Fallback function to fetch article data if segments not provided in state
+  // Fallback function to fetch article data using API service
   const fetchArticleData = async (id) => {
     setLoading(true);
     try {
-      
-      const response = await fetch(`https://api.saleh.host/getArticle?id=${id}`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      if (data.status !== 200) {
-        throw new Error(`API error! status: ${data.status}`);
-      }
-      
-      // Extract segments from API response
+      const data = await ApiService.getArticle(id);
       setSegments(data.article.segments || []);
     } catch (error) {
       console.error('Error fetching article data:', error);
@@ -74,7 +62,6 @@ export function QuestionPage() {
     if (currentIndex < segments.length - 1) {
       setCurrentIndex(currentIndex + 1);
     } else {
-      // On last segment, go to next article if available, otherwise back to current article
       if (nextArticleId) {
         navigate(`/articles/${nextArticleId}`);
       } else {
@@ -87,18 +74,17 @@ export function QuestionPage() {
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
     } else {
-      // Navigate back to article page if on first question
       navigate(`/articles/${articleId}`);
     }
   };
 
   // Swipe handlers
   const handlers = useSwipeable({
-    onSwipedLeft: goToNext,        // Swipe left to go to next question or next article
-    onSwipedRight: goToPrev,       // Swipe right to go to previous question or back to article
+    onSwipedLeft: goToNext,
+    onSwipedRight: goToPrev,
     swipeDuration: 500,
     preventScrollOnSwipe: true,
-    trackMouse: true // This enables mouse dragging for testing on desktop
+    trackMouse: true
   });
 
   // Keyboard event handler
@@ -113,13 +99,8 @@ export function QuestionPage() {
       }
     };
 
-    // Add event listener
     window.addEventListener('keydown', handleKeyDown);
-
-    // Cleanup function to remove event listener
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [loading, segments.length, currentIndex, nextArticleId]);
 
   // Loading state
@@ -164,23 +145,24 @@ export function QuestionPage() {
     );
   }
 
+  const currentSegment = segments[currentIndex];
+  const contentType = currentSegment?.content?.type || currentSegment?.type;
+  const ContentComponent = CONTENT_COMPONENTS[contentType];
+
   return (
     <div {...handlers} className="w-full bg-gray-200 flex flex-col">
       <QuestionHeader
         questionNumber={currentIndex + 1}
         totalQuestions={segments.length}
-        taskType={capitalise(segments[currentIndex]?.content?.type || segments[currentIndex]?.type)}
+        taskType={capitalise(contentType)}
       />
       
-      {/* Render based on content type */}
-      {(segments[currentIndex]?.type === "question") && (
-        <QuestionContent content={segments[currentIndex]} />
-      )}
-      {(segments[currentIndex]?.type === "poll") && (
-        <PollContent content={segments[currentIndex]} />
-      )}
-      {(segments[currentIndex]?.type === "discussion") && (
-        <DiscussionContent content={segments[currentIndex]} />
+      {ContentComponent ? (
+        <ContentComponent content={currentSegment} />
+      ) : (
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-red-600">Unknown content type: {contentType}</p>
+        </div>
       )}
     </div>
   );

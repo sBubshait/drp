@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import { useNavigate, useParams } from 'react-router';
 import QuestionHeader from "../components/question_elements/questionHeader.jsx";
+import ApiService from '../services/api.js';
 
 export function ArticlePage() {
   const navigate = useNavigate();
@@ -13,56 +14,30 @@ export function ArticlePage() {
   // Get article ID from URL params, null if not provided
   const articleId = params.id ? parseInt(params.id, 10) : null;
 
-  // Function to fetch article by ID from API
+  // Function to fetch article by ID from API using the service layer
   const fetchArticle = async (id) => {
     setLoading(true);
     setError(null);
     
     try {
-      // Use different endpoints based on whether ID is provided
-      const url = id 
-        ? `https://api.saleh.host/getArticle?id=${id}`
-        : `https://api.saleh.host/getArticle`;
-      
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      if (data.status !== 200) {
-        throw new Error(`API error! status: ${data.status}`);
-      }
-      
-      // Use the API response structure directly
-      const transformedArticle = {
-        id: data.article.id,
-        title: data.article.content, // API uses 'content' field as the title
-        body: `Category: ${data.article.category}\n\nThis article covers ${data.article.category.toLowerCase()} topics. Navigate through the questions to explore different perspectives on this subject.`,
-        category: data.article.category,
-        type: data.article.type,
-        prev: data.prev,
-        next: data.next,
-        segments: data.article.segments || []
-      };
-      
-      setFetchedArticle(transformedArticle);
+      const data = await ApiService.getArticle(id);
+      setFetchedArticle(data);
     } catch (error) {
       console.error('Error fetching article:', error);
       setError(error.message);
       
       // Fallback to a basic article structure on error
       const fallbackArticle = {
-        id: id || 1,
-        title: `Article ${id || 'Default'} (Error Loading)`,
-        body: `Unable to load article ${id ? `${id}` : ''}. Please try again later.`,
-        category: "Unknown",
-        type: "text",
+        status: 200,
         prev: id && id > 1 ? id - 1 : null,
         next: (id || 1) + 1,
-        segments: []
+        article: {
+          id: id || 1,
+          content: `Article ${id || 'Default'} (Error Loading)`,
+          category: "Unknown",
+          type: "text",
+          segments: []
+        }
       };
       
       setFetchedArticle(fallbackArticle);
@@ -84,31 +59,30 @@ export function ArticlePage() {
     }
   };
 
-  // Navigation function for swipe to questions - now passes segments and next article ID in state
+  // Navigation function for swipe to questions
   const goToQuestions = () => {
     const questionUrl = articleId 
       ? `/articles/${articleId}/questions`
-      : `/articles/${fetchedArticle.id}/questions`;
+      : `/articles/${fetchedArticle.article.id}/questions`;
       
     navigate(questionUrl, {
       state: {
-        segments: fetchedArticle.segments,
+        segments: fetchedArticle.article.segments,
         nextArticleId: fetchedArticle.next,
-        articleId: articleId || fetchedArticle.id,
-        articleTitle: fetchedArticle.title
+        articleId: articleId || fetchedArticle.article.id,
+        articleTitle: fetchedArticle.article.content
       }
     });
   };
 
   // Swipe handlers
   const handlers = useSwipeable({
-    onSwipedLeft: goToQuestions,     // Swipe left to go to questions
-    onSwipedRight: goToPrev,         // Swipe right to go to previous article
-    onSwipedUp: goToNext,            // Swipe up to go to next article
-    onSwipedDown: goToPrev,          // Swipe down to go to previous article
+    onSwipedLeft: goToQuestions,
+    onSwipedUp: goToNext,
+    onSwipedDown: goToPrev,
     swipeDuration: 500,
     preventScrollOnSwipe: true,
-    trackMouse: true // This enables mouse dragging for testing on desktop
+    trackMouse: true
   });
 
   // Fetch article when component mounts or articleId changes
@@ -130,13 +104,8 @@ export function ArticlePage() {
       }
     };
 
-    // Add event listener
     window.addEventListener('keydown', handleKeyDown);
-
-    // Cleanup function to remove event listener
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [fetchedArticle, loading]);
 
   if (loading) {
@@ -179,41 +148,35 @@ export function ArticlePage() {
   return (
     <div {...handlers} className="w-full bg-gray-200 flex flex-col min-h-screen">
       <QuestionHeader
-        questionNumber={fetchedArticle.id}
-        totalQuestions={fetchedArticle.segments.length}
+        questionNumber={fetchedArticle.article.id}
+        totalQuestions={fetchedArticle.article.segments?.length || 0}
         taskType="Article Summary"
       />
       
       <div className="flex-1 p-6">
         <div className="bg-white rounded-lg shadow-md p-6 h-full">
           <h1 className="text-3xl font-bold text-gray-800 mb-6">
-            {fetchedArticle.title}
+            {fetchedArticle.article.content}
           </h1>
           
-          {fetchedArticle.category && (
+          {fetchedArticle.article.category && (
             <div className="mb-4">
               <span className="inline-block bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
-                {fetchedArticle.category}
+                {fetchedArticle.article.category}
               </span>
             </div>
           )}
           
-          <div className="text-gray-700 leading-relaxed space-y-4">
-            {fetchedArticle.body.split('\n\n').map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
-            ))}
-          </div>
-          
           <div className="mt-8 space-y-4">
-            {fetchedArticle.segments.length > 0 && (
+            {fetchedArticle.article.segments?.length > 0 && (
               <div className="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400">
                 <p className="text-blue-800 font-medium">
-                  💡 Tip: Swipe left to proceed to {fetchedArticle.segments.length} question{fetchedArticle.segments.length !== 1 ? 's' : ''} about this article
+                  💡 Tip: Swipe left to proceed to {fetchedArticle.article.segments.length} question{fetchedArticle.article.segments.length !== 1 ? 's' : ''} about this article
                 </p>
               </div>
             )}
             
-            {fetchedArticle.segments.length === 0 && (
+            {(!fetchedArticle.article.segments || fetchedArticle.article.segments.length === 0) && (
               <div className="p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-400">
                 <p className="text-yellow-800 font-medium">
                   ℹ️ No questions available for this article

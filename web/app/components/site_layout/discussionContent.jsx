@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
 import ContextBox from "../question_elements/contextBox.jsx";
 import PinkContainer from "../discussions/PinkContainer.jsx";
 import WriteSection from "../discussions/WriteSection.jsx";
 import ResponseContainer from "../discussions/ResponseContainer.jsx";
-import { API_URL } from '../../config.js';
+import ApiService from '../../services/api.js';
 
 export default function DiscussionContent({ content }) {
   const [userInput, setUserInput] = useState('');
@@ -12,7 +11,6 @@ export default function DiscussionContent({ content }) {
   const [responses, setResponses] = useState([]);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isLoadingResponses, setIsLoadingResponses] = useState(false);
-  const navigate = useNavigate();
 
   if (!content) {
     return (
@@ -27,16 +25,8 @@ export default function DiscussionContent({ content }) {
   const fetchResponses = async () => {
     setIsLoadingResponses(true);
     try {
-      const response = await fetch(`${API_URL}/discussions/responses?discussionId=${id}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch discussion responses');
-      }
-
-      const data = await response.json();
-      if (data.status === 200) {
-        setResponses(data.responses || []);
-      }
+      const data = await ApiService.getDiscussionResponses(id);
+      setResponses(data.responses || []);
     } catch (error) {
       console.error('Error fetching discussion responses:', error);
     } finally {
@@ -53,26 +43,9 @@ export default function DiscussionContent({ content }) {
     setIsSubmitting(true);
 
     try {
-      // Submit the response
-      const respondResponse = await fetch(`${API_URL}/discussions/respond`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          discussionId: id,
-          content: userInput.trim()
-        })
-      });
-
-      if (!respondResponse.ok) {
-        throw new Error('Failed to submit response');
-      }
-
-      // Mark as submitted and fetch responses
+      await ApiService.submitDiscussionResponse(id, userInput);
       setHasSubmitted(true);
       await fetchResponses();
-
     } catch (error) {
       console.error('Error submitting response:', error);
       alert('There was an error submitting your response. Please try again.');
