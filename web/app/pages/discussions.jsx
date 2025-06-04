@@ -1,20 +1,89 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router';
 import SectionHeader from '../components/common/sectionHeader';
 import ContextBox from '../components/common/contextBox';
 import PinkContainer from '../components/discussions/PinkContainer';
 import WriteSection from '../components/discussions/WriteSection';
+import { API_URL } from '../config';
 
 export function DiscussionsPage() {
     const [userInput, setUserInput] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [discussionData, setDiscussionData] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [responses, setResponses] = useState([]);
+    const navigate = useNavigate();
 
-    const handleSubmit = () => {
+    const discussionId = 4; // Hardcoded now
+
+    useEffect(() => {
+        fetchDiscussionData();
+    }, []);
+
+    const fetchDiscussionData = async () => {
+        try {
+            const response = await fetch(`${API_URL}/discussions/responses?discussionId=4`);
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch discussion data');
+            }
+
+            const data = await response.json();
+            if (data.status != 200) {
+                useNavigate('/?error=Discussion not found');
+                return;
+            }
+            setDiscussionData(data.discussion);
+            setResponses(data.responses || []);
+        } catch (error) {
+            console.error('Error fetching discussion data:', error);
+            // Could show error state or use fallback data
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleSubmit = async () => {
         if (userInput.trim().length === 0) {
             alert('Please share your thoughts before unlocking the discussion!');
             return;
         }
 
-        alert('Thank you for sharing! The discussion is now unlocked.');
-        setUserInput('');
+        setIsSubmitting(true);
+
+        try {
+            // Submit the response
+            const respondResponse = await fetch(`${API_URL}/discussions/respond`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    discussionId: 4,
+                    content: userInput.trim()
+                })
+            });
+
+            if (!respondResponse.ok) {
+                throw new Error('Failed to submit response');
+            }
+
+            // Navigate to results page with the data
+            navigate('/discussions/results', {
+                state: {
+                    userResponse: userInput.trim(),
+                    discussionData,
+                    responses: responses || [],
+                    discussionId
+                }
+            });
+
+        } catch (error) {
+            console.error('Error submitting response:', error);
+            alert('There was an error submitting your response. Please try again.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const avatarLetters = ['A', 'M', 'S', 'J', 'R'];
@@ -27,19 +96,39 @@ export function DiscussionsPage() {
         'bg-amber-500'
     ];
 
+    if (isLoading) {
+        return (
+            <div className="w-full h-screen bg-gray-200 flex flex-col">
+                <SectionHeader sectionNumber={3} totalSections={4} sectionType="Community Thoughts" />
+                <div className="flex-1 flex items-center justify-center">
+                    <div className="text-gray-500">Loading discussion...</div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="w-full h-screen bg-gray-200 flex flex-col">
             <SectionHeader sectionNumber={3} totalSections={4} sectionType="Community Thoughts" />
 
             <div className="flex-1 p-5 flex flex-col gap-4">
 
-                <ContextBox text="Trump wants to cut funding to universities that teach critical race theory." />
+                <ContextBox text={discussionData?.context || "Loading context..."} />
 
-                <PinkContainer text="Should the government use funding to control what universities teach and believe?" />
+                <PinkContainer text={discussionData?.prompt || "Loading prompt..."} />
 
-                <WriteSection userInput={userInput} setUserInput={setUserInput} handleSubmit={handleSubmit} />
+                <WriteSection
+                    userInput={userInput}
+                    setUserInput={setUserInput}
+                    handleSubmit={handleSubmit}
+                    isSubmitting={isSubmitting}
+                />
 
-                <ParticipationSection avatarLetters={avatarLetters} avatarColors={avatarColors} />
+                <ParticipationSection
+                    avatarLetters={avatarLetters}
+                    avatarColors={avatarColors}
+                    responseCount={discussionData?.totalResponses || 0}
+                />
 
                 <LockedDiscussionSection />
 
@@ -48,7 +137,7 @@ export function DiscussionsPage() {
     );
 }
 
-function ParticipationSection({ avatarLetters, avatarColors }) {
+function ParticipationSection({ avatarLetters, avatarColors, responseCount }) {
     return (
         <div className="flex items-center justify-center gap-3 bg-white rounded-lg p-4 mb-4">
             <div className="flex items-center">
@@ -62,7 +151,7 @@ function ParticipationSection({ avatarLetters, avatarColors }) {
                 ))}
             </div>
             <div className="text-md text-gray-600 font-medium">
-                <span className="text-cyan-600 font-bold">12+</span> People shared their thoughts!
+                <span className="text-cyan-600 font-bold">{responseCount}+</span> People shared their thoughts!
             </div>
         </div>
     )

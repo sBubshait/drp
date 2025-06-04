@@ -28,7 +28,7 @@ public class DiscussionService {
     return discussionResponseRepository.findByDiscussionIdOrderByCreatedAtAsc(discussionId);
   }
 
-  public DiscussionResponse addResponse(Long discussionId, String responseText, String author) {
+  public DiscussionResponse addResponse(Long discussionId, String responseText) {
     // Check if discussion exists and is open
     Discussion discussion = discussionRepository.findById(discussionId)
         .orElseThrow(() -> new RuntimeException("Discussion not found"));

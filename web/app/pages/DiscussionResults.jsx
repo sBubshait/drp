@@ -1,41 +1,59 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 import SectionHeader from '../components/common/sectionHeader';
-import ContextBox from '../components/common/contextBox';
 import PinkContainer from '../components/discussions/PinkContainer';
-import WriteSection from '../components/discussions/WriteSection';
 import ResponseContainer from '../components/discussions/ResponseContainer';
 
-export function DiscussionResultsPage() {
-    // Mock data - in real app this would come from props or API
-    const userResponse = "I think that... and this is because.... but I disagree with the idea that.....";
+export default function DiscussionResultsPage() {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const [responses, setResponses] = useState([]);
+    const [userResponse, setUserResponse] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
 
-    const otherResponses = [
-        {
-            id: 1,
-            text: "But I feel like... and that means... I'm not sure about... because of...",
-            user: "user2"
-        },
-        {
-            id: 2,
-            text: "I think that... and this is because... but I disagree with the idea that...",
-            user: "user3"
-        },
-        {
-            id: 3,
-            text: "Actually, I believe the opposite because... when you consider... it becomes clear that...",
-            user: "user4"
-        },
-        {
-            id: 4,
-            text: "This is a complex issue that requires... we need to think about... from multiple perspectives...",
-            user: "user5"
-        },
-        {
-            id: 5,
-            text: "My experience has shown me that... which is why I think... but I understand others might...",
-            user: "user6"
+    useEffect(() => {
+        // Check if we have data from navigation
+        if (location.state) {
+            const { userResponse: navUserResponse, responses: navResponses } = location.state;
+            console.log('Navigation state:', location.state, responses);
+            setUserResponse(navUserResponse || '');
+            setResponses(navResponses || []);
+            setIsLoading(false);
+        } else {
+            // If no navigation state, fetch data directly (for direct page access)
+            fetchResponses();
         }
-    ];
+    }, [location.state]);
+
+    const fetchResponses = async () => {
+        try {
+            const response = await fetch('/discussion/responses?discussionId=4');
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch responses');
+            }
+
+            const data = await response.json();
+            setResponses(data);
+        } catch (error) {
+            console.error('Error fetching responses:', error);
+            // Could show an error state or redirect back
+            navigate('/discussions');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <div className="w-full h-screen bg-gray-200 flex flex-col">
+                <SectionHeader sectionNumber={3} totalSections={4} sectionType="Community Thoughts" />
+                <div className="flex-1 flex items-center justify-center">
+                    <div className="text-gray-500">Loading responses...</div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="w-full h-screen bg-gray-200 flex flex-col">
@@ -46,13 +64,19 @@ export function DiscussionResultsPage() {
                 <PinkContainer text="Should the government use funding to control what universities teach and believe?" />
 
                 <div className="text-xl font-semibold text-gray-700 mb-2 text-center">
-                    12 Responses..
+                    {responses.length + 1} Response{responses.length !== 0 ? 's' : ''}..
                 </div>
 
                 <div className="flex-1 overflow-y-auto space-y-4 mb-5 min-h-0 no-scrollbar">
-                    <ResponseContainer active={true} response={{ text: userResponse, user: "You" }} />
-                    {otherResponses.map((response, index) => (
-                        <ResponseContainer key={response.id} response={response} />
+                    {userResponse && (
+                        <ResponseContainer active={true} content={userResponse} user="You" />
+                    )}
+                    {responses.map((response, index) => (
+                        <ResponseContainer
+                            key={response.id || index}
+                            content={response.content}
+                            user={response.author || `User ${index + 1}`}
+                        />
                     ))}
                 </div>
             </div>

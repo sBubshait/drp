@@ -1,5 +1,4 @@
 import { DiscussionsPage } from "../pages/discussions";
-import { DiscussionResultsPage } from "../pages/DiscussionResults"
 
 export function meta() {
     return [
