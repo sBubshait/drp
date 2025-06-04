@@ -4,6 +4,7 @@ import { useSwipeable } from 'react-swipeable';
 import QuestionHeader from "../components/question_elements/questionHeader.jsx";
 import QuestionContent from "../components/site_layout/questionContent.jsx";
 import PollContent from "../components/site_layout/pollContent.jsx";
+import DiscussionContent from "../components/site_layout/discussionContent.jsx";
 
 export function QuestionPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -175,6 +176,9 @@ export function QuestionPage() {
       )}
       {(segments[currentIndex]?.type === "poll") && (
         <PollContent content={segments[currentIndex]} />
+      )}
+      {(segments[currentIndex]?.type === "discussion") && (
+        <DiscussionContent content={segments[currentIndex]} />
       )}
     </div>
   );
