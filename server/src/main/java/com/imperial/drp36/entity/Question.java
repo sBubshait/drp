@@ -9,7 +9,14 @@ import org.hibernate.type.SqlTypes;
 @Entity
 @Table(name = "questions")
 @DiscriminatorValue("question")
-public class Question extends FeedItem {
+public class Question extends Segment {
+
+  @Column(name = "title", nullable = false)
+  private String title;
+
+  @Column(name = "context", columnDefinition = "TEXT")
+  private String context;
+
   @Column(name = "options")
   @JdbcTypeCode(SqlTypes.JSON)
   private List<String> options = new ArrayList<>();
@@ -17,11 +24,8 @@ public class Question extends FeedItem {
   @Column(name = "correct_answer_index")
   private Integer correctAnswerIndex;
 
-  @Column(name = "is_correctable")
-  private Boolean isCorrectable = false;
-
-  @Column(name = "has_answer")
-  private Boolean hasAnswer = false;
+  @Column(name = "has_correct_answer")
+  private Boolean hasCorrectAnswer = false;
 
   @Column(name = "correct_feedback", columnDefinition = "TEXT")
   private String correctFeedback;
@@ -37,52 +41,76 @@ public class Question extends FeedItem {
     super();
   }
 
-  public Question(String title, String context, String createdBy,
-      List<String> options, Boolean isCorrectable) {
-    super(title, context, createdBy);
+  public Question(String title, String context, List<String> options, Boolean hasCorrectAnswer) {
+    super();
+    this.title = title;
+    this.context = context;
     this.options = options != null ? new ArrayList<>(options) : new ArrayList<>();
-    this.isCorrectable = isCorrectable;
+    this.hasCorrectAnswer = hasCorrectAnswer;
   }
 
   // Getters and Setters
-  public List<String> getOptions() { return options; }
-  public void setOptions(List<String> options) {
-    this.options = options != null ? new ArrayList<>(options) : new ArrayList<>();
+  public String getTitle() {
+    return title;
   }
 
-  public Integer getCorrectAnswerIndex() { return correctAnswerIndex; }
+  public void setTitle(String title) {
+    this.title = title;
+  }
+
+  public String getContext() {
+    return context;
+  }
+
+  public void setContext(String context) {
+    this.context = context;
+  }
+
+  public List<String> getOptions() {
+    return options;
+  }
+
+  public void setOptions(List<String> options) {
+    this.options = options;
+  }
+
+  public Integer getCorrectAnswerIndex() {
+    return correctAnswerIndex;
+  }
+
   public void setCorrectAnswerIndex(Integer correctAnswerIndex) {
     this.correctAnswerIndex = correctAnswerIndex;
   }
 
-  public Boolean getIsCorrectable() { return isCorrectable; }
-  public void setIsCorrectable(Boolean isCorrectable) { this.isCorrectable = isCorrectable; }
-
-  public Boolean getHasAnswer() { return hasAnswer; }
-  public void setHasAnswer(Boolean hasAnswer) { this.hasAnswer = hasAnswer; }
-
-  public String getCorrectFeedback() { return correctFeedback; }
-  public void setCorrectFeedback(String correctFeedback) { this.correctFeedback = correctFeedback; }
-
-  public String getIncorrectFeedback() { return incorrectFeedback; }
-  public void setIncorrectFeedback(String incorrectFeedback) { this.incorrectFeedback = incorrectFeedback; }
-
-  public String getGeneralAnswer() { return generalAnswer; }
-  public void setGeneralAnswer(String generalAnswer) { this.generalAnswer = generalAnswer; }
-
-  // Helper methods
-  public String getCorrectAnswer() {
-    if (correctAnswerIndex != null && correctAnswerIndex >= 0 && correctAnswerIndex < options.size()) {
-      return options.get(correctAnswerIndex);
-    }
-    return null;
+  public Boolean getHasCorrectAnswer() {
+    return hasCorrectAnswer;
   }
 
-  public boolean isCorrectAnswer(int index) {
-    return correctAnswerIndex != null && correctAnswerIndex.equals(index);
+  public void setHasCorrectAnswer(Boolean hasCorrectAnswer) {
+    this.hasCorrectAnswer = hasCorrectAnswer;
   }
 
-  public void addOption(String option) {
-    this.options.add(option);
+  public String getCorrectFeedback() {
+    return correctFeedback;
+  }
+
+  public void setCorrectFeedback(String correctFeedback) {
+    this.correctFeedback = correctFeedback;
+  }
+
+  public String getIncorrectFeedback() {
+    return incorrectFeedback;
+  }
+
+  public void setIncorrectFeedback(String incorrectFeedback) {
+    this.incorrectFeedback = incorrectFeedback;
+  }
+
+  public String getGeneralAnswer() {
+    return generalAnswer;
+  }
+
+  public void setGeneralAnswer(String generalAnswer) {
+    this.generalAnswer = generalAnswer;
   }
 }
