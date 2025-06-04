@@ -2,7 +2,7 @@ package com.imperial.drp36.services;
 
 import com.imperial.drp36.entity.Segment;
 import com.imperial.drp36.entity.Poll;
-import com.imperial.drp36.model.FeedContentResponse;
+import com.imperial.drp36.model.SegmentContent;
 import com.imperial.drp36.repository.FeedItemRepository;
 import com.imperial.drp36.repository.PollRepository;
 import com.imperial.drp36.repository.QuestionRepository;
@@ -59,13 +59,13 @@ public class FeedService {
     return feedItemRepository.existsById(id);
   }
 
-  public FeedContentResponse getFeedContentResponse(Segment segment) {
+  public SegmentContent getFeedContentResponse(Segment segment) {
     switch (segment.getItemType()) {
       case "question":
-        return FeedContentResponse.fromQuestion(questionRepository.findById(segment.getId()).orElse(null));
+        return SegmentContent.fromQuestion(questionRepository.findById(segment.getId()).orElse(null));
 
       case "poll":
-        return FeedContentResponse.fromPoll(pollRepository.findById(segment.getId()).orElse(null));
+        return SegmentContent.fromPoll(pollRepository.findById(segment.getId()).orElse(null));
 
       default:
         System.err.println("Unknown item type: " + segment.getItemType());

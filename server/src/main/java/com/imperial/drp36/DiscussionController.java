@@ -2,7 +2,6 @@ package com.imperial.drp36;
 
 import com.imperial.drp36.entity.Discussion;
 import com.imperial.drp36.entity.DiscussionResponse;
-import com.imperial.drp36.model.DiscussionResponses;
 import com.imperial.drp36.model.OneDiscussionResponse;
 import com.imperial.drp36.model.StatusResponse;
 import com.imperial.drp36.services.DiscussionService;

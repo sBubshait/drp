@@ -6,9 +6,6 @@ import jakarta.persistence.*;
 @Table(name = "discussions")
 @DiscriminatorValue("discussion")
 public class Discussion extends Segment {
-  @Column(name = "title", nullable = false)
-  private String title;
-
   @Column(name = "context", columnDefinition = "TEXT")
   private String context;
 
@@ -23,17 +20,13 @@ public class Discussion extends Segment {
     super();
   }
 
-  public Discussion(String title, String context, String prompt) {
+  public Discussion(String context, String prompt) {
     super();
-    this.title = title;
     this.context = context;
     this.prompt = prompt;
   }
 
   // Getters and Setters
-  public String getTitle() { return title; }
-  public void setTitle(String title) { this.title = title; }
-
   public String getContext() { return context; }
   public void setContext(String context) { this.context = context; }
 
