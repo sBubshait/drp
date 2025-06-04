@@ -7,82 +7,65 @@ export function ArticlePage() {
   const navigate = useNavigate();
   const params = useParams();
   const [fetchedArticle, setFetchedArticle] = useState();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Get article ID from URL params, default to 10 if not provided
   const articleId = params.id ? parseInt(params.id, 10) : 10;
 
-  // Mock article data - replace with actual API call later
-  const mockArticleData = {
-    id: 10,
-    title: "Understanding Climate Change",
-    body: `Climate change refers to long-term shifts in global or regional climate patterns. Since the mid-20th century, scientists have observed unprecedented changes in Earth's climate system, primarily attributed to increased levels of greenhouse gases in the atmosphere.
-
-The primary driver of recent climate change is human activity, particularly the burning of fossil fuels such as coal, oil, and natural gas. These activities release carbon dioxide and other greenhouse gases into the atmosphere, creating a "greenhouse effect" that traps heat and warms the planet.
-
-The effects of climate change are far-reaching and include rising global temperatures, melting ice caps and glaciers, rising sea levels, and more frequent extreme weather events such as hurricanes, droughts, and heatwaves.
-
-Addressing climate change requires global cooperation and action on multiple fronts, including transitioning to renewable energy sources, improving energy efficiency, protecting and restoring natural ecosystems, and developing new technologies to reduce greenhouse gas emissions.`,
-    prev: 9,    // Previous article ID
-    next: 11,    // Next article ID
-    segments: [
-      {"status":200,"prev":0,"next":2,"articleIndex":1,"content":{"type":"question","id":1,"context":"Trump wants to cut all federal grant money to that was supposed to go for scientific and engineering research at Harvard. He called  Harvard as 'radicalised', 'lunatics', and 'troublemakers' who don't deserve taxpayer cash. Instead, they can use the 'ridiculous' endowments they have.","title":"How much do you think Harvard's endowment is actually worth?","options":["$5 Billion","$15 Billion","$35 Billion","$53 Billion"],"answer":null,"hasAnswer":true,"correctAnswerFeedback":"Yes, you got it! It was indeed worth $53 Billion.. literally wealthier than half of the countries on earth!\r\n\r\nDoes this give you any thoughts?","wrongAnswerFeedback":"It's actually worth $53 Billion.. literally wealthier than half of the countries on earth!\r\n\r\nDoes this give you any thoughts?","generalAnswer":null},"createdAt":"2025-05-29T23:31:56.052484","source":""},
-      {"status":200,"prev":1,"next":3,"articleIndex":1,"content":{"type":"poll","id":2,"context":"Citing the combating of anti-semitism within Harvard, the Trump administration banned the university's ability to admit international students until it handed over 'any and all audio or video footage of any protest activity involving a non-immigrant student on campus in the last 5 years'.","title":"Do you think this request is too far?","options":["It was necessary","It was reasonable","It overstepped","It's an abuse of power"],"responseCounts":[20,27,61,15],"totalResponses":123,"allowsMultipleSelection":false,"type":"poll"},"createdAt":"2025-05-29T23:32:42.879658","source":""},
-    ]
-  };
-
-  // Mock different articles for different IDs
-  const generateMockArticleForId = (id) => {
-    const articles = {
-      9: {
-        ...mockArticleData,
-        id: 9,
-        title: "Renewable Energy Solutions",
-        body: "Renewable energy technologies have made significant strides in recent years. Solar and wind power are now cost-competitive with fossil fuels in many markets. The transition to clean energy is accelerating globally, driven by technological improvements, falling costs, and supportive policies.",
-        prev: 8,
-        next: 10,
-        segments: [
-          {"status":200,"prev":0,"next":2,"articleIndex":1,"content":{"type":"question","id":1,"context":"Solar panel efficiency has improved dramatically over the past decade.","title":"What is the typical efficiency of modern solar panels?","options":["10-15%","15-20%","20-25%","25-30%"],"answer":2,"hasAnswer":true,"correctAnswerFeedback":"Correct! Modern solar panels typically achieve 20-25% efficiency.","wrongAnswerFeedback":"Actually, modern solar panels typically achieve 20-25% efficiency.","generalAnswer":null},"createdAt":"2025-05-29T23:31:56.052484","source":""}
-        ]
-      },
-      10: mockArticleData,
-      11: {
-        ...mockArticleData,
-        id: 11,
-        title: "Future of Transportation",
-        body: "Electric vehicles are revolutionizing the transportation sector. With improving battery technology, expanding charging infrastructure, and falling costs, EVs are becoming mainstream. Autonomous driving technology promises to further transform how we move around cities.",
-        prev: 10,
-        next: 12,
-        segments: [
-          {"status":200,"prev":0,"next":2,"articleIndex":1,"content":{"type":"poll","id":1,"context":"Electric vehicle adoption is accelerating worldwide.","title":"What's the biggest barrier to EV adoption?","options":["Cost","Charging infrastructure","Range anxiety","Lack of models"],"responseCounts":[45,67,89,23],"totalResponses":224,"allowsMultipleSelection":false,"type":"poll"},"createdAt":"2025-05-29T23:32:42.879658","source":""}
-        ]
+  // Function to fetch article by ID from API
+  const fetchArticle = async (id) => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      console.log(`Fetching article with ID: ${id}`);
+      
+      const response = await fetch(`https://api.saleh.host/getArticle?id=${id}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    };
-
-    return articles[id] || {
-      ...mockArticleData,
-      id: id,
-      title: `Article ${id}`,
-      body: `This is the content for article ${id}. Lorem ipsum dolor sit amet, consectetur adipiscing elit.`,
-      prev: id > 1 ? id - 1 : null,
-      next: id + 1,
-      segments: [
-        {"status":200,"prev":0,"next":2,"articleIndex":1,"content":{"type":"question","id":1,"context":`This is a question for article ${id}.`,"title":`Question about article ${id}?`,"options":["Option A","Option B","Option C","Option D"],"answer":0,"hasAnswer":true,"correctAnswerFeedback":"Correct!","wrongAnswerFeedback":"Not quite right.","generalAnswer":null},"createdAt":"2025-05-29T23:31:56.052484","source":""}
-      ]
-    };
-  };
-
-  // Function to fetch article by ID (currently using mock data)
-  const fetchArticle = (id) => {
-    // TODO: Replace with actual API call
-    // const url = `https://api.saleh.host/getArticle?id=${id}`;
-    
-    console.log(`Fetching article with ID: ${id}`);
-    
-    // Simulate API call with setTimeout
-    setTimeout(() => {
-      const articleData = generateMockArticleForId(id);
-      setFetchedArticle(articleData);
-    }, 100);
+      
+      const data = await response.json();
+      
+      if (data.status !== 200) {
+        throw new Error(`API error! status: ${data.status}`);
+      }
+      
+      // Use the API response structure directly
+      const transformedArticle = {
+        id: data.article.id,
+        title: data.article.content, // API uses 'content' field as the title
+        body: `Category: ${data.article.category}\n\nThis article covers ${data.article.category.toLowerCase()} topics. Navigate through the questions to explore different perspectives on this subject.`,
+        category: data.article.category,
+        type: data.article.type,
+        prev: data.prev,
+        next: data.next,
+        segments: data.article.segments || []
+      };
+      
+      setFetchedArticle(transformedArticle);
+    } catch (error) {
+      console.error('Error fetching article:', error);
+      setError(error.message);
+      
+      // Fallback to a basic article structure on error
+      const fallbackArticle = {
+        id: id,
+        title: `Article ${id} (Error Loading)`,
+        body: `Unable to load article ${id}. Please try again later.`,
+        category: "Unknown",
+        type: "text",
+        prev: id > 1 ? id - 1 : null,
+        next: id + 1,
+        segments: []
+      };
+      
+      setFetchedArticle(fallbackArticle);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Navigation functions
@@ -122,7 +105,7 @@ Addressing climate change requires global cooperation and action on multiple fro
   // Keyboard event handler
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (!fetchedArticle) return;
+      if (!fetchedArticle || loading) return;
 
       if (event.key === 'ArrowRight') {
         goToNext();
@@ -140,13 +123,36 @@ Addressing climate change requires global cooperation and action on multiple fro
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [fetchedArticle]);
+  }, [fetchedArticle, loading]);
+
+  if (loading) {
+    return (
+      <div className="w-full bg-gray-200 flex flex-col min-h-screen items-center justify-center">
+        <p className="text-gray-600">Loading article...</p>
+        <p className="text-gray-500 text-sm mt-2">Fetching article {articleId} from API...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full bg-gray-200 flex flex-col min-h-screen items-center justify-center">
+        <p className="text-red-600 font-semibold">Error loading article</p>
+        <p className="text-gray-500 text-sm mt-2">{error}</p>
+        <button 
+          onClick={() => fetchArticle(articleId)}
+          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   if (!fetchedArticle) {
     return (
       <div className="w-full bg-gray-200 flex flex-col min-h-screen items-center justify-center">
-        <p className="text-gray-600">Loading article...</p>
-        <p className="text-gray-500 text-sm mt-2">Loading article {articleId}...</p>
+        <p className="text-gray-600">No article data available</p>
       </div>
     );
   }
@@ -165,6 +171,14 @@ Addressing climate change requires global cooperation and action on multiple fro
             {fetchedArticle.title}
           </h1>
           
+          {fetchedArticle.category && (
+            <div className="mb-4">
+              <span className="inline-block bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
+                {fetchedArticle.category}
+              </span>
+            </div>
+          )}
+          
           <div className="text-gray-700 leading-relaxed space-y-4">
             {fetchedArticle.body.split('\n\n').map((paragraph, index) => (
               <p key={index}>{paragraph}</p>
@@ -172,12 +186,40 @@ Addressing climate change requires global cooperation and action on multiple fro
           </div>
           
           <div className="mt-8 space-y-4">
-            <div className="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400">
-              <p className="text-blue-800 font-medium">
-                💡 Tip: Swipe left to proceed to questions about this article
-              </p>
-            </div>
+            {fetchedArticle.segments.length > 0 && (
+              <div className="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                <p className="text-blue-800 font-medium">
+                  💡 Tip: Swipe left to proceed to {fetchedArticle.segments.length} question{fetchedArticle.segments.length !== 1 ? 's' : ''} about this article
+                </p>
+              </div>
+            )}
             
+            {fetchedArticle.segments.length === 0 && (
+              <div className="p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-400">
+                <p className="text-yellow-800 font-medium">
+                  ℹ️ No questions available for this article
+                </p>
+              </div>
+            )}
+            
+            <div className="flex justify-between text-sm text-gray-500">
+              {fetchedArticle.prev && (
+                <button 
+                  onClick={goToPrev}
+                  className="text-blue-600 hover:text-blue-800"
+                >
+                  ← Previous Article ({fetchedArticle.prev})
+                </button>
+              )}
+              {fetchedArticle.next && (
+                <button 
+                  onClick={goToNext}
+                  className="text-blue-600 hover:text-blue-800 ml-auto"
+                >
+                  Next Article ({fetchedArticle.next}) →
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
