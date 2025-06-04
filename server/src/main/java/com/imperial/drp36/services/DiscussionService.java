@@ -20,7 +20,7 @@ public class DiscussionService {
   private DiscussionResponseRepository discussionResponseRepository;
 
   public Discussion createDiscussion(String title, String context, String prompt) {
-    Discussion discussion = new Discussion(title, context, prompt);
+    Discussion discussion = new Discussion(context, prompt);
     return discussionRepository.save(discussion);
   }
 
@@ -29,16 +29,8 @@ public class DiscussionService {
   }
 
   public DiscussionResponse addResponse(Long discussionId, String responseText) {
-    // Check if discussion exists and is open
     Discussion discussion = discussionRepository.findById(discussionId)
         .orElseThrow(() -> new RuntimeException("Discussion not found"));
-
-//    String finalAuthor = author;
-//    if (author == null || author.equals("anonymous")) {
-//      // Check if this IP/session already responded (for now just use "anonymous")
-//      // In a real implementation, you'd use session/IP tracking
-//      finalAuthor = "anonymous";
-//    }
 
     DiscussionResponse response = new DiscussionResponse(discussionId, responseText);
     DiscussionResponse savedResponse = discussionResponseRepository.save(response);
@@ -46,6 +38,7 @@ public class DiscussionService {
     Long totalResponses = discussionResponseRepository.countByDiscussionId(discussionId);
     discussion.setTotalResponses(totalResponses);
     discussionRepository.save(discussion);
+
     return savedResponse;
   }
 

@@ -1,7 +1,7 @@
 package com.imperial.drp36;
 
 import com.imperial.drp36.model.SegmentContent;
-import com.imperial.drp36.services.FeedService;
+import com.imperial.drp36.services.ArticleService;
 import com.imperial.drp36.entity.Segment;
 import com.imperial.drp36.model.StatusResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class FeedController {
 
 @Autowired
-  private FeedService feedService;
+  private ArticleService articleService;
 
   @Operation(
       summary = "Check API Status",
@@ -82,16 +82,16 @@ public class FeedController {
       id = 1L;
     else if (id < 1)
       id = 1L;
-    else if (id > feedService.getTotalFeedItemCount())
-      id = feedService.getTotalFeedItemCount();
+    else if (id > articleService.getTotalFeedItemCount())
+      id = articleService.getTotalFeedItemCount();
 
-    Segment segment = feedService.getFeedItemById(id);
+    Segment segment = articleService.getFeedItemById(id);
     System.out.println("Feed item: " + segment);
     if (segment == null)
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new FeedResponse(404));
 
-    SegmentContent contentResopnse = feedService.getFeedContentResponse(segment);
+    SegmentContent contentResopnse = articleService.getFeedContentResponse(segment);
     return ResponseEntity.status(HttpStatus.OK)
         .body(new FeedResponse(
             200,
@@ -147,7 +147,7 @@ public class FeedController {
       @RequestParam Integer optionIndex) {
 
     try {
-      boolean success = feedService.voteOnPoll(pollId, optionIndex);
+      boolean success = articleService.voteOnPoll(pollId, optionIndex);
 
       if (success) {
         return ResponseEntity.ok(new StatusResponse(200, "Vote recorded successfully"));
