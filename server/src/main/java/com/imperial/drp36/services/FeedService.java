@@ -3,7 +3,7 @@ package com.imperial.drp36.services;
 import com.imperial.drp36.entity.Segment;
 import com.imperial.drp36.entity.Poll;
 import com.imperial.drp36.model.SegmentContent;
-import com.imperial.drp36.repository.FeedItemRepository;
+import com.imperial.drp36.repository.SegmentRepository;
 import com.imperial.drp36.repository.PollRepository;
 import com.imperial.drp36.repository.QuestionRepository;
 import jakarta.transaction.Transactional;
@@ -17,7 +17,7 @@ import org.springframework.data.domain.*;
 public class FeedService {
 
   @Autowired
-  private FeedItemRepository feedItemRepository;
+  private SegmentRepository segmentRepository;
 
   @Autowired
   private QuestionRepository questionRepository;
@@ -26,37 +26,37 @@ public class FeedService {
   private PollRepository pollRepository;
 
   public Segment getFeedItemById(Long id) {
-    return feedItemRepository.findByIdOptional(id).orElse(null);
+    return segmentRepository.findByIdOptional(id).orElse(null);
   }
 
   public Page<Segment> getAllFeedItems(int page, int size) {
     Pageable pageable = PageRequest.of(page, size);
-    return feedItemRepository.findAllFeedItems(pageable);
+    return segmentRepository.findAllFeedItems(pageable);
   }
 
   public List<Segment> getAllFeedItemsSequential() {
-    return feedItemRepository.findAllOrderByIdAsc();
+    return segmentRepository.findAllOrderByIdAsc();
   }
 
   public Page<Segment> getFeedItemsByType(String itemType, int page, int size) {
     Pageable pageable = PageRequest.of(page, size);
-    return feedItemRepository.findByItemType(itemType, pageable);
+    return segmentRepository.findByItemType(itemType, pageable);
   }
 
   public long getTotalFeedItemCount() {
-    return feedItemRepository.count();
+    return segmentRepository.count();
   }
 
   public Segment saveFeedItem(Segment segment) {
-    return feedItemRepository.save(segment);
+    return segmentRepository.save(segment);
   }
 
   public void deleteFeedItem(Long id) {
-    feedItemRepository.deleteById(id);
+    segmentRepository.deleteById(id);
   }
 
   public boolean feedItemExists(Long id) {
-    return feedItemRepository.existsById(id);
+    return segmentRepository.existsById(id);
   }
 
   public SegmentContent getFeedContentResponse(Segment segment) {

@@ -8,6 +8,4 @@ import java.util.List;
 
 @Repository
 public interface DiscussionResponseRepository extends JpaRepository<DiscussionResponse, Long> {
-  List<DiscussionResponse> findByDiscussionIdOrderByCreatedAtAsc(Long discussionId);
-  Long countByDiscussionId(Long discussionId);
 }

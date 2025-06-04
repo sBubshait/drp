@@ -11,16 +11,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface QuestionRepository extends JpaRepository<Question, Long> {
-
-  @Query("SELECT q FROM Question q ORDER BY q.createdAt DESC")
-  Page<Question> findAllQuestions(Pageable pageable);
-
-  @Query("SELECT q FROM Question q WHERE q.isCorrectable = :correctable")
-  List<Question> findByIsCorrectable(Boolean correctable);
-
-  @Query("SELECT q FROM Question q WHERE q.hasAnswer = true")
-  List<Question> findQuestionsWithAnswers();
-
-  @Query("SELECT q FROM Question q WHERE q.createdBy = :createdBy ORDER BY q.createdAt DESC")
-  List<Question> findByCreatedBy(String createdBy);
 }
