@@ -81,9 +81,13 @@ export function ArticlePage() {
     }
   };
 
-  // Navigation function for swipe to questions
+  // Navigation function for swipe to questions - now passes segments in state
   const goToQuestions = () => {
-    navigate(`/articles/${articleId}/questions`);
+    navigate(`/articles/${articleId}/questions`, {
+      state: {
+        segments: fetchedArticle.segments
+      }
+    });
   };
 
   // Swipe handlers
@@ -201,25 +205,6 @@ export function ArticlePage() {
                 </p>
               </div>
             )}
-            
-            <div className="flex justify-between text-sm text-gray-500">
-              {fetchedArticle.prev && (
-                <button 
-                  onClick={goToPrev}
-                  className="text-blue-600 hover:text-blue-800"
-                >
-                  ← Previous Article ({fetchedArticle.prev})
-                </button>
-              )}
-              {fetchedArticle.next && (
-                <button 
-                  onClick={goToNext}
-                  className="text-blue-600 hover:text-blue-800 ml-auto"
-                >
-                  Next Article ({fetchedArticle.next}) →
-                </button>
-              )}
-            </div>
           </div>
         </div>
       </div>

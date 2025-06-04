@@ -15,6 +15,7 @@ export default function QuestionContent({content}) {
     )
   }
 
+  console.log(content);
   const {title, options, context, hasAnswer, answer, correctAnswerFeedback, wrongAnswerFeedback, generalAnswer} = content;
 
   function handleOptionClick(index) {
