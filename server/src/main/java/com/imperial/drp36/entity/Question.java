@@ -9,7 +9,7 @@ import org.hibernate.type.SqlTypes;
 @Entity
 @Table(name = "questions")
 @DiscriminatorValue("question")
-public class Question extends FeedItem {
+public class Question extends Segment {
   @Column(name = "options")
   @JdbcTypeCode(SqlTypes.JSON)
   private List<String> options = new ArrayList<>();

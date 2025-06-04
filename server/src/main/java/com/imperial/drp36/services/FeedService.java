@@ -1,9 +1,8 @@
 package com.imperial.drp36.services;
 
-import com.imperial.drp36.entity.FeedItem;
+import com.imperial.drp36.entity.Segment;
 import com.imperial.drp36.entity.Poll;
 import com.imperial.drp36.model.FeedContentResponse;
-import com.imperial.drp36.model.QuestionContentResponse;
 import com.imperial.drp36.repository.FeedItemRepository;
 import com.imperial.drp36.repository.PollRepository;
 import com.imperial.drp36.repository.QuestionRepository;
@@ -26,20 +25,20 @@ public class FeedService {
   @Autowired
   private PollRepository pollRepository;
 
-  public FeedItem getFeedItemById(Long id) {
+  public Segment getFeedItemById(Long id) {
     return feedItemRepository.findByIdOptional(id).orElse(null);
   }
 
-  public Page<FeedItem> getAllFeedItems(int page, int size) {
+  public Page<Segment> getAllFeedItems(int page, int size) {
     Pageable pageable = PageRequest.of(page, size);
     return feedItemRepository.findAllFeedItems(pageable);
   }
 
-  public List<FeedItem> getAllFeedItemsSequential() {
+  public List<Segment> getAllFeedItemsSequential() {
     return feedItemRepository.findAllOrderByIdAsc();
   }
 
-  public Page<FeedItem> getFeedItemsByType(String itemType, int page, int size) {
+  public Page<Segment> getFeedItemsByType(String itemType, int page, int size) {
     Pageable pageable = PageRequest.of(page, size);
     return feedItemRepository.findByItemType(itemType, pageable);
   }
@@ -48,8 +47,8 @@ public class FeedService {
     return feedItemRepository.count();
   }
 
-  public FeedItem saveFeedItem(FeedItem feedItem) {
-    return feedItemRepository.save(feedItem);
+  public Segment saveFeedItem(Segment segment) {
+    return feedItemRepository.save(segment);
   }
 
   public void deleteFeedItem(Long id) {
@@ -60,16 +59,16 @@ public class FeedService {
     return feedItemRepository.existsById(id);
   }
 
-  public FeedContentResponse getFeedContentResponse(FeedItem feedItem) {
-    switch (feedItem.getItemType()) {
+  public FeedContentResponse getFeedContentResponse(Segment segment) {
+    switch (segment.getItemType()) {
       case "question":
-        return FeedContentResponse.fromQuestion(questionRepository.findById(feedItem.getId()).orElse(null));
+        return FeedContentResponse.fromQuestion(questionRepository.findById(segment.getId()).orElse(null));
 
       case "poll":
-        return FeedContentResponse.fromPoll(pollRepository.findById(feedItem.getId()).orElse(null));
+        return FeedContentResponse.fromPoll(pollRepository.findById(segment.getId()).orElse(null));
 
       default:
-        System.err.println("Unknown item type: " + feedItem.getItemType());
+        System.err.println("Unknown item type: " + segment.getItemType());
         return null; // or throw an exception if item type is unknown
     }
   }

@@ -1,6 +1,6 @@
 package com.imperial.drp36.repository;
 
-import com.imperial.drp36.entity.FeedItem;
+import com.imperial.drp36.entity.Segment;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -10,17 +10,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface FeedItemRepository extends JpaRepository<FeedItem, Long> {
+public interface FeedItemRepository extends JpaRepository<Segment, Long> {
 
-  @Query("SELECT f FROM FeedItem f ORDER BY f.createdAt DESC")
-  Page<FeedItem> findAllFeedItems(Pageable pageable);
+  @Query("SELECT f FROM Segment f ORDER BY f.createdAt DESC")
+  Page<Segment> findAllFeedItems(Pageable pageable);
 
-  @Query("SELECT f FROM FeedItem f WHERE f.itemType = :itemType ORDER BY f.createdAt DESC")
-  Page<FeedItem> findByItemType(String itemType, Pageable pageable);
+  @Query("SELECT f FROM Segment f WHERE f.itemType = :itemType ORDER BY f.createdAt DESC")
+  Page<Segment> findByItemType(String itemType, Pageable pageable);
 
-  @Query("SELECT f FROM FeedItem f ORDER BY f.id ASC")
-  List<FeedItem> findAllOrderByIdAsc();
+  @Query("SELECT f FROM Segment f ORDER BY f.id ASC")
+  List<Segment> findAllOrderByIdAsc();
 
-  @Query("SELECT f FROM FeedItem f WHERE f.id = :id")
-  Optional<FeedItem> findByIdOptional(Long id);
+  @Query("SELECT f FROM Segment f WHERE f.id = :id")
+  Optional<Segment> findByIdOptional(Long id);
 }

@@ -1,16 +1,11 @@
 package com.imperial.drp36.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "discussions")
 @DiscriminatorValue("discussion")
-public class Discussion extends FeedItem {
+public class Discussion extends Segment {
   @Column(name = "prompt", columnDefinition = "TEXT", nullable = false)
   private String prompt;
 

@@ -1,7 +1,6 @@
 package com.imperial.drp36.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -10,7 +9,7 @@ import org.hibernate.type.SqlTypes;
 @Entity
 @Table(name = "polls")
 @DiscriminatorValue("poll")
-public class Poll extends FeedItem {
+public class Poll extends Segment {
   @Column(name = "options")
   @JdbcTypeCode(SqlTypes.JSON)
   private List<String> options = new ArrayList<>();
