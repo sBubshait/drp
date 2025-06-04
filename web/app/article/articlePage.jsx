@@ -40,7 +40,6 @@ export function ArticlePage() {
       const transformedArticle = {
         id: data.article.id,
         title: data.article.content, // API uses 'content' field as the title
-        body: `Category: ${data.article.category}\n\nThis article covers ${data.article.category.toLowerCase()} topics. Navigate through the questions to explore different perspectives on this subject.`,
         category: data.article.category,
         type: data.article.type,
         prev: data.prev,
@@ -57,7 +56,6 @@ export function ArticlePage() {
       const fallbackArticle = {
         id: id || 1,
         title: `Article ${id || 'Default'} (Error Loading)`,
-        body: `Unable to load article ${id ? `${id}` : ''}. Please try again later.`,
         category: "Unknown",
         type: "text",
         prev: id && id > 1 ? id - 1 : null,
@@ -197,12 +195,6 @@ export function ArticlePage() {
               </span>
             </div>
           )}
-          
-          <div className="text-gray-700 leading-relaxed space-y-4">
-            {fetchedArticle.body.split('\n\n').map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
-            ))}
-          </div>
           
           <div className="mt-8 space-y-4">
             {fetchedArticle.segments.length > 0 && (
