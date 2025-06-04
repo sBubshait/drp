@@ -9,5 +9,5 @@ export function meta() {
 }
 
 export default function Discussions() {
-    return <DiscussionResultsPage />;
+    return <DiscussionsPage />;
 }
