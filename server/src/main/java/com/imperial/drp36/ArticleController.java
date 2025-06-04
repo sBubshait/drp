@@ -1,5 +1,8 @@
 package com.imperial.drp36;
 
+import com.imperial.drp36.entity.Article;
+import com.imperial.drp36.model.ArticleContent;
+import com.imperial.drp36.model.ArticleResponse;
 import com.imperial.drp36.model.SegmentContent;
 import com.imperial.drp36.services.ArticleService;
 import com.imperial.drp36.entity.Segment;
@@ -22,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/")
-public class FeedController {
+public class ArticleController {
 
 @Autowired
   private ArticleService articleService;
@@ -59,7 +62,7 @@ public class FeedController {
           description = "Feed item retrieved successfully",
           content = @Content(
               mediaType = "application/json",
-              schema = @Schema(implementation = FeedResponse.class)
+              schema = @Schema(implementation = ArticleResponse.class)
           )
       ),
       @ApiResponse(
@@ -67,41 +70,38 @@ public class FeedController {
           description = "Feed item not found",
           content = @Content(
               mediaType = "application/json",
-              schema = @Schema(implementation = FeedResponse.class),
+              schema = @Schema(implementation = ArticleResponse.class),
               examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
                   name = "Not Found Response",
                   value = "{\"status\": 404, \"message\": \"Feed item not found\"}"
           ))
       )
   })
-  @Tag(name = "Feed")
-  @GetMapping("/getFeed")
-  public ResponseEntity<FeedResponse> getFeed(@RequestParam(required = false) Long id) {
-    // Sequential Scheduler (TODO: Improve as a real scheduler)
-    if (id == null)
+  @Tag(name = "Articles")
+  @GetMapping("/getArticle")
+  public ResponseEntity<ArticleResponse> getArticle(@RequestParam(required = false) Long id) {
+    if (id == null) {
       id = 1L;
-    else if (id < 1)
+    } else if (id < 1) {
       id = 1L;
-    else if (id > articleService.getTotalFeedItemCount())
-      id = articleService.getTotalFeedItemCount();
+    } else if (id > articleService.getTotalArticleCount()) {
+      id = articleService.getTotalArticleCount();
+    }
 
-    Segment segment = articleService.getFeedItemById(id);
-    System.out.println("Feed item: " + segment);
-    if (segment == null)
+    Article article = articleService.getArticleById(id);
+    if (article == null) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
-          .body(new FeedResponse(404));
+          .body(new ArticleResponse(404));
+    }
 
-    SegmentContent contentResopnse = articleService.getFeedContentResponse(segment);
-    return ResponseEntity.status(HttpStatus.OK)
-        .body(new FeedResponse(
-            200,
-            id - 1,
-            id + 1,
-            1,
-            contentResopnse,
-            segment.getCreatedAt().toString(),
-            ""
-        ));
+    ArticleContent articleContent = articleService.getArticleContent(article);
+
+    return ResponseEntity.ok(new ArticleResponse(
+        200,
+        id > 1 ? id - 1 : null,
+        id < articleService.getTotalArticleCount() ? id + 1 : null,
+        articleContent
+    ));
   }
 
   @Operation(

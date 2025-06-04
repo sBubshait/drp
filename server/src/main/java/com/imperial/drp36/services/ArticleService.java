@@ -45,6 +45,10 @@ public class ArticleService {
     return articleRepository.findById(id).orElse(null);
   }
 
+  public long getTotalArticleCount() {
+    return articleRepository.count();
+  }
+
   public ArticleContent getArticleContent(Article article) {
     if (article == null) {
       return null;

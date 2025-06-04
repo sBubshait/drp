@@ -19,7 +19,7 @@ public class DiscussionService {
   @Autowired
   private DiscussionResponseRepository discussionResponseRepository;
 
-  public Discussion createDiscussion(String title, String context, String prompt) {
+  public Discussion createDiscussion(String context, String prompt) {
     Discussion discussion = new Discussion(context, prompt);
     return discussionRepository.save(discussion);
   }
