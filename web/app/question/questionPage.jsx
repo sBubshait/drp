@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSwipeable } from 'react-swipeable';
 import QuestionHeader from "../components/question_elements/questionHeader.jsx";
 import QuestionContent from "../components/site_layout/questionContent.jsx";
 import PollContent from "../components/site_layout/pollContent.jsx";
@@ -28,6 +29,28 @@ export function QuestionPage() {
       });
   };
 
+  // Navigation functions
+  const goToNext = () => {
+    if (fetchedQuestion?.next) {
+      fetchQuestion(fetchedQuestion.next);
+    }
+  };
+
+  const goToPrev = () => {
+    if (fetchedQuestion?.prev) {
+      fetchQuestion(fetchedQuestion.prev);
+    }
+  };
+
+  // Swipe handlers
+  const handlers = useSwipeable({
+    onSwipedLeft: goToNext,   // Swipe left to go to next
+    onSwipedRight: goToPrev,  // Swipe right to go to previous
+    swipeDuration: 500,
+    preventScrollOnSwipe: true,
+    trackMouse: true // This enables mouse dragging for testing on desktop
+  });
+
   // Initial fetch on component mount
   useEffect(() => {
     fetchQuestion(); // No ID parameter for initial load
@@ -38,10 +61,10 @@ export function QuestionPage() {
     const handleKeyDown = (event) => {
       if (!fetchedQuestion) return;
 
-      if (event.key === 'ArrowRight' && fetchedQuestion.next) {
-        fetchQuestion(fetchedQuestion.next);
-      } else if (event.key === 'ArrowLeft' && fetchedQuestion.prev) {
-        fetchQuestion(fetchedQuestion.prev);
+      if (event.key === 'ArrowRight') {
+        goToNext();
+      } else if (event.key === 'ArrowLeft') {
+        goToPrev();
       }
     };
 
@@ -60,7 +83,7 @@ export function QuestionPage() {
 
   //TODO: Handle loading data time rather than just potential nulls
   return (
-    <div className="w-full bg-gray-200 flex flex-col">
+    <div {...handlers} className="w-full bg-gray-200 flex flex-col">
       <QuestionHeader
         questionNumber={fetchedQuestion?.content.id}
         totalQuestions={fetchedQuestion?.articleIndex}
