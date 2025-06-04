@@ -48,6 +48,18 @@ public class QuestionContent extends SegmentContent {
   }
 
   // Getters
+  public String getTitle() {
+    return title;
+  }
+  public String getContext() {
+    return context;
+  }
+  public void setTitle(String title) {
+    this.title = title;
+  }
+  public void setContext(String context) {
+    this.context = context;
+  }
   public List<String> getOptions() {
     return options;
   }
