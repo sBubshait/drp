@@ -94,7 +94,6 @@ export function ArticlePage() {
   // Swipe handlers
   const handlers = useSwipeable({
     onSwipedLeft: goToQuestions,     // Swipe left to go to questions
-    onSwipedRight: goToPrev,         // Swipe right to go to previous article
     onSwipedUp: goToNext,            // Swipe up to go to next article
     onSwipedDown: goToPrev,          // Swipe down to go to previous article
     swipeDuration: 500,
