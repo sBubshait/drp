@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useSwipeable } from 'react-swipeable';
-import { useNavigate, useLocation } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import QuestionHeader from "../components/question_elements/questionHeader.jsx";
 
 export function ArticlePage() {
   const navigate = useNavigate();
-  const location = useLocation();
+  const params = useParams();
   const [fetchedArticle, setFetchedArticle] = useState();
 
-  // Get article ID from navigation state (from question page) or use default
-  const requestedArticleId = location.state?.articleId || null;
+  // Get article ID from URL params, default to 10 if not provided
+  const articleId = params.id ? parseInt(params.id, 10) : 10;
 
   // Mock article data - replace with actual API call later
   const mockArticleData = {
@@ -74,13 +74,13 @@ Addressing climate change requires global cooperation and action on multiple fro
   // Function to fetch article by ID (currently using mock data)
   const fetchArticle = (id) => {
     // TODO: Replace with actual API call
-    // const url = id ? `https://api.saleh.host/getArticle?id=${id}` : 'https://api.saleh.host/getArticle';
+    // const url = `https://api.saleh.host/getArticle?id=${id}`;
     
-    console.log(`Fetching article with ID: ${id || 'default'}`);
+    console.log(`Fetching article with ID: ${id}`);
     
     // Simulate API call with setTimeout
     setTimeout(() => {
-      const articleData = id ? generateMockArticleForId(id) : mockArticleData;
+      const articleData = generateMockArticleForId(id);
       setFetchedArticle(articleData);
     }, 100);
   };
@@ -88,23 +88,19 @@ Addressing climate change requires global cooperation and action on multiple fro
   // Navigation functions
   const goToNext = () => {
     if (fetchedArticle?.next) {
-      fetchArticle(fetchedArticle.next);
+      navigate(`/articles/${fetchedArticle.next}`);
     }
   };
 
   const goToPrev = () => {
     if (fetchedArticle?.prev) {
-      fetchArticle(fetchedArticle.prev);
+      navigate(`/articles/${fetchedArticle.prev}`);
     }
   };
 
   // Navigation function for swipe to questions
   const goToQuestions = () => {
-    navigate(`/article/${fetchedArticle?.id || 10}/questions`, {
-      state: {
-        segments: fetchedArticle?.segments || [],
-      }
-    });
+    navigate(`/articles/${articleId}/questions`);
   };
 
   // Swipe handlers
@@ -118,25 +114,10 @@ Addressing climate change requires global cooperation and action on multiple fro
     trackMouse: true // This enables mouse dragging for testing on desktop
   });
 
-  // Initial fetch on component mount
+  // Fetch article when articleId changes
   useEffect(() => {
-    if (requestedArticleId) {
-      // If coming from question page with specific article ID
-      console.log(`Loading article ${requestedArticleId} from navigation state`);
-      fetchArticle(requestedArticleId);
-    } else {
-      // Default behavior - load default article
-      fetchArticle(); // No ID parameter for initial load
-    }
-  }, [requestedArticleId]);
-
-  // Clear navigation state after using it to prevent issues on refresh
-  useEffect(() => {
-    if (requestedArticleId && fetchedArticle) {
-      // Replace the current history entry to clear the state
-      window.history.replaceState({}, '', window.location.pathname);
-    }
-  }, [requestedArticleId, fetchedArticle]);
+    fetchArticle(articleId);
+  }, [articleId]);
 
   // Keyboard event handler
   useEffect(() => {
@@ -165,9 +146,7 @@ Addressing climate change requires global cooperation and action on multiple fro
     return (
       <div className="w-full bg-gray-200 flex flex-col min-h-screen items-center justify-center">
         <p className="text-gray-600">Loading article...</p>
-        {requestedArticleId && (
-          <p className="text-gray-500 text-sm mt-2">Loading article {requestedArticleId}...</p>
-        )}
+        <p className="text-gray-500 text-sm mt-2">Loading article {articleId}...</p>
       </div>
     );
   }
