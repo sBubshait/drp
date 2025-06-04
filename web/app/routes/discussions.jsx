@@ -1,4 +1,4 @@
-import { QuestionPage } from "../pages/questionPage";
+import { DiscussionsPage } from "../pages/discussions";
 
 export function meta() {
     return [
@@ -7,6 +7,6 @@ export function meta() {
     ];
 }
 
-export default function Question() {
-    return <QuestionPage />;
+export default function Discussions() {
+    return <DiscussionsPage />;
 }

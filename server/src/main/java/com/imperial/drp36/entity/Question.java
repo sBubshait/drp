@@ -3,13 +3,15 @@ package com.imperial.drp36.entity;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "questions")
 @DiscriminatorValue("question")
 public class Question extends FeedItem {
-  @Column(name = "options", columnDefinition = "JSON")
-  @Convert(converter = StringListConverter.class)
+  @Column(name = "options")
+  @JdbcTypeCode(SqlTypes.JSON)
   private List<String> options = new ArrayList<>();
 
   @Column(name = "correct_answer_index")
