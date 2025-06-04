@@ -10,8 +10,8 @@ export function ArticlePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Get article ID from URL params, default to 10 if not provided
-  const articleId = params.id ? parseInt(params.id, 10) : 10;
+  // Get article ID from URL params, null if not provided
+  const articleId = params.id ? parseInt(params.id, 10) : null;
 
   // Function to fetch article by ID from API
   const fetchArticle = async (id) => {
@@ -19,9 +19,14 @@ export function ArticlePage() {
     setError(null);
     
     try {
-      console.log(`Fetching article with ID: ${id}`);
+      // Use different endpoints based on whether ID is provided
+      const url = id 
+        ? `https://api.saleh.host/getArticle?id=${id}`
+        : `https://api.saleh.host/getArticle`;
       
-      const response = await fetch(`https://api.saleh.host/getArticle?id=${id}`);
+      console.log(`Fetching article from: ${url}`);
+      
+      const response = await fetch(url);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -52,13 +57,13 @@ export function ArticlePage() {
       
       // Fallback to a basic article structure on error
       const fallbackArticle = {
-        id: id,
-        title: `Article ${id} (Error Loading)`,
-        body: `Unable to load article ${id}. Please try again later.`,
+        id: id || 1,
+        title: `Article ${id || 'Default'} (Error Loading)`,
+        body: `Unable to load article ${id ? `${id}` : ''}. Please try again later.`,
         category: "Unknown",
         type: "text",
-        prev: id > 1 ? id - 1 : null,
-        next: id + 1,
+        prev: id && id > 1 ? id - 1 : null,
+        next: (id || 1) + 1,
         segments: []
       };
       
@@ -83,11 +88,15 @@ export function ArticlePage() {
 
   // Navigation function for swipe to questions - now passes segments and next article ID in state
   const goToQuestions = () => {
-    navigate(`/articles/${articleId}/questions`, {
+    const questionUrl = articleId 
+      ? `/articles/${articleId}/questions`
+      : `/articles/${fetchedArticle.id}/questions`;
+      
+    navigate(questionUrl, {
       state: {
         segments: fetchedArticle.segments,
         nextArticleId: fetchedArticle.next,
-        articleId: articleId,
+        articleId: articleId || fetchedArticle.id,
         articleTitle: fetchedArticle.title
       }
     });
@@ -104,7 +113,7 @@ export function ArticlePage() {
     trackMouse: true // This enables mouse dragging for testing on desktop
   });
 
-  // Fetch article when articleId changes
+  // Fetch article when component mounts or articleId changes
   useEffect(() => {
     fetchArticle(articleId);
   }, [articleId]);
@@ -136,7 +145,12 @@ export function ArticlePage() {
     return (
       <div className="w-full bg-gray-200 flex flex-col min-h-screen items-center justify-center">
         <p className="text-gray-600">Loading article...</p>
-        <p className="text-gray-500 text-sm mt-2">Fetching article {articleId} from API...</p>
+        <p className="text-gray-500 text-sm mt-2">
+          {articleId 
+            ? `Fetching article ${articleId} from API...`
+            : `Fetching default article from API...`
+          }
+        </p>
       </div>
     );
   }
