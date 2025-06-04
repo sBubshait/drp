@@ -24,8 +24,6 @@ export function ArticlePage() {
         ? `https://api.saleh.host/getArticle?id=${id}`
         : `https://api.saleh.host/getArticle`;
       
-      console.log(`Fetching article from: ${url}`);
-      
       const response = await fetch(url);
       
       if (!response.ok) {

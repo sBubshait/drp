@@ -28,12 +28,10 @@ export function QuestionPage() {
   useEffect(() => {
     if (location.state?.segments) {
       // Use segments passed from ArticlePage
-      console.log('Using segments from navigation state');
       setSegments(location.state.segments);
       setLoading(false);
     } else if (articleId) {
       // Fallback: fetch article data if no segments in state (direct navigation)
-      console.log('No segments in state, fetching from API');
       fetchArticleData(articleId);
     } else {
       // No article ID and no state
@@ -48,7 +46,6 @@ export function QuestionPage() {
   const fetchArticleData = async (id) => {
     setLoading(true);
     try {
-      console.log(`Fetching article data for ID: ${id}`);
       
       const response = await fetch(`https://api.saleh.host/getArticle?id=${id}`);
       
@@ -81,7 +78,6 @@ export function QuestionPage() {
       if (nextArticleId) {
         navigate(`/articles/${nextArticleId}`);
       } else {
-        console.log('No next article available, navigating back to current article');
         navigate(`/articles/${articleId}`);
       }
     }
