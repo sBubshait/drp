@@ -42,10 +42,16 @@ export function QuestionPage() {
     }
   };
 
+  // Function to fetch a new random question
+  const fetchNewQuestion = () => {
+    fetchQuestion(); // No ID parameter for random question
+  };
+
   // Swipe handlers
   const handlers = useSwipeable({
-    onSwipedLeft: goToNext,   // Swipe left to go to next
-    onSwipedRight: goToPrev,  // Swipe right to go to previous
+    onSwipedLeft: goToNext,     // Swipe left to go to next
+    onSwipedRight: goToPrev,    // Swipe right to go to previous
+    onSwipedUp: fetchNewQuestion, // Swipe up to fetch new random question
     swipeDuration: 500,
     preventScrollOnSwipe: true,
     trackMouse: true // This enables mouse dragging for testing on desktop
