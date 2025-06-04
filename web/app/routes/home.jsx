@@ -1,12 +1,12 @@
-import { QuestionPage } from "../question/questionPage";
+import { ArticlePage } from "../article/articlePage";
 
 export function meta() {
   return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
+    { title: "Article Summary - Climate Change" },
+    { name: "description", content: "Read about climate change and test your understanding" },
   ];
 }
 
 export default function Home() {
-  return <QuestionPage />;
+  return <ArticlePage />;
 }

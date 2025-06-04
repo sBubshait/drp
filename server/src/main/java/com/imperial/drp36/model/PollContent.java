@@ -4,7 +4,21 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
 
-public class PollContentResponse extends FeedContentResponse {
+public class PollContent extends SegmentContent {
+
+  @Schema(
+      description = "Title of the poll",
+      example = "Was the government's intervention necessary?",
+      requiredMode = Schema.RequiredMode.REQUIRED
+  )
+  private String title;
+
+  @Schema(
+      description = "Context or background information for the poll",
+      example = "In response to the recent crisis, the government implemented several measures to stabilize the economy.",
+      requiredMode = Schema.RequiredMode.REQUIRED
+  )
+  private String context;
 
   @Schema(
       description = "List of poll options that users can vote on",
@@ -27,20 +41,22 @@ public class PollContentResponse extends FeedContentResponse {
   )
   private Long totalResponses;
 
-  @Schema(
-      description = "Whether users can select multiple options in this poll",
-      example = "false"
-  )
-  private Boolean allowsMultipleSelection;
 
-  public PollContentResponse(Long id, String context, String title, List<String> options,
-      List<Long> responseCounts, Long totalResponses, Boolean allowsMultipleSelection) {
-    super(id, context, "poll", title);
+  public PollContent(Long id, String title, String context, List<String> options,
+      List<Long> responseCounts, Long totalResponses) {
+    super(id, "poll");
+    this.title = title;
+    this.context = context;
     this.options = options;
     this.responseCounts = responseCounts;
     this.totalResponses = totalResponses;
-    this.allowsMultipleSelection = allowsMultipleSelection;
   }
+
+  public String getTitle() { return title; }
+  public void setTitle(String title) { this.title = title; }
+
+  public String getContext() { return context; }
+  public void setContext(String context) { this.context = context; }
 
   public List<String> getOptions() {
     return options;
@@ -52,10 +68,6 @@ public class PollContentResponse extends FeedContentResponse {
 
   public Long getTotalResponses() {
     return totalResponses;
-  }
-
-  public Boolean getAllowsMultipleSelection() {
-    return allowsMultipleSelection;
   }
 
   public void setOptions(List<String> options) {
@@ -70,7 +82,4 @@ public class PollContentResponse extends FeedContentResponse {
     this.totalResponses = totalResponses;
   }
 
-  public void setAllowsMultipleSelection(Boolean allowsMultipleSelection) {
-    this.allowsMultipleSelection = allowsMultipleSelection;
-  }
 }

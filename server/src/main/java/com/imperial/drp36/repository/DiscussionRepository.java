@@ -1,5 +1,6 @@
 package com.imperial.drp36.repository;
 
+import com.imperial.drp36.entity.Discussion;
 import com.imperial.drp36.entity.Poll;
 import java.util.List;
 import java.util.Optional;
@@ -10,5 +11,5 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface PollRepository extends JpaRepository<Poll, Long> {
+public interface DiscussionRepository extends JpaRepository<Discussion, Long> {
 }
