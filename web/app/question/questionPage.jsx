@@ -65,6 +65,11 @@ export function QuestionPage() {
 
   // Navigation functions
   const goToNext = () => {
+    if (currentIndex >= segments.length - 1) {
+      // Navigate to the article page if on last question
+      navigate(`/articles/${articleId}`);
+      return;
+    }
     if (currentIndex < segments.length - 1) {
       setCurrentIndex(currentIndex + 1);
     }
