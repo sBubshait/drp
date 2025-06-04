@@ -81,11 +81,14 @@ export function ArticlePage() {
     }
   };
 
-  // Navigation function for swipe to questions - now passes segments in state
+  // Navigation function for swipe to questions - now passes segments and next article ID in state
   const goToQuestions = () => {
     navigate(`/articles/${articleId}/questions`, {
       state: {
-        segments: fetchedArticle.segments
+        segments: fetchedArticle.segments,
+        nextArticleId: fetchedArticle.next,
+        articleId: articleId,
+        articleTitle: fetchedArticle.title
       }
     });
   };

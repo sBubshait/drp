@@ -17,6 +17,9 @@ export function QuestionPage() {
   // Get article ID from URL params
   const articleId = params.id ? parseInt(params.id, 10) : null;
   
+  // Get next article ID from navigation state
+  const nextArticleId = location.state?.nextArticleId;
+  
   function capitalise(s) {
     return s && String(s[0]).toUpperCase() + String(s).slice(1);
   }
@@ -71,13 +74,16 @@ export function QuestionPage() {
 
   // Navigation functions
   const goToNext = () => {
-    if (currentIndex >= segments.length - 1) {
-      // Navigate to the next article or back to current article
-      navigate(`/articles/${articleId}`);
-      return;
-    }
     if (currentIndex < segments.length - 1) {
       setCurrentIndex(currentIndex + 1);
+    } else {
+      // On last segment, go to next article if available, otherwise back to current article
+      if (nextArticleId) {
+        navigate(`/articles/${nextArticleId}`);
+      } else {
+        console.log('No next article available, navigating back to current article');
+        navigate(`/articles/${articleId}`);
+      }
     }
   };
 
@@ -92,7 +98,7 @@ export function QuestionPage() {
 
   // Swipe handlers
   const handlers = useSwipeable({
-    onSwipedLeft: goToNext,        // Swipe left to go to next question
+    onSwipedLeft: goToNext,        // Swipe left to go to next question or next article
     onSwipedRight: goToPrev,       // Swipe right to go to previous question or back to article
     swipeDuration: 500,
     preventScrollOnSwipe: true,
@@ -118,7 +124,7 @@ export function QuestionPage() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [loading, segments.length, currentIndex]);
+  }, [loading, segments.length, currentIndex, nextArticleId]);
 
   // Loading state
   if (loading) {
