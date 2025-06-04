@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import QuestionHeader from "../components/question_elements/questionHeader.jsx";
+import InfoContent from "../components/site_layout/infoContent.jsx";
 import QuestionContent from "../components/site_layout/questionContent.jsx";
 import PollContent from "../components/site_layout/pollContent.jsx";
+
+const apiUrl = `http://localhost:4000`
 
 export function QuestionPage() {
   const [fetchedQuestion, setFetchedQuestion] = useState();
@@ -12,7 +15,7 @@ export function QuestionPage() {
 
   // Function to fetch question by ID
   const fetchQuestion = (id) => {
-    const url = id ? `https://api.saleh.host/getFeed?id=${id}` : 'https://api.saleh.host/getFeed';
+    const url = `${apiUrl}/getFeed${id ? `?id=${id}` : ``}`
     fetch(url)
       .then(response => {
         if (!response.ok) {
@@ -72,6 +75,9 @@ export function QuestionPage() {
       )}
       {(fetchedQuestion?.content.type === "poll") && (
         <PollContent content={fetchedQuestion?.content || {}} />
+      )}
+      {(fetchedQuestion?.content.type === "info") && (
+        <InfoContent content={fetchedQuestion?.content || {}} />
       )}
     </div>
   );

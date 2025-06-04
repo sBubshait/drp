@@ -5,6 +5,7 @@ import com.imperial.drp36.entity.Poll;
 import com.imperial.drp36.model.FeedContentResponse;
 import com.imperial.drp36.model.QuestionContentResponse;
 import com.imperial.drp36.repository.FeedItemRepository;
+import com.imperial.drp36.repository.InfoRepository;
 import com.imperial.drp36.repository.PollRepository;
 import com.imperial.drp36.repository.QuestionRepository;
 import jakarta.transaction.Transactional;
@@ -19,6 +20,9 @@ public class FeedService {
 
   @Autowired
   private FeedItemRepository feedItemRepository;
+
+  @Autowired
+  private InfoRepository infoRepository;
 
   @Autowired
   private QuestionRepository questionRepository;
@@ -67,6 +71,9 @@ public class FeedService {
 
       case "poll":
         return FeedContentResponse.fromPoll(pollRepository.findById(feedItem.getId()).orElse(null));
+
+      case "info":
+        return FeedContentResponse.fromInfo(infoRepository.findById(feedItem.getId()).orElse(null));
 
       default:
         System.err.println("Unknown item type: " + feedItem.getItemType());

@@ -2,6 +2,7 @@ package com.imperial.drp36.model;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.imperial.drp36.entity.Info;
 import com.imperial.drp36.entity.Poll;
 import com.imperial.drp36.entity.Question;
 import io.swagger.v3.oas.annotations.media.DiscriminatorMapping;
@@ -11,7 +12,8 @@ import java.util.Optional;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = QuestionContentResponse.class, name = "question"),
-    @JsonSubTypes.Type(value = PollContentResponse.class, name = "poll")
+    @JsonSubTypes.Type(value = PollContentResponse.class, name = "poll"),
+    @JsonSubTypes.Type(value = InfoContentResponse.class, name = "info")
 })
 public abstract class FeedContentResponse {
   @Schema(
@@ -94,6 +96,18 @@ public abstract class FeedContentResponse {
         poll.getResponseCounts(),
         poll.getTotalResponses(),
         poll.getAllowsMultipleSelection()
+    );
+  }
+
+  public static FeedContentResponse fromInfo(Info info) {
+    if (info == null) {
+      return null;
+    }
+
+    return new InfoContentResponse(
+        info.getId(),
+        info.getContext(),
+        info.getTitle()
     );
   }
 }
