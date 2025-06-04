@@ -53,19 +53,10 @@ export function QuestionPage() {
     }
   };
 
-  // Function to go to random segment (swipe up)
-  const goToRandomSegment = () => {
-    if (segments.length > 0) {
-      const randomIndex = Math.floor(Math.random() * segments.length);
-      setCurrentIndex(randomIndex);
-    }
-  };
-
   // Swipe handlers
   const handlers = useSwipeable({
     onSwipedLeft: goToNext,        // Swipe left to go to next question
     onSwipedRight: goToPrev,       // Swipe right to go to previous question or back to article
-    onSwipedUp: goToRandomSegment, // Swipe up to go to random question
     swipeDuration: 500,
     preventScrollOnSwipe: true,
     trackMouse: true // This enables mouse dragging for testing on desktop
