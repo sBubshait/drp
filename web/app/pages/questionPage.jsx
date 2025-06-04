@@ -6,6 +6,17 @@ import QuestionContent from "../components/site_layout/questionContent.jsx";
 import PollContent from "../components/site_layout/pollContent.jsx";
 import DiscussionContent from "../components/site_layout/discussionContent.jsx";
 
+// Component map for different content types
+const CONTENT_COMPONENTS = {
+  question: QuestionContent,
+  poll: PollContent,
+  discussion: DiscussionContent,
+  // To add new types:
+  // survey: SurveyContent,
+  // video: VideoContent,
+  // matching: MatchingContent,
+};
+
 export function QuestionPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [segments, setSegments] = useState([]);
@@ -164,23 +175,28 @@ export function QuestionPage() {
     );
   }
 
+  // Get the current segment and its type
+  const currentSegment = segments[currentIndex];
+  const contentType = currentSegment?.content?.type || currentSegment?.type;
+  
+  // Get the appropriate component for this content type
+  const ContentComponent = CONTENT_COMPONENTS[contentType];
+
   return (
     <div {...handlers} className="w-full bg-gray-200 flex flex-col">
       <QuestionHeader
         questionNumber={currentIndex + 1}
         totalQuestions={segments.length}
-        taskType={capitalise(segments[currentIndex]?.content?.type || segments[currentIndex]?.type)}
+        taskType={capitalise(contentType)}
       />
       
-      {/* Render based on content type */}
-      {(segments[currentIndex]?.type === "question") && (
-        <QuestionContent content={segments[currentIndex]} />
-      )}
-      {(segments[currentIndex]?.type === "poll") && (
-        <PollContent content={segments[currentIndex]} />
-      )}
-      {(segments[currentIndex]?.type === "discussion") && (
-        <DiscussionContent content={segments[currentIndex]} />
+      {/* Render the appropriate content component */}
+      {ContentComponent ? (
+        <ContentComponent content={currentSegment} />
+      ) : (
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-red-600">Unknown content type: {contentType}</p>
+        </div>
       )}
     </div>
   );
