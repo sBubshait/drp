@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import { useNavigate, useParams } from 'react-router';
 import QuestionHeader from "../components/question_elements/questionHeader.jsx";
+import ApiService from '../services/api.js';
 
 export function ArticlePage() {
   const navigate = useNavigate();
@@ -13,30 +14,13 @@ export function ArticlePage() {
   // Get article ID from URL params, null if not provided
   const articleId = params.id ? parseInt(params.id, 10) : null;
 
-  // Function to fetch article by ID from API
+  // Function to fetch article by ID from API using the service layer
   const fetchArticle = async (id) => {
     setLoading(true);
     setError(null);
     
     try {
-      // Use different endpoints based on whether ID is provided
-      const url = id 
-        ? `https://api.saleh.host/getArticle?id=${id}`
-        : `https://api.saleh.host/getArticle`;
-      
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      if (data.status !== 200) {
-        throw new Error(`API error! status: ${data.status}`);
-      }
-      
-      // Use the API response directly
+      const data = await ApiService.getArticle(id);
       setFetchedArticle(data);
     } catch (error) {
       console.error('Error fetching article:', error);
@@ -75,7 +59,7 @@ export function ArticlePage() {
     }
   };
 
-  // Navigation function for swipe to questions - now passes segments and next article ID in state
+  // Navigation function for swipe to questions
   const goToQuestions = () => {
     const questionUrl = articleId 
       ? `/articles/${articleId}/questions`
@@ -93,12 +77,12 @@ export function ArticlePage() {
 
   // Swipe handlers
   const handlers = useSwipeable({
-    onSwipedLeft: goToQuestions,     // Swipe left to go to questions
-    onSwipedUp: goToNext,            // Swipe up to go to next article
-    onSwipedDown: goToPrev,          // Swipe down to go to previous article
+    onSwipedLeft: goToQuestions,
+    onSwipedUp: goToNext,
+    onSwipedDown: goToPrev,
     swipeDuration: 500,
     preventScrollOnSwipe: true,
-    trackMouse: true // This enables mouse dragging for testing on desktop
+    trackMouse: true
   });
 
   // Fetch article when component mounts or articleId changes
@@ -120,13 +104,8 @@ export function ArticlePage() {
       }
     };
 
-    // Add event listener
     window.addEventListener('keydown', handleKeyDown);
-
-    // Cleanup function to remove event listener
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [fetchedArticle, loading]);
 
   if (loading) {
