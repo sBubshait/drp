@@ -174,7 +174,7 @@ export function QuestionPage() {
 
       <div className="flex-1 flex flex-col min-h-0 relative overflow-hidden">
         <div
-          className={`flex-1 flex flex-col transition-all duration-300 ease-out ${isAnimating ? 'opacity-0 transform translate-x-4' : 'opacity-100 transform translate-x-0'
+          className={`flex-1 flex flex-col ${contentType !== 'info' ? 'transition-all duration-300 ease-out' : ''} ${isAnimating && contentType !== 'info' ? 'opacity-0 transform translate-x-4' : (contentType !== 'info' ? 'opacity-100 transform translate-x-0' : '')
             }`}
         >
           {ContentComponent ? (
