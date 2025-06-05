@@ -96,33 +96,27 @@ export function QuestionPage() {
   // Swipe handlers
   const handlers = useSwipeable({
     onSwipedLeft: (eventData) => {
-      // Check if the swipe started on the annotation sidebar
       const target = eventData.event.target;
       const annotationSidebar = document.getElementById('annotationSidebar');
-
       if (annotationSidebar && annotationSidebar.contains(target)) {
-        return; // Don't handle swipe if it's on the annotation sidebar
+        return;
       }
-
       goToNext();
     },
     onSwipedRight: (eventData) => {
-      // Check if the swipe started on the annotation sidebar
       const target = eventData.event.target;
       const annotationSidebar = document.getElementById('annotationSidebar');
-
       if (annotationSidebar && annotationSidebar.contains(target)) {
-        return; // Don't handle swipe if it's on the annotation sidebar
+        return;
       }
-
       goToPrev();
     },
     swipeDuration: 500,
-    preventScrollOnSwipe: true,
+    preventScrollOnSwipe: true, // Don't prevent scrolling globally
     trackMouse: true,
-    delta: 10,
-    preventDefaultTouchmoveEvent: true,
-    touchEventOptions: { passive: false }
+    delta: 50, // Higher threshold for intentional swipes
+    preventDefaultTouchmoveEvent: false,
+    touchEventOptions: { passive: true }
   });
 
   // Keyboard event handler
