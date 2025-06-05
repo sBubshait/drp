@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import { useNavigate, useParams } from 'react-router';
 import QuestionHeader from "../components/question_elements/questionHeader.jsx";
+import VerticalVideoPlayer from "../components/site_layout/videoPlayer.jsx";
+import ArticlePreview from '../components/site_layout/articlePreview.jsx';
 import ApiService from '../services/api.js';
 
 export function ArticlePage() {
@@ -135,13 +137,7 @@ export function ArticlePage() {
   if (loading) {
     return (
       <div className="w-full bg-gray-200 flex flex-col min-h-screen items-center justify-center">
-        {/* <p className="text-gray-600">Loading article...</p>
-        <p className="text-gray-500 text-sm mt-2">
-          {articleId
-            ? `Fetching article ${articleId} from API...`
-            : `Fetching default article from API...`
-          }
-        </p> */}
+        {/* Loading state */}
       </div>
     );
   }
@@ -169,8 +165,10 @@ export function ArticlePage() {
     );
   }
 
+  const isVideoArticle = fetchedArticle.article.type === 'video';
+
   return (
-    <div {...handlers} className="w-full bg-gray-200 flex flex-col min-h-screen overflow-hidden">
+    <div {...handlers} className="w-full bg-gray-200 flex flex-col min-h-screen overflow-hidden relative">
       {/* Header */}
       <div className="flex">
         <div className="bg-gray-800 px-6 py-3 text-white font-bold text-lg flex-1">
@@ -178,49 +176,45 @@ export function ArticlePage() {
         </div>
       </div>
 
+      {/* Main Content Area */}
       <div
-        className={`flex-1 flex flex-col justify-center items-center px-6 transition-all duration-300 ease-out ${isAnimating ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'
-          }`}
+        className={`flex-1 flex flex-col justify-center items-center relative transition-all duration-300 ease-out ${
+          isAnimating ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'
+        }`}
       >
-        <div className="text-center space-y-4 max-w-md">
-          {/* Category Tag */}
-          <div>
-            <span className="inline-block px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wide text-white" style={{ backgroundColor: '#00ADB5' }}>
-              {fetchedArticle.article.category}
-            </span>
-          </div>
-
-          {/* Main Headline */}
-          <h1 className="text-3xl font-bold text-gray-800 leading-tight">
-            {fetchedArticle.article.content}
-          </h1>
-
-          {/* Date */}
-          <div className="text-gray-600 text-sm font-medium">
-            Today at 12:00 PM
-          </div>
-        </div>
-      </div>
-
-      {/* Closeable Tip Box */}
-      {
-        showTip && (
-          <div className="p-6">
-            <div className="bg-blue-50 rounded-lg border-l-4 border-blue-400 p-4 relative">
-              <button
-                onClick={handleCloseTip}
-                className="absolute top-2 right-2 text-blue-600 hover:text-blue-800 font-bold text-lg"
-              >
-                ×
-              </button>
-              <p className="text-blue-800 font-medium pr-6">
-                💡 Tip: {fetchedArticle.article.segments.length} interactive segment{fetchedArticle.article.segments.length !== 1 ? 's' : ''} available for this article. Swipe left!
-                Swipe up and down to move between articles!
-              </p>
+        {isVideoArticle ? (
+          /* Video Article Layout - Full Screen */
+          <div className="w-full h-full relative">
+            {/* Video Player - Takes full available space */}
+            <div className="w-full h-full p-4">
+              <VerticalVideoPlayer
+                videoUrl={fetchedArticle.article.content}
+              />
             </div>
           </div>
-        )
-      }
-    </div >
+        ) : (
+          /* Text Article Layout - Centered */
+          <ArticlePreview article={fetchedArticle.article} />
+        )}
+      </div>
+
+      {/* Tip Box - Positioned absolutely over content */}
+      {showTip && (
+        <div className="absolute bottom-4 left-4 right-4 z-40">
+          <div className="bg-blue-50 bg-opacity-95 backdrop-blur-sm rounded-lg border-l-4 border-blue-400 p-4 relative shadow-lg">
+            <button
+              onClick={handleCloseTip}
+              className="absolute top-2 right-2 text-blue-600 hover:text-blue-800 font-bold text-lg"
+            >
+              ×
+            </button>
+            <p className="text-blue-800 font-medium pr-6">
+              💡 Tip: {fetchedArticle.article.segments.length} interactive segment{fetchedArticle.article.segments.length !== 1 ? 's' : ''} available for this article. Swipe left!
+              Swipe up and down to move between articles!
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
