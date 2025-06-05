@@ -181,13 +181,13 @@ export function ArticlePage() {
           isAnimating ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'
         }`}
       >
-        {!isVideoArticle ? (
+        {isVideoArticle ? (
           /* Video Article Layout - Full Screen */
           <div className="w-full h-full relative">
             {/* Video Player - Takes full available space */}
             <div className="w-full h-full p-4">
               <VerticalVideoPlayer
-                videoUrl={"https://archive.org/download/BigBuckBunny_124/Content/big_buck_bunny_720p_surround.mp4"}
+                videoUrl={fetchedArticle.article.content}
               />
             </div>
           </div>
