@@ -64,69 +64,65 @@ export default function DiscussionContent({ content }) {
   ];
 
   return (
-    <>
-      <div className="flex-1 p-6">
+    <div className="flex flex-col h-full">
+      <div className="p-3 max-h-32 overflow-y-auto">
         <ContextBox text={context} />
       </div>
 
-      <div className="px-6 mb-6">
+      <div className="px-3 mb-3">
         <PinkContainer text={prompt} />
       </div>
 
-      {!hasSubmitted ? (
-        <>
-          <div className="px-6 mb-4">
+      <div className="flex-1 flex flex-col min-h-0 px-3">
+        {!hasSubmitted ? (
+          <div className="flex flex-col space-y-3">
             <WriteSection
               userInput={userInput}
               setUserInput={setUserInput}
               handleSubmit={handleSubmit}
               isSubmitting={isSubmitting}
             />
-          </div>
 
-          <div className="px-6 mb-4">
             <ParticipationSection
               avatarLetters={avatarLetters}
               avatarColors={avatarColors}
               responseCount={totalResponses || 0}
             />
-          </div>
 
-          <div className="px-6 mb-6">
             <LockedDiscussionSection />
           </div>
-        </>
-      ) : (
-        <div className="px-6 mb-6">
-          <div className="text-xl font-semibold text-gray-700 mb-4 text-center">
-            {responses.length + 1} Response{responses.length !== 0 ? 's' : ''}
-          </div>
+        ) : (
+          <div className="flex flex-col h-full">
+            <div className="text-lg font-semibold text-gray-700 mb-3 text-center">
+              {responses.length + 1} Response{responses.length !== 0 ? 's' : ''}
+            </div>
 
-          {isLoadingResponses ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="text-gray-500">Loading responses...</div>
-            </div>
-          ) : (
-            <div className="space-y-4 max-h-96 overflow-y-auto no-scrollbar">
-              {userInput && (
-                <ResponseContainer 
-                  active={true} 
-                  content={userInput} 
-                  user="You" 
-                />
-              )}
-              {responses.map((response, index) => (
-                <ResponseContainer
-                  key={response.id || index}
-                  content={response.content}
-                  user={response.author || `User ${index + 1}`}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-    </>
+            {isLoadingResponses ? (
+              <div className="flex items-center justify-center py-4">
+                <div className="text-gray-500 text-sm">Loading responses...</div>
+              </div>
+            ) : (
+              <div className="flex-1 space-y-3 overflow-y-auto no-scrollbar">
+                {userInput && (
+                  <ResponseContainer
+                    active={true}
+                    content={userInput}
+                    user="You"
+                  />
+                )}
+                {responses.map((response, index) => (
+                  <ResponseContainer
+                    key={response.id || index}
+                    content={response.content}
+                    user={response.author || `User ${index + 1}`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 

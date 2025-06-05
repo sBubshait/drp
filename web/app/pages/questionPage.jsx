@@ -21,10 +21,10 @@ export function QuestionPage() {
   const navigate = useNavigate();
   const params = useParams();
   const location = useLocation();
-  
+
   const articleId = params.id ? parseInt(params.id, 10) : null;
   const nextArticleId = location.state?.nextArticleId;
-  
+
   function capitalise(s) {
     return s && String(s[0]).toUpperCase() + String(s).slice(1);
   }
@@ -39,7 +39,7 @@ export function QuestionPage() {
     } else {
       setLoading(false);
     }
-    
+
     setCurrentIndex(0);
   }, [location.state, articleId]);
 
@@ -120,7 +120,7 @@ export function QuestionPage() {
     return (
       <div className="w-full bg-gray-200 flex flex-col min-h-screen items-center justify-center">
         <p className="text-gray-600">No article ID provided.</p>
-        <button 
+        <button
           onClick={() => navigate('/articles/10/questions')}
           className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
@@ -135,7 +135,7 @@ export function QuestionPage() {
     return (
       <div className="w-full bg-gray-200 flex flex-col min-h-screen items-center justify-center">
         <p className="text-gray-600">No questions found for this article.</p>
-        <button 
+        <button
           onClick={() => navigate(`/articles/${articleId}`)}
           className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
@@ -150,20 +150,22 @@ export function QuestionPage() {
   const ContentComponent = CONTENT_COMPONENTS[contentType];
 
   return (
-    <div {...handlers} className="w-full bg-gray-200 flex flex-col">
+    <div {...handlers} className="h-screen w-full bg-gray-200 flex flex-col overflow-hidden">
       <QuestionHeader
         questionNumber={currentIndex + 1}
         totalQuestions={segments.length}
         taskType={capitalise(contentType)}
       />
-      
-      {ContentComponent ? (
-        <ContentComponent content={currentSegment} />
-      ) : (
-        <div className="flex-1 flex items-center justify-center">
-          <p className="text-red-600">Unknown content type: {contentType}</p>
-        </div>
-      )}
+
+      <div className="flex-1 flex flex-col min-h-0">
+        {ContentComponent ? (
+          <ContentComponent content={currentSegment} />
+        ) : (
+          <div className="flex-1 flex items-center justify-center">
+            <p className="text-red-600 text-sm">Unknown content type: {contentType}</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
