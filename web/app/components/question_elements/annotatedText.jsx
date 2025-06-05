@@ -67,7 +67,7 @@ export default function AnnotatedText({ text, annotations }) {
       </div>
 
       <div className="relative overflow-x-hidden gap-6">
-        <div id="annotationSidebar" className="fixed w-[340px] bottom-[-340px] overflow-x-scroll gap-4 p-3 bg-gray-100 rounded"
+        <div id="annotationSidebar" className="fixed w-[88%] bottom-[-340px] overflow-x-scroll gap-4 p-3 bg-gray-100 rounded"
              style={{
                 scrollbarWidth: "none",
                 transition: "all 270ms",
