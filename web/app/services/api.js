@@ -19,7 +19,6 @@ class ApiService {
     };
 
     try {
-      console.log(`API Request: ${defaultOptions.method} ${url}`);
       
       const response = await fetch(url, defaultOptions);
       
@@ -28,7 +27,6 @@ class ApiService {
       }
       
       const data = await response.json();
-      console.log(`API Response: ${url}`, data);
       
       return data;
     } catch (error) {
