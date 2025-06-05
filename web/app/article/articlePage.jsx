@@ -3,6 +3,7 @@ import { useSwipeable } from 'react-swipeable';
 import { useNavigate, useParams } from 'react-router';
 import QuestionHeader from "../components/question_elements/questionHeader.jsx";
 import VerticalVideoPlayer from "../components/site_layout/videoPlayer.jsx";
+import ArticlePreview from '../components/site_layout/articlePreview.jsx';
 import ApiService from '../services/api.js';
 
 export function ArticlePage() {
@@ -177,7 +178,7 @@ export function ArticlePage() {
 
       {/* Main Content Area */}
       <div
-        className={`flex-1 relative transition-all duration-300 ease-out ${
+        className={`flex-1 flex flex-col justify-center items-center relative transition-all duration-300 ease-out ${
           isAnimating ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'
         }`}
       >
@@ -193,26 +194,7 @@ export function ArticlePage() {
           </div>
         ) : (
           /* Text Article Layout - Centered */
-          <div className="flex-1 flex flex-col justify-center items-center px-6">
-            <div className="text-center space-y-4 max-w-md">
-              {/* Category Tag */}
-              <div>
-                <span className="inline-block px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wide text-white" style={{ backgroundColor: '#00ADB5' }}>
-                  {fetchedArticle.article.category}
-                </span>
-              </div>
-
-              {/* Main Headline */}
-              <h1 className="text-3xl font-bold text-gray-800 leading-tight">
-                {fetchedArticle.article.content}
-              </h1>
-
-              {/* Date */}
-              <div className="text-gray-600 text-sm font-medium">
-                Today at 12:00 PM
-              </div>
-            </div>
-          </div>
+          <ArticlePreview article={fetchedArticle.article} />
         )}
       </div>
 
