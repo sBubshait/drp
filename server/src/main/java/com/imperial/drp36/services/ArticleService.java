@@ -3,18 +3,16 @@ package com.imperial.drp36.services;
 import com.imperial.drp36.entity.Article;
 import com.imperial.drp36.entity.Discussion;
 import com.imperial.drp36.entity.Question;
+import com.imperial.drp36.entity.Info;
 import com.imperial.drp36.entity.Segment;
 import com.imperial.drp36.entity.Poll;
 import com.imperial.drp36.model.ArticleContent;
 import com.imperial.drp36.model.DiscussionContent;
 import com.imperial.drp36.model.PollContent;
 import com.imperial.drp36.model.QuestionContent;
+import com.imperial.drp36.model.InfoContent;
 import com.imperial.drp36.model.SegmentContent;
-import com.imperial.drp36.repository.ArticleRepository;
-import com.imperial.drp36.repository.DiscussionRepository;
-import com.imperial.drp36.repository.SegmentRepository;
-import com.imperial.drp36.repository.PollRepository;
-import com.imperial.drp36.repository.QuestionRepository;
+import com.imperial.drp36.repository.*;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +38,12 @@ public class ArticleService {
 
   @Autowired
   private DiscussionRepository discussionRepository;
+
+  @Autowired
+  private InfoRepository infoRepository;
+
+  @Autowired
+  private AnnotationRepository annotationRepository;
 
   public Article getArticleById(Long id) {
     return articleRepository.findById(id).orElse(null);
@@ -116,6 +120,17 @@ public class ArticleService {
               discussion.getContext(),
               discussion.getPrompt(),
               discussion.getTotalResponses()
+          );
+        }
+        break;
+
+      case "info":
+        Info info = infoRepository.findById(segment.getId()).orElse(null);
+        if (info != null) {
+          return new InfoContent(
+            info.getId(),
+            info.getBody(),
+            annotationRepository.findByInfoIdOrderByCreatedAtAsc(segment.getId())
           );
         }
         break;
