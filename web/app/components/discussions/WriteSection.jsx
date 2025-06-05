@@ -1,6 +1,6 @@
 export default function WriteSection({ userInput, setUserInput, handleSubmit }) {
     return (
-        <div className="bg-white rounded-xl p-5 mb-5 flex-1 flex flex-col">
+        <div className="bg-white rounded-xl p-5 mb-2 flex-1 flex flex-col h-full">
             <textarea
                 className="w-full flex-1 p-4 border-2 border-gray-300 rounded-lg text-base resize-none outline-none focus:border-cyan-600 transition-colors text-gray-700"
                 placeholder="Type your response here..."

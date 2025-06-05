@@ -14,7 +14,7 @@ export default function DiscussionContent({ content }) {
 
   if (!content) {
     return (
-      <div className="h-full flex items-center justify-center">
+      <div className="flex-1 flex items-center justify-center">
         <p className="text-gray-600">Loading discussion...</p>
       </div>
     );
@@ -63,73 +63,62 @@ export default function DiscussionContent({ content }) {
     'bg-amber-500'
   ];
 
+  const responsesCount = responses.length + 1;
+
   return (
-    <div className="h-full flex flex-col">
-      {/* Context section - fixed height */}
-      <div className="flex-shrink-0 p-3">
-        <div className="max-h-32 overflow-y-auto">
-          <ContextBox text={context} />
-        </div>
+    <div className="flex flex-col h-full">
+      <div className="p-3 max-h-32 overflow-y-auto">
+        <ContextBox text={context} />
       </div>
 
-      {/* Prompt section - fixed height */}
-      <div className="flex-shrink-0 px-3 mb-3">
+      <div className="px-3 mb-3">
         <PinkContainer text={prompt} />
       </div>
 
-      {/* Main content area - takes remaining space */}
-      <div className="flex-1 flex flex-col min-h-0 px-3 pb-3">
+      <div className="flex-1 flex flex-col min-h-0 px-3">
         {!hasSubmitted ? (
-          <div className="h-full flex flex-col space-y-4">
-            {/* Write section - takes all available space */}
-            <div className="flex-1 min-h-0">
-              <WriteSection
-                userInput={userInput}
-                setUserInput={setUserInput}
-                handleSubmit={handleSubmit}
-                isSubmitting={isSubmitting}
-              />
-            </div>
+          <div className="flex flex-col space-y-3">
+            <WriteSection
+              userInput={userInput}
+              setUserInput={setUserInput}
+              handleSubmit={handleSubmit}
+              isSubmitting={isSubmitting}
+            />
 
-            {/* Bottom sections - fixed size */}
-            <div className="flex-shrink-0 space-y-4">
-              <ParticipationSection
-                avatarLetters={avatarLetters}
-                avatarColors={avatarColors}
-                responseCount={totalResponses || 0}
-              />
+            <ParticipationSection
+              avatarLetters={avatarLetters}
+              avatarColors={avatarColors}
+              responseCount={totalResponses || 0}
+            />
 
-              <LockedDiscussionSection />
-            </div>
+            <LockedDiscussionSection />
           </div>
         ) : (
-          <div className="h-full flex flex-col">
-            <div className="flex-shrink-0 text-lg font-semibold text-gray-700 mb-3 text-center">
-              {responses.length + 1} Response{responses.length !== 0 ? 's' : ''}
+          <div className="flex flex-col h-full">
+            <div className="text-lg font-semibold text-gray-700 mb-3 text-center">
+              {responsesCount} Response{responsesCount !== 1 ? 's' : ''}
             </div>
 
             {isLoadingResponses ? (
-              <div className="flex-1 flex items-center justify-center">
+              <div className="flex items-center justify-center py-4">
                 <div className="text-gray-500 text-sm">Loading responses...</div>
               </div>
             ) : (
-              <div className="flex-1 overflow-y-auto no-scrollbar">
-                <div className="space-y-3">
-                  {userInput && (
-                    <ResponseContainer
-                      active={true}
-                      content={userInput}
-                      user="You"
-                    />
-                  )}
-                  {responses.map((response, index) => (
-                    <ResponseContainer
-                      key={response.id || index}
-                      content={response.content}
-                      user={response.author || `User ${index + 1}`}
-                    />
-                  ))}
-                </div>
+              <div className="flex-1 space-y-3 overflow-y-auto no-scrollbar">
+                {userInput && (
+                  <ResponseContainer
+                    active={true}
+                    content={userInput}
+                    user="You"
+                  />
+                )}
+                {responses.map((response, index) => (
+                  <ResponseContainer
+                    key={response.id || index}
+                    content={response.content}
+                    user={response.author || `User ${index + 1}`}
+                  />
+                ))}
               </div>
             )}
           </div>
