@@ -86,7 +86,7 @@ export default function AnnotatedText({ text, annotations }) {
               onClick={() => setActiveId(ann.id)}
             >
               <p className="text-sm text-gray-600 font-medium mb-1">
-                {ann.author}
+                {ann.authorName}
               </p>
               <p className="text-gray-800 text-sm">{ann.content}</p>
             </div>

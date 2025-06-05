@@ -12,12 +12,7 @@ import com.imperial.drp36.model.PollContent;
 import com.imperial.drp36.model.QuestionContent;
 import com.imperial.drp36.model.InfoContent;
 import com.imperial.drp36.model.SegmentContent;
-import com.imperial.drp36.repository.ArticleRepository;
-import com.imperial.drp36.repository.DiscussionRepository;
-import com.imperial.drp36.repository.SegmentRepository;
-import com.imperial.drp36.repository.PollRepository;
-import com.imperial.drp36.repository.QuestionRepository;
-import com.imperial.drp36.repository.InfoRepository;
+import com.imperial.drp36.repository.*;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +41,9 @@ public class ArticleService {
 
   @Autowired
   private InfoRepository infoRepository;
+
+  @Autowired
+  private AnnotationRepository annotationRepository;
 
   public Article getArticleById(Long id) {
     return articleRepository.findById(id).orElse(null);
@@ -131,7 +129,8 @@ public class ArticleService {
         if (info != null) {
           return new InfoContent(
             info.getId(),
-            info.getBody()
+            info.getBody(),
+            annotationRepository.findByInfoIdOrderByCreatedAtAsc(segment.getId())
           );
         }
         break;
