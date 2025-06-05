@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import { useNavigate, useParams } from 'react-router';
 import QuestionHeader from "../components/question_elements/questionHeader.jsx";
+import VerticalVideoPlayer from "../components/site_layout/videoPlayer.jsx";
 import ApiService from '../services/api.js';
 
 export function ArticlePage() {
@@ -169,6 +170,8 @@ export function ArticlePage() {
     );
   }
 
+  const isVideoArticle = fetchedArticle.article.type === 'video';
+
   return (
     <div {...handlers} className="w-full bg-gray-200 flex flex-col min-h-screen overflow-hidden">
       {/* Header */}
@@ -182,45 +185,56 @@ export function ArticlePage() {
         className={`flex-1 flex flex-col justify-center items-center px-6 transition-all duration-300 ease-out ${isAnimating ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'
           }`}
       >
-        <div className="text-center space-y-4 max-w-md">
-          {/* Category Tag */}
-          <div>
-            <span className="inline-block px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wide text-white" style={{ backgroundColor: '#00ADB5' }}>
-              {fetchedArticle.article.category}
-            </span>
-          </div>
+        {!isVideoArticle ? (
+          /* Video Article Layout */
+          <div className="flex flex-col items-center space-y-4 max-w-md w-full">
 
-          {/* Main Headline */}
-          <h1 className="text-3xl font-bold text-gray-800 leading-tight">
-            {fetchedArticle.article.content}
-          </h1>
+            {/* Video Player */}
+            <VerticalVideoPlayer
+              videoUrl={"https://archive.org/download/BigBuckBunny_124/Content/big_buck_bunny_720p_surround.mp4"}
+            />
 
-          {/* Date */}
-          <div className="text-gray-600 text-sm font-medium">
-            Today at 12:00 PM
           </div>
-        </div>
+        ) : (
+          /* Text Article Layout */
+          <div className="text-center space-y-4 max-w-md">
+            {/* Category Tag */}
+            <div>
+              <span className="inline-block px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wide text-white" style={{ backgroundColor: '#00ADB5' }}>
+                {fetchedArticle.article.category}
+              </span>
+            </div>
+
+            {/* Main Headline */}
+            <h1 className="text-3xl font-bold text-gray-800 leading-tight">
+              {fetchedArticle.article.content}
+            </h1>
+
+            {/* Date */}
+            <div className="text-gray-600 text-sm font-medium">
+              Today at 12:00 PM
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Closeable Tip Box */}
-      {
-        showTip && (
-          <div className="p-6">
-            <div className="bg-blue-50 rounded-lg border-l-4 border-blue-400 p-4 relative">
-              <button
-                onClick={handleCloseTip}
-                className="absolute top-2 right-2 text-blue-600 hover:text-blue-800 font-bold text-lg"
-              >
-                ×
-              </button>
-              <p className="text-blue-800 font-medium pr-6">
-                💡 Tip: {fetchedArticle.article.segments.length} interactive segment{fetchedArticle.article.segments.length !== 1 ? 's' : ''} available for this article. Swipe left!
-                Swipe up and down to move between articles!
-              </p>
-            </div>
+      {showTip && (
+        <div className="p-6">
+          <div className="bg-blue-50 rounded-lg border-l-4 border-blue-400 p-4 relative">
+            <button
+              onClick={handleCloseTip}
+              className="absolute top-2 right-2 text-blue-600 hover:text-blue-800 font-bold text-lg"
+            >
+              ×
+            </button>
+            <p className="text-blue-800 font-medium pr-6">
+              💡 Tip: {fetchedArticle.article.segments.length} interactive segment{fetchedArticle.article.segments.length !== 1 ? 's' : ''} available for this article. Swipe left!
+              Swipe up and down to move between articles!
+            </p>
           </div>
-        )
-      }
-    </div >
+        </div>
+      )}
+    </div>
   );
 }
