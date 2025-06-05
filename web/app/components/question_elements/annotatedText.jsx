@@ -22,6 +22,14 @@ export default function AnnotatedText({ text, annotations }) {
   };
 
   useEffect(() => {
+    const sidebar = document.getElementById("annotationSidebar");
+    const width = sidebar.offsetWidth;
+    sidebar.style.position = "fixed";
+    sidebar.style.width = `${width}px`;
+    sidebar.style.bottom = "-340px";
+  }, [])
+
+  useEffect(() => {
     document.addEventListener("click", handleClick, true);
     return () => {
       document.removeEventListener("click", handleClick, true);
@@ -67,12 +75,13 @@ export default function AnnotatedText({ text, annotations }) {
       </div>
 
       <div className="relative overflow-x-hidden gap-6">
-        <div id="annotationSidebar" className="fixed w-[88%] bottom-[-340px] overflow-x-scroll gap-4 p-3 bg-gray-100 rounded"
+        <div id="annotationSidebar" className="overflow-x-scroll gap-4 p-3 bg-gray-100 rounded"
              style={{
                 scrollbarWidth: "none",
                 transition: "all 270ms",
                 transform: activeId ? "translateY(-350px)" : ""
-             }}>
+             }}
+        >
           <div className="flex gap-6">
           {annotations.map((ann) => (
             <div

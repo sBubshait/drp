@@ -14,7 +14,7 @@ export default function InfoContent({content}) {
 
   return (
     <>
-      <div className="flex-1 p-6">
+      <div className="block p-6">
           <AnnotatedText text={body} annotations={annotations}/>
         </div>
     </>
