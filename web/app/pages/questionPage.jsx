@@ -18,6 +18,7 @@ export function QuestionPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [segments, setSegments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isAnimating, setIsAnimating] = useState(false);
   const navigate = useNavigate();
   const params = useParams();
   const location = useLocation();
@@ -57,10 +58,16 @@ export function QuestionPage() {
     }
   };
 
-  // Navigation functions
+  // Navigation functions with animation
   const goToNext = () => {
+    if (isAnimating) return;
+
     if (currentIndex < segments.length - 1) {
-      setCurrentIndex(currentIndex + 1);
+      setIsAnimating(true);
+      setTimeout(() => {
+        setCurrentIndex(currentIndex + 1);
+        setIsAnimating(false);
+      }, 150);
     } else {
       if (nextArticleId) {
         navigate(`/articles/${nextArticleId}`);
@@ -71,8 +78,14 @@ export function QuestionPage() {
   };
 
   const goToPrev = () => {
+    if (isAnimating) return;
+
     if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
+      setIsAnimating(true);
+      setTimeout(() => {
+        setCurrentIndex(currentIndex - 1);
+        setIsAnimating(false);
+      }, 150);
     } else {
       navigate(`/articles/${articleId}`);
     }
@@ -90,7 +103,7 @@ export function QuestionPage() {
   // Keyboard event handler
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (loading || segments.length === 0) return;
+      if (loading || segments.length === 0 || isAnimating) return;
 
       if (event.key === 'ArrowRight') {
         goToNext();
@@ -101,7 +114,7 @@ export function QuestionPage() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [loading, segments.length, currentIndex, nextArticleId]);
+  }, [loading, segments.length, currentIndex, nextArticleId, isAnimating]);
 
   // Loading state
   if (loading) {
@@ -157,14 +170,19 @@ export function QuestionPage() {
         taskType={capitalise(contentType)}
       />
 
-      <div className="flex-1 flex flex-col min-h-0">
-        {ContentComponent ? (
-          <ContentComponent content={currentSegment} />
-        ) : (
-          <div className="flex-1 flex items-center justify-center">
-            <p className="text-red-600 text-sm">Unknown content type: {contentType}</p>
-          </div>
-        )}
+      <div className="flex-1 flex flex-col min-h-0 relative overflow-hidden">
+        <div
+          className={`flex-1 flex flex-col transition-all duration-300 ease-out ${isAnimating ? 'opacity-0 transform translate-x-4' : 'opacity-100 transform translate-x-0'
+            }`}
+        >
+          {ContentComponent ? (
+            <ContentComponent content={currentSegment} />
+          ) : (
+            <div className="flex-1 flex items-center justify-center">
+              <p className="text-red-600 text-sm">Unknown content type: {contentType}</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -11,6 +11,7 @@ export function ArticlePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showTip, setShowTip] = useState(true);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
     const tipDismissed = localStorage.getItem('tipDismissed');
@@ -59,21 +60,31 @@ export function ArticlePage() {
     }
   };
 
-  // Navigation functions
+  // Navigation functions with animation
   const goToNext = () => {
-    if (fetchedArticle?.next) {
+    if (isAnimating || !fetchedArticle?.next) return;
+
+    setIsAnimating(true);
+    setTimeout(() => {
       navigate(`/articles/${fetchedArticle.next}`);
-    }
+      setIsAnimating(false);
+    }, 150);
   };
 
   const goToPrev = () => {
-    if (fetchedArticle?.prev) {
+    if (isAnimating || !fetchedArticle?.prev) return;
+
+    setIsAnimating(true);
+    setTimeout(() => {
       navigate(`/articles/${fetchedArticle.prev}`);
-    }
+      setIsAnimating(false);
+    }, 150);
   };
 
   // Navigation function for swipe to questions
   const goToQuestions = () => {
+    if (isAnimating) return;
+
     const questionUrl = articleId
       ? `/articles/${articleId}/questions`
       : `/articles/${fetchedArticle.article.id}/questions`;
@@ -106,7 +117,7 @@ export function ArticlePage() {
   // Keyboard event handler
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (!fetchedArticle || loading) return;
+      if (!fetchedArticle || loading || isAnimating) return;
 
       if (event.key === 'ArrowRight') {
         goToNext();
@@ -119,18 +130,18 @@ export function ArticlePage() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [fetchedArticle, loading]);
+  }, [fetchedArticle, loading, isAnimating]);
 
   if (loading) {
     return (
       <div className="w-full bg-gray-200 flex flex-col min-h-screen items-center justify-center">
-        <p className="text-gray-600">Loading article...</p>
+        {/* <p className="text-gray-600">Loading article...</p>
         <p className="text-gray-500 text-sm mt-2">
           {articleId
             ? `Fetching article ${articleId} from API...`
             : `Fetching default article from API...`
           }
-        </p>
+        </p> */}
       </div>
     );
   }
@@ -159,7 +170,7 @@ export function ArticlePage() {
   }
 
   return (
-    <div {...handlers} className="w-full bg-gray-200 flex flex-col min-h-screen">
+    <div {...handlers} className="w-full bg-gray-200 flex flex-col min-h-screen overflow-hidden">
       {/* Header */}
       <div className="flex">
         <div className="bg-gray-800 px-6 py-3 text-white font-bold text-lg flex-1">
@@ -167,7 +178,10 @@ export function ArticlePage() {
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col justify-center items-center px-6">
+      <div
+        className={`flex-1 flex flex-col justify-center items-center px-6 transition-all duration-300 ease-out ${isAnimating ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'
+          }`}
+      >
         <div className="text-center space-y-4 max-w-md">
           {/* Category Tag */}
           <div>
