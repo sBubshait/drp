@@ -1,18 +1,32 @@
-import {useState, useRef} from "react";
+import {useState, useRef, useEffect, useCallback, act} from "react";
 
 export default function AnnotatedText({ text, annotations }) {
   const [activeId, setActiveId] = useState(null);
   const annotationRefs = useRef({});
 
-  const handleClick = (id) => {
+  const handleClick = useCallback(event => {
+    const target = event.target
+    if (!target.classList.contains("annotation")) {
+      setActiveId(null);
+    }
+  }, [])
+
+  const handleAnnotationClick = (id) => {
     setTimeout(() => {
       const ref = annotationRefs.current[id];
       if (ref) {
         ref.scrollIntoView({ behavior: activeId ? "smooth" : "auto", inline: "center" });
-        setActiveId(id);
       }
-    }, 100);
+      setActiveId(id);
+    }, 50);
   };
+
+  useEffect(() => {
+    document.addEventListener("click", handleClick, true);
+    return () => {
+      document.removeEventListener("click", handleClick, true);
+    }
+  }, [handleClick])
 
   const renderText = () => {
     let parts = [];
@@ -28,10 +42,10 @@ export default function AnnotatedText({ text, annotations }) {
      parts.push(
         <span
           key={`ann-${i}`}
-          className={`bg-yellow-300 cursor-pointer px-1 rounded-sm ${
+          className={`annotation bg-yellow-300 cursor-pointer px-1 rounded-sm ${
             activeId === id ? "ring-2 ring-blue-500" : ""
           }`}
-          onClick={() => handleClick(id)}
+          onClick={() => handleAnnotationClick(id)}
         >
           {text.slice(start, end)}
         </span>
@@ -56,7 +70,7 @@ export default function AnnotatedText({ text, annotations }) {
         <div id="annotationSidebar" className="fixed w-[340px] bottom-[-340px] overflow-x-scroll gap-4 p-3 bg-gray-100 rounded"
              style={{
                 scrollbarWidth: "none",
-                transition: "all 300ms",
+                transition: "all 270ms",
                 transform: activeId ? "translateY(-350px)" : ""
              }}>
           <div className="flex gap-6">
