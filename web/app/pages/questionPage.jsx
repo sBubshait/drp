@@ -4,6 +4,7 @@ import { useSwipeable } from 'react-swipeable';
 import QuestionHeader from "../components/question_elements/questionHeader.jsx";
 import QuestionContent from "../components/site_layout/questionContent.jsx";
 import PollContent from "../components/site_layout/pollContent.jsx";
+import InfoContent from '../components/site_layout/infoContent.jsx';
 import DiscussionContent from "../components/site_layout/discussionContent.jsx";
 import ApiService from '../services/api.js';
 
@@ -12,6 +13,7 @@ const CONTENT_COMPONENTS = {
   question: QuestionContent,
   poll: PollContent,
   discussion: DiscussionContent,
+  info: InfoContent
 };
 
 export function QuestionPage() {

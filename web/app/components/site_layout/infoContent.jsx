@@ -10,13 +10,13 @@ export default function InfoContent({content}) {
     )
   }
 
-  const {context} = content;
+  const {body} = content;
 
   return (
     <>
       <div className="flex-1 p-6">
 
-          <AnnotatedText text={context}
+          <AnnotatedText text={body}
            annotations={[
                           {
                             id: 1,
