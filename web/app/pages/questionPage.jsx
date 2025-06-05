@@ -61,7 +61,7 @@ export function QuestionPage() {
   };
 
   // Navigation functions with animation
-  const goToNext = () => {
+  const goToNext = (event) => {
     if (isAnimating) return;
 
     if (currentIndex < segments.length - 1) {
@@ -95,11 +95,34 @@ export function QuestionPage() {
 
   // Swipe handlers
   const handlers = useSwipeable({
-    onSwipedLeft: goToNext,
-    onSwipedRight: goToPrev,
+    onSwipedLeft: (eventData) => {
+      // Check if the swipe started on the annotation sidebar
+      const target = eventData.event.target;
+      const annotationSidebar = document.getElementById('annotationSidebar');
+
+      if (annotationSidebar && annotationSidebar.contains(target)) {
+        return; // Don't handle swipe if it's on the annotation sidebar
+      }
+
+      goToNext();
+    },
+    onSwipedRight: (eventData) => {
+      // Check if the swipe started on the annotation sidebar
+      const target = eventData.event.target;
+      const annotationSidebar = document.getElementById('annotationSidebar');
+
+      if (annotationSidebar && annotationSidebar.contains(target)) {
+        return; // Don't handle swipe if it's on the annotation sidebar
+      }
+
+      goToPrev();
+    },
     swipeDuration: 500,
     preventScrollOnSwipe: true,
-    trackMouse: true
+    trackMouse: true,
+    delta: 10,
+    preventDefaultTouchmoveEvent: true,
+    touchEventOptions: { passive: false }
   });
 
   // Keyboard event handler
