@@ -57,27 +57,30 @@ export default function VerticalVideoPlayer({ videoUrl }) {
 
   if (hasError) {
     return (
-      <div className="w-full max-w-xs mx-auto aspect-[9/16] bg-gray-100 rounded-lg border-2 border-cyan-300 flex items-center justify-center">
-        <div className="text-center p-4">
-          <p className="text-gray-600 mb-2">Failed to load video</p>
-          <button 
-            onClick={() => {
-              setHasError(false);
-              setIsLoading(true);
-            }}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            Retry
-          </button>
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="w-full max-w-sm aspect-[9/16] bg-gray-100 rounded-lg border-2 border-cyan-300 flex items-center justify-center">
+          <div className="text-center p-4">
+            <p className="text-gray-600 mb-2">Failed to load video</p>
+            <button 
+              onClick={() => {
+                setHasError(false);
+                setIsLoading(true);
+              }}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              Retry
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-xs mx-auto relative">
-      {/* Video Container */}
-      <div className="relative aspect-[9/16] bg-black rounded-lg overflow-hidden border-2 border-cyan-300 shadow-lg">
+    <div className="w-full h-full flex items-center justify-center">
+      {/* Video Container - vertical aspect ratio, centered, fills available height */}
+      <div className="relative w-full max-w-sm h-full max-h-full bg-black rounded-lg overflow-hidden border-2 border-cyan-300 shadow-lg" 
+           style={{ aspectRatio: '9/16' }}>
         {/* Loading Overlay */}
         {isLoading && (
           <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20">
