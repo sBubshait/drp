@@ -3,6 +3,7 @@ import ChoicesButtons from "../question_elements/choicesButtons.jsx";
 import ViewResultsButton from "../question_elements/viewResultsButton.jsx";
 import PollResults from "../question_elements/pollResults.jsx";
 import { useState } from 'react';
+import ApiService from '../../services/api.js';
 
 export default function PollContent({ content }) {
   const { context, title, options, id } = content;
@@ -14,22 +15,14 @@ export default function PollContent({ content }) {
 
   async function onSelectOption(index) {
     try {
-      const response = await fetch(`https://api.saleh.host/vote?pollId=${id}&optionIndex=${index}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        console.error('Failed to submit vote:', response.status);
-      } else {
-        // Update local counts on successful vote
-        content.responseCounts[index]++;
-        content.totalResponses++;
-      }
+      await ApiService.submitVote(id, index);
+      
+      // Update local counts on successful vote
+      content.responseCounts[index]++;
+      content.totalResponses++;
     } catch (error) {
       console.error('Error submitting vote:', error);
+      // Still show results even if vote submission failed
     }
 
     setShowResults(true);
@@ -46,9 +39,7 @@ export default function PollContent({ content }) {
         </div>
       </div>
       {showResults ? (
-        <PollResults
-          content={content}
-        />
+        <PollResults content={content} />
       ) : (
         <>
           <ChoicesButtons options={options} onSelectOption={onSelectOption} />

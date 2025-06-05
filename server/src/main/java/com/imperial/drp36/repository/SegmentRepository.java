@@ -1,6 +1,6 @@
 package com.imperial.drp36.repository;
 
-import com.imperial.drp36.entity.Poll;
+import com.imperial.drp36.entity.Segment;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -10,5 +10,4 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface PollRepository extends JpaRepository<Poll, Long> {
-}
+public interface SegmentRepository extends JpaRepository<Segment, Long> { }

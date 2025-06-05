@@ -14,7 +14,7 @@ export default function QuestionContent({content}) {
       <p> Loading... </p>
     )
   }
-
+  
   const {title, options, context, hasAnswer, answer, correctAnswerFeedback, wrongAnswerFeedback, generalAnswer} = content;
 
   function handleOptionClick(index) {
