@@ -20,13 +20,14 @@ export function QuestionPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [segments, setSegments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isAnimating, setIsAnimating] = useState(false);
   const navigate = useNavigate();
   const params = useParams();
   const location = useLocation();
-  
+
   const articleId = params.id ? parseInt(params.id, 10) : null;
   const nextArticleId = location.state?.nextArticleId;
-  
+
   function capitalise(s) {
     return s && String(s[0]).toUpperCase() + String(s).slice(1);
   }
@@ -41,7 +42,7 @@ export function QuestionPage() {
     } else {
       setLoading(false);
     }
-    
+
     setCurrentIndex(0);
   }, [location.state, articleId]);
 
@@ -59,10 +60,16 @@ export function QuestionPage() {
     }
   };
 
-  // Navigation functions
+  // Navigation functions with animation
   const goToNext = () => {
+    if (isAnimating) return;
+
     if (currentIndex < segments.length - 1) {
-      setCurrentIndex(currentIndex + 1);
+      setIsAnimating(true);
+      setTimeout(() => {
+        setCurrentIndex(currentIndex + 1);
+        setIsAnimating(false);
+      }, 150);
     } else {
       if (nextArticleId) {
         navigate(`/articles/${nextArticleId}`);
@@ -73,8 +80,14 @@ export function QuestionPage() {
   };
 
   const goToPrev = () => {
+    if (isAnimating) return;
+
     if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
+      setIsAnimating(true);
+      setTimeout(() => {
+        setCurrentIndex(currentIndex - 1);
+        setIsAnimating(false);
+      }, 150);
     } else {
       navigate(`/articles/${articleId}`);
     }
@@ -92,7 +105,7 @@ export function QuestionPage() {
   // Keyboard event handler
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (loading || segments.length === 0) return;
+      if (loading || segments.length === 0 || isAnimating) return;
 
       if (event.key === 'ArrowRight') {
         goToNext();
@@ -103,7 +116,7 @@ export function QuestionPage() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [loading, segments.length, currentIndex, nextArticleId]);
+  }, [loading, segments.length, currentIndex, nextArticleId, isAnimating]);
 
   // Loading state
   if (loading) {
@@ -122,7 +135,7 @@ export function QuestionPage() {
     return (
       <div className="w-full bg-gray-200 flex flex-col min-h-screen items-center justify-center">
         <p className="text-gray-600">No article ID provided.</p>
-        <button 
+        <button
           onClick={() => navigate('/articles/10/questions')}
           className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
@@ -137,7 +150,7 @@ export function QuestionPage() {
     return (
       <div className="w-full bg-gray-200 flex flex-col min-h-screen items-center justify-center">
         <p className="text-gray-600">No questions found for this article.</p>
-        <button 
+        <button
           onClick={() => navigate(`/articles/${articleId}`)}
           className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
@@ -152,20 +165,27 @@ export function QuestionPage() {
   const ContentComponent = CONTENT_COMPONENTS[contentType];
 
   return (
-    <div {...handlers} className="w-full bg-gray-200 flex flex-col">
+    <div {...handlers} className="h-screen w-full bg-gray-200 flex flex-col overflow-hidden">
       <QuestionHeader
         questionNumber={currentIndex + 1}
         totalQuestions={segments.length}
         taskType={capitalise(contentType)}
       />
-      
-      {ContentComponent ? (
-        <ContentComponent content={currentSegment} />
-      ) : (
-        <div className="flex-1 flex items-center justify-center">
-          <p className="text-red-600">Unknown content type: {contentType}</p>
+
+      <div className="flex-1 flex flex-col min-h-0 relative overflow-hidden">
+        <div
+          className={`flex-1 flex flex-col transition-all duration-300 ease-out ${isAnimating ? 'opacity-0 transform translate-x-4' : 'opacity-100 transform translate-x-0'
+            }`}
+        >
+          {ContentComponent ? (
+            <ContentComponent content={currentSegment} />
+          ) : (
+            <div className="flex-1 flex items-center justify-center">
+              <p className="text-red-600 text-sm">Unknown content type: {contentType}</p>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
