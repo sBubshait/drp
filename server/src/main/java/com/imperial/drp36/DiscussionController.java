@@ -1,5 +1,6 @@
 package com.imperial.drp36;
 
+import com.imperial.drp36.entity.Annotation;
 import com.imperial.drp36.entity.Discussion;
 import com.imperial.drp36.entity.DiscussionResponse;
 import com.imperial.drp36.model.DiscussionResponses;
@@ -8,7 +9,9 @@ import com.imperial.drp36.services.DiscussionService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
