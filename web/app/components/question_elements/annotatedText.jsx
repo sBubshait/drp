@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect, useCallback, act } from "react";
 import ApiService from '../../services/api.js'
+import { API_URL } from "../../config.js";
 
-export default function AnnotatedText({ text, annotations }) {
+export default function AnnotatedText({ text, annotations: fetchedAnnotations, segmentId }) {
   const [activeId, setActiveId] = useState(null);
+  const [annotations, setAnnotations] = useState(fetchedAnnotations);
   const [localUpvotes, setLocalUpvotes] = useState(annotations.map((ann) => false))
   const annotationRefs = useRef({});
 
@@ -15,7 +17,6 @@ export default function AnnotatedText({ text, annotations }) {
 
   const handleAnnotationClick = (id) => {
     setTimeout(() => {
-      ApiService.upvoteAnnotation(id);
       const ref = annotationRefs.current[id];
       if (ref) {
         ref.scrollIntoView({ behavior: activeId ? "smooth" : "auto", inline: "center" });
@@ -38,6 +39,19 @@ export default function AnnotatedText({ text, annotations }) {
       document.removeEventListener("click", handleClick, true);
     }
   }, [handleClick])
+
+  useEffect(() => {
+    fetch(API_URL + `/getSegment?segmentId=${segmentId}`)
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+        // Handle the fetched data  
+        // Set the annotations state with the fetched data
+        if (data.status === 200) {
+          setAnnotations(data.segment.annotations || []);
+        }
+      });
+  }, [activeId]);
 
   const renderText = () => {
     let parts = [];
@@ -109,7 +123,7 @@ export default function AnnotatedText({ text, annotations }) {
                   <button className="text-xl" style={{ padding: '8px 12px', cursor: 'pointer' }}>
                     👍
                   </button>
-                  <span className="text-sm font-bold text-gray-600"> {localUpvotes[i] ? ann.upvotes + 1 : ann.upvotes} </span>
+                  <span className="text-sm font-bold text-gray-600"> {localUpvotes[i] ? ann.upvotes : ann.upvotes} </span>
                 </div>
               </div>
             ))}

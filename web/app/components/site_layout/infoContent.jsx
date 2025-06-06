@@ -10,12 +10,12 @@ export default function InfoContent({content}) {
     )
   }
 
-  const {body, annotations} = content;
+  const {body, annotations, id} = content;
 
   return (
     <>
       <div className="block p-6">
-          <AnnotatedText text={body} annotations={annotations}/>
+          <AnnotatedText text={body} annotations={annotations} segmentId={id}/>
         </div>
     </>
   );
