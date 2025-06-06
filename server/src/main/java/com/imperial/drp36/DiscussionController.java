@@ -4,6 +4,7 @@ import com.imperial.drp36.entity.Annotation;
 import com.imperial.drp36.entity.Discussion;
 import com.imperial.drp36.entity.DiscussionResponse;
 import com.imperial.drp36.model.DiscussionResponses;
+import com.imperial.drp36.model.IdStatusResponse;
 import com.imperial.drp36.model.StatusResponse;
 import com.imperial.drp36.services.DiscussionService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -79,7 +80,7 @@ public class DiscussionController {
 
   @Tag(name = "Discussions")
   @PostMapping("/respond")
-  public ResponseEntity<StatusResponse> respondToDiscussion(
+  public ResponseEntity<IdStatusResponse> respondToDiscussion(
       @Parameter(description = "ID of the discussion", required = true, example = "1")
       @RequestParam Long discussionId,
 
@@ -89,18 +90,18 @@ public class DiscussionController {
     try {
       if (content == null || content.trim().isEmpty()) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-            .body(new StatusResponse(400, "Response text cannot be empty"));
+            .body(new IdStatusResponse(400, "Response text cannot be empty"));
       }
 
       DiscussionResponse response = discussionService.addResponse(discussionId, content.trim());
 
-      return ResponseEntity.ok(new StatusResponse(200, "Response added successfully"));
+      return ResponseEntity.ok(new IdStatusResponse(200, "Response added successfully", response.getId()));
     } catch (RuntimeException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-          .body(new StatusResponse(400, e.getMessage()));
+          .body(new IdStatusResponse(400, e.getMessage()));
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .body(new StatusResponse(500, "Error adding response: " + e.getMessage()));
+          .body(new IdStatusResponse(500, "Error adding response: " + e.getMessage()));
     }
   }
 }
