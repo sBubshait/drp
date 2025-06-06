@@ -27,28 +27,25 @@ public class Annotation {
   @Column(name = "author_credentials", nullable = false)
   private String authorCredentials;
 
-  @Column(name = "start", nullable = false)
-  private Integer start;
-
-  @Column(name = "upvotes", nullable = false)
-  private Integer upvotes;
+  @Column(name = "startPos", nullable = false)
+  private Integer startPos;
 
   public Annotation() {
     this.createdAt = LocalDateTime.now();
   }
 
-  public Annotation(Long id, Long infoId, String content, String authorName, String authorCredentials, Integer start, Integer end) {
+  public Annotation(Long id, Long infoId, String content, String authorName, String authorCredentials, Integer startPos, Integer endPos) {
     this();
     this.id = id;
     this.infoId = infoId;
     this.content = content;
     this.authorName = authorName;
     this.authorCredentials = authorCredentials;
-    this.start = start;
-    this.end = end;
+    this.startPos = start;
+    this.endPos = endPos;
   }
-  @Column(name = "end", nullable = false)
-  private Integer end;
+  @Column(name = "endPos", nullable = false)
+  private Integer endPos;
 
   public Long getId() {
     return id;
@@ -98,27 +95,19 @@ public class Annotation {
     this.authorCredentials = authorCredentials;
   }
 
-  public Integer getStart() {
-    return start;
+  public Integer getStartPos() {
+    return startPos;
   }
 
-  public void setStart(Integer start) {
-    this.start = start;
+  public void setStartPos(Integer start) {
+    this.startPos = start;
   }
 
-  public Integer getEnd() {
-    return end;
+  public Integer getEndPos() {
+    return endPos;
   }
 
-  public void setEnd(Integer end) {
-    this.end = end;
-  }
-
-  public Integer getUpvotes() {
-    return upvotes;
-  }
-
-  public void setUpvotes(Integer upvotes) {
-    this.upvotes = upvotes;
+  public void setEndPos(Integer endPos) {
+    this.endPos = endPos;
   }
 }
