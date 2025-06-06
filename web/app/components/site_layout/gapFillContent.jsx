@@ -38,8 +38,7 @@ export default function GapfillContent({ content }) {
       <span key={idx}>
         {part}
         {idx < correctAnswers.length && (
-            // "text-3xl font-medium text-gray-800 text-center mb-24"
-          <span className="inline-block min-w-[3rem] mx-1 border-b-2 text-center font-bold">
+          <span className="inline-block min-w-[3rem] mx-1 border-b-2 text-center text-teal-400 font-bold">
             {filledGaps[idx] || ""}
           </span>
         )}
@@ -54,23 +53,21 @@ export default function GapfillContent({ content }) {
     filledGaps.length === correctAnswers.length &&
     filledGaps.every((word, idx) => word === correctAnswers[idx]);
 
-    console.log(content);
-
   return (
     <div className="p-4 space-y-6 flex flex-col items-center">
       <div className="flex-1 p-6">
         <ContextBox text={context} />
       </div>
 
-      <div className="text-xl text-center">{renderSentence()}</div>
+      <div className="text-3xl font-medium text-gray-800 text-center text-center">{renderSentence()}</div>
 
       {submitted && (
-        <div className={`mt-4 text-lg font-semibold ${isCorrect ? "text-green-600" : "text-red-600"}`}>
+        <div className={`mt-4 text-lg font-semibold ${isCorrect ? "text-teal-600" : "text-red-600"}`}>
           {isCorrect ? "Correct!" : "Try Again!"}
         </div>
       )}
 
-      <div className="flex gap-4 mt-6">
+      <div className="flex justify-end gap-2 mt-6 w-full max-w-md">
         <GapfillButton
           label="Undo"
           onClick={handleUndo}
