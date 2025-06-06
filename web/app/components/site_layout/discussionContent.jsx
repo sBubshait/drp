@@ -207,8 +207,8 @@ export default function DiscussionContent({ content }) {
                 <div className="text-gray-500 text-sm">Loading responses...</div>
               </div>
             ) : (
-              <div className="h-150 flex-1 overflow-y-auto no-scrollbar  border border-gray-200 rounded-lg">
-                <div className="h-full space-y-3 p-3" id="responseContainer">
+              <div className="h-full flex-1 overflow-y-auto no-scrollbar  border border-gray-200 rounded-lg">
+                <div className="h-96 space-y-3 p-3" id="responseContainer">
                   {responses
                     .sort((a, b) => {
                       // Put user's response first, then others
