@@ -113,8 +113,8 @@ export default function DiscussionContent({ content }) {
                 <div className="text-gray-500 text-sm">Loading responses...</div>
               </div>
             ) : (
-              <div className="flex-1 overflow-y-auto no-scrollbar">
-                <div className="space-y-3">
+              <div className="h-150 overflow-y-auto no-scrollbar border border-gray-200 rounded-lg">
+                <div className="h-full space-y-3 p-3" id="responseContainer">
                   {userInput && (
                     <ResponseContainer
                       active={true}

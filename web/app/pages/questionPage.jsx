@@ -93,23 +93,42 @@ export function QuestionPage() {
     }
   };
 
+  // Add this helper function at the top of your QuestionPage component:
+
+  const isSwipeExcluded = (target) => {
+    const excludedElements = [
+      document.getElementById('annotationSidebar'),
+      document.getElementById('responseContainer')
+    ];
+
+    return excludedElements.some(element =>
+      element && element.contains(target)
+    );
+  };
+
   // Swipe handlers
   const handlers = useSwipeable({
     onSwipedLeft: (eventData) => {
-      const target = eventData.event.target;
-      const annotationSidebar = document.getElementById('annotationSidebar');
-      if (annotationSidebar && annotationSidebar.contains(target)) {
+      if (isSwipeExcluded(eventData.event.target)) {
         return;
       }
       goToNext();
     },
     onSwipedRight: (eventData) => {
-      const target = eventData.event.target;
-      const annotationSidebar = document.getElementById('annotationSidebar');
-      if (annotationSidebar && annotationSidebar.contains(target)) {
+      if (isSwipeExcluded(eventData.event.target)) {
         return;
       }
       goToPrev();
+    },
+    onSwipedUp: (eventData) => {
+      if (isSwipeExcluded(eventData.event.target)) {
+        return;
+      }
+    },
+    onSwipedDown: (eventData) => {
+      if (isSwipeExcluded(eventData.event.target)) {
+        return;
+      }
     },
     swipeDuration: 500,
     preventScrollOnSwipe: true, // Don't prevent scrolling globally
