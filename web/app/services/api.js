@@ -110,6 +110,19 @@ class ApiService {
     
     return data;
   }
+
+  static async editDiscussionResponse(responseId, content) {
+    return this.request('/discussions/editResponse', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        responseId: responseId.toString(),
+        content: content.trim()
+      })
+    });
+  }
 }
 
 /**
