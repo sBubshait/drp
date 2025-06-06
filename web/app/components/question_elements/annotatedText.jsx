@@ -1,4 +1,4 @@
-import {useState, useRef, useEffect, useCallback, act} from "react";
+import { useState, useRef, useEffect, useCallback, act } from "react";
 import ApiService from '../../services/api.js'
 
 export default function AnnotatedText({ text, annotations }) {
@@ -15,6 +15,7 @@ export default function AnnotatedText({ text, annotations }) {
 
   const handleAnnotationClick = (id) => {
     setTimeout(() => {
+      ApiService.upvoteAnnotation(id);
       const ref = annotationRefs.current[id];
       if (ref) {
         ref.scrollIntoView({ behavior: activeId ? "smooth" : "auto", inline: "center" });
@@ -49,12 +50,11 @@ export default function AnnotatedText({ text, annotations }) {
         parts.push(<span key={`plain-${i}`}>{text.slice(lastIndex, startPos)}</span>);
       }
 
-     parts.push(
+      parts.push(
         <span
           key={`ann-${i}`}
-          className={`annotation bg-yellow-300 cursor-pointer px-1 rounded-sm ${
-            activeId === id ? "ring-2 ring-blue-500" : ""
-          }`}
+          className={`annotation bg-yellow-300 cursor-pointer px-1 rounded-sm ${activeId === id ? "ring-2 ring-blue-500" : ""
+            }`}
           onClick={() => handleAnnotationClick(id)}
         >
           {text.slice(startPos, endPos)}
@@ -67,7 +67,6 @@ export default function AnnotatedText({ text, annotations }) {
     parts.push(<span key="end">{text.slice(lastIndex)}</span>);
     return parts;
   };
-
   return (
     <div>
       <div className="flex">
@@ -79,31 +78,41 @@ export default function AnnotatedText({ text, annotations }) {
       <div className="relative overflow-x-hidden gap-6">
         <div id="annotationSidebar" className="overflow-x-scroll gap-4 p-3 bg-gray-100 rounded"
 
-             style={{
-                scrollbarWidth: "none",
-                transition: "all 0ms",
-                transform: activeId ? "translateY(-350px)" : ""
-             }}
+          style={{
+            scrollbarWidth: "none",
+            transition: "all 270ms",
+            transform: activeId ? "translateY(-350px)" : ""
+          }}
         >
           <div className="flex gap-6">
-          {annotations.map((ann) => (
-            <div
-              key={ann.id}
-              ref={(el) => (annotationRefs.current[ann.id] = el)}
-              className={`min-w-[250px] p-3 rounded shadow-sm cursor-pointer transition-all duration-200 ${
-                activeId === ann.id
+            {annotations.map((ann, i) => (
+              <div
+                key={ann.id}
+                ref={(el) => (annotationRefs.current[ann.id] = el)}
+                className={`min-w-[250px] p-3 rounded shadow-sm cursor-pointer transition-all duration-200 ${activeId === ann.id
                   ? "bg-blue-100 border border-blue-500"
-                  : "hidden bg-white border border-transparent"
-              }`}
-              onClick={() => setActiveId(ann.id)}
-            >
-              <p>
-                <span className="text-sm text-black-600 font-medium mb-1"> <b> {ann.authorName} </b> </span>
-                <span className="text-sm text-gray-600 font-medium mb-1"> {ann.authorCredentials} </span>
-              </p>
-              <p className="text-gray-800 text-sm">{ann.content}</p>
-            </div>
-          ))}
+                  : "bg-white border border-transparent"
+                  }`}
+                onClick={() => setActiveId(ann.id)}
+              >
+                <p className="text-sm text-gray-600 font-bold mb-1">
+                  {ann.authorName}
+                </p>
+                <p className="text-gray-600 text-sm mb-3">{ann.authorCredentials}</p>
+                <p className="text-gray-800 text-sm">{ann.content}</p>
+                <div
+                  onClick={(e) => {
+                    localUpvotes[i] = true; setLocalUpvotes(localUpvotes); ApiService.upvoteAnnotation(ann.id)
+                  }}
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 transition-colors cursor-pointer mt-2"
+                >
+                  <button className="text-xl" style={{ padding: '8px 12px', cursor: 'pointer' }}>
+                    👍
+                  </button>
+                  <span className="text-sm font-bold text-gray-600"> {localUpvotes[i] ? ann.upvotes + 1 : ann.upvotes} </span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
