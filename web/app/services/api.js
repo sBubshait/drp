@@ -111,7 +111,7 @@ class ApiService {
     return data;
   }
 
-  static async editDiscussionResponse(responseId, content) {
+  static async editDiscussionResponse(id, responseId, content) {
     return this.request('/discussions/editResponse', {
       method: 'POST',
       headers: {

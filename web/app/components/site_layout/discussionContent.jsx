@@ -95,6 +95,7 @@ export default function DiscussionContent({ content }) {
     try {
       await ApiService.editDiscussionResponse(id, userResponseId, userInput);
       await fetchResponses();
+      setHasSubmitted(true);
     } catch (error) {
       console.error('Error editing response:', error);
       alert('There was an error updating your response. Please try again.');
