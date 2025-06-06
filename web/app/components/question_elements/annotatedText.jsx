@@ -81,7 +81,7 @@ export default function AnnotatedText({ text, annotations }) {
 
              style={{
                 scrollbarWidth: "none",
-                transition: "all 270ms",
+                transition: "all 0ms",
                 transform: activeId ? "translateY(-350px)" : ""
              }}
         >
