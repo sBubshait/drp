@@ -104,4 +104,31 @@ public class DiscussionController {
           .body(new IdStatusResponse(500, "Error adding response: " + e.getMessage()));
     }
   }
+
+  @Tag(name = "Discussions")
+  @PostMapping("/editResponse")
+  public ResponseEntity<StatusResponse> editDiscussionResponse(
+      @Parameter(description = "ID of the response to edit", required = true, example = "1")
+      @RequestParam Long responseId,
+
+      @Parameter(description = "Updated response text", required = true)
+      @RequestParam String content) {
+
+    try {
+      if (content == null || content.trim().isEmpty()) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(new StatusResponse(400, "Response content cannot be empty"));
+      }
+
+      discussionService.editResponse(responseId, content.trim());
+
+      return ResponseEntity.ok(new StatusResponse(200, "Response updated successfully"));
+    } catch (RuntimeException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(new StatusResponse(400, e.getMessage()));
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(new StatusResponse(500, "Error updating response: " + e.getMessage()));
+    }
+  }
 }
