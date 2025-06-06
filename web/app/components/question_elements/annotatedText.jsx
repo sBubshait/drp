@@ -1,7 +1,9 @@
 import {useState, useRef, useEffect, useCallback, act} from "react";
+import ApiService from '../../services/api.js'
 
 export default function AnnotatedText({ text, annotations }) {
   const [activeId, setActiveId] = useState(null);
+  const [localUpvotes, setLocalUpvotes] = useState(annotations.map((ann) => false))
   const annotationRefs = useRef({});
 
   const handleClick = useCallback(event => {
@@ -13,6 +15,7 @@ export default function AnnotatedText({ text, annotations }) {
 
   const handleAnnotationClick = (id) => {
     setTimeout(() => {
+      ApiService.upvoteAnnotation(id);
       const ref = annotationRefs.current[id];
       if (ref) {
         ref.scrollIntoView({ behavior: activeId ? "smooth" : "auto", inline: "center" });
@@ -41,10 +44,10 @@ export default function AnnotatedText({ text, annotations }) {
     let lastIndex = 0;
 
     annotations.forEach((ann, i) => {
-      const { start, end, id } = ann;
+      const { startPos, endPos, id } = ann;
 
-      if (start > lastIndex) {
-        parts.push(<span key={`plain-${i}`}>{text.slice(lastIndex, start)}</span>);
+      if (startPos > lastIndex) {
+        parts.push(<span key={`plain-${i}`}>{text.slice(lastIndex, startPos)}</span>);
       }
 
      parts.push(
@@ -55,11 +58,11 @@ export default function AnnotatedText({ text, annotations }) {
           }`}
           onClick={() => handleAnnotationClick(id)}
         >
-          {text.slice(start, end)}
+          {text.slice(startPos, endPos)}
         </span>
       );
 
-      lastIndex = end;
+      lastIndex = endPos;
     });
 
     parts.push(<span key="end">{text.slice(lastIndex)}</span>);
@@ -84,7 +87,7 @@ export default function AnnotatedText({ text, annotations }) {
              }}
         >
           <div className="flex gap-6">
-          {annotations.map((ann) => (
+          {annotations.map((ann, i) => (
             <div
               key={ann.id}
               ref={(el) => (annotationRefs.current[ann.id] = el)}
@@ -99,6 +102,10 @@ export default function AnnotatedText({ text, annotations }) {
                 {ann.authorName}
               </p>
               <p className="text-gray-800 text-sm">{ann.content}</p>
+              <button onClick={() => {localUpvotes[i] = true; setLocalUpvotes(localUpvotes); ApiService.upvoteAnnotation(ann.id)}} className="text-xl" style={{ padding: '8px 12px', cursor: 'pointer' }}>
+                👍
+              </button>
+              <span> {localUpvotes[i] ? ann.upvotes + 1 : ann.upvotes} </span>
             </div>
           ))}
           </div>

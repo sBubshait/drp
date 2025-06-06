@@ -83,6 +83,18 @@ class ApiService {
     });
   }
 
+  static async upvoteAnnotation(annotationId) {
+    return this.request('/info/upvote', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        annotationId: annotationId.toString()
+      })
+    });
+  }
+
   /**
    * Get discussion responses
    * @param {number} discussionId - Discussion ID
