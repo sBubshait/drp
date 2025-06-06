@@ -30,6 +30,9 @@ public class Annotation {
   @Column(name = "startPos", nullable = false)
   private Integer startPos;
 
+  @Column(name = "upvotes", nullable = false)
+  private Integer upvotes = 0;
+
   public Annotation() {
     this.createdAt = LocalDateTime.now();
   }
@@ -41,7 +44,7 @@ public class Annotation {
     this.content = content;
     this.authorName = authorName;
     this.authorCredentials = authorCredentials;
-    this.startPos = start;
+    this.startPos = startPos;
     this.endPos = endPos;
   }
   @Column(name = "endPos", nullable = false)
@@ -99,8 +102,8 @@ public class Annotation {
     return startPos;
   }
 
-  public void setStartPos(Integer start) {
-    this.startPos = start;
+  public void setStartPos(Integer startPos) {
+    this.startPos = startPos;
   }
 
   public Integer getEndPos() {
@@ -109,5 +112,13 @@ public class Annotation {
 
   public void setEndPos(Integer endPos) {
     this.endPos = endPos;
+  }
+
+  public void setUpvotes(Integer upvotes) {
+    this.upvotes = upvotes;
+  }
+
+  public Integer getUpvotes() {
+    return upvotes;
   }
 }
