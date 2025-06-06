@@ -79,7 +79,7 @@ public class ArticleService {
     );
   }
 
-  private SegmentContent getSegmentContent(Segment segment) {
+  public SegmentContent getSegmentContent(Segment segment) {
     switch (segment.getType()) {
       case "question":
         Question question = questionRepository.findById(segment.getId()).orElse(null);
