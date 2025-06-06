@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router';
 import ContextBox from "../question_elements/contextBox.jsx";
 import PinkContainer from "../discussions/PinkContainer.jsx";
 import WriteSection from "../discussions/WriteSection.jsx";
@@ -11,6 +12,8 @@ export default function DiscussionContent({ content }) {
   const [responses, setResponses] = useState([]);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isLoadingResponses, setIsLoadingResponses] = useState(false);
+  const [userResponseId, setUserResponseId] = useState(null);
+  const navigate = useNavigate();
 
   if (!content) {
     return (
@@ -22,11 +25,32 @@ export default function DiscussionContent({ content }) {
 
   const { id, context, prompt, totalResponses } = content;
 
-  const fetchResponses = async () => {
+  // Check localStorage on component mount
+  useEffect(() => {
+    if (id) {
+      const savedResponseId = localStorage.getItem(`discussion_${id}_responseId`);
+      if (savedResponseId) {
+        setHasSubmitted(true);
+        setUserResponseId(savedResponseId);
+        fetchResponses(savedResponseId);
+      }
+    }
+  }, [id]);
+
+  const fetchResponses = async (savedResponseId = userResponseId) => {
     setIsLoadingResponses(true);
     try {
       const data = await ApiService.getDiscussionResponses(id);
-      setResponses(data.responses || []);
+      setResponses(data.responses);
+
+      // Find and set user's response if it exists
+      if (savedResponseId) {
+        const userResponse = data.responses.find(response => response.id == savedResponseId);
+        console.log('User response:', userResponse);
+        if (userResponse) {
+          setUserInput(userResponse.content);
+        }
+      }
     } catch (error) {
       console.error('Error fetching discussion responses:', error);
     } finally {
@@ -35,7 +59,7 @@ export default function DiscussionContent({ content }) {
   };
 
   const handleSubmit = async () => {
-    if (userInput.trim().length === 0) {
+    if (userInput.trim().length == 0) {
       alert('Please share your thoughts before unlocking the discussion!');
       return;
     }
@@ -43,8 +67,14 @@ export default function DiscussionContent({ content }) {
     setIsSubmitting(true);
 
     try {
-      await ApiService.submitDiscussionResponse(id, userInput);
+      const response = await ApiService.submitDiscussionResponse(id, userInput);
+      const responseId = response.id || response.responseId; // Adjust based on your API response structure
+
+      // Save to localStorage
+      localStorage.setItem(`discussion_${id}_responseId`, responseId);
+
       setHasSubmitted(true);
+      setUserResponseId(responseId);
       await fetchResponses();
     } catch (error) {
       console.error('Error submitting response:', error);
@@ -52,6 +82,34 @@ export default function DiscussionContent({ content }) {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleEditResponse = async () => {
+    if (userInput.trim().length == 0) {
+      alert('Please share your thoughts before updating!');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      await ApiService.editDiscussionResponse(id, userResponseId, userInput);
+      await fetchResponses();
+    } catch (error) {
+      console.error('Error editing response:', error);
+      alert('There was an error updating your response. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleBackToEdit = () => {
+    setHasSubmitted(false);
+    console.log(hasSubmitted)
+  };
+
+  const handleBackToArticle = () => {
+    navigate('/article');
   };
 
   const avatarLetters = ['A', 'M', 'S', 'J', 'R'];
@@ -63,8 +121,11 @@ export default function DiscussionContent({ content }) {
     'bg-amber-500'
   ];
 
+  // Check if user has not yet submitted AND there is no existing response
+  const showWriteSection = !hasSubmitted && !userResponseId;
+
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col relative">
       {/* Context section - fixed height */}
       <div className="flex-shrink-0 p-3">
         <div className="max-h-32 overflow-y-auto">
@@ -79,7 +140,7 @@ export default function DiscussionContent({ content }) {
 
       {/* Main content area - takes remaining space */}
       <div className="flex-1 flex flex-col min-h-0 px-3 pb-3">
-        {!hasSubmitted ? (
+        {showWriteSection ? (
           <div className="h-full flex flex-col space-y-4">
             {/* Write section - takes all available space */}
             <div className="flex-1 min-h-0">
@@ -88,6 +149,7 @@ export default function DiscussionContent({ content }) {
                 setUserInput={setUserInput}
                 handleSubmit={handleSubmit}
                 isSubmitting={isSubmitting}
+                isEditing={false}
               />
             </div>
 
@@ -102,10 +164,42 @@ export default function DiscussionContent({ content }) {
               <LockedDiscussionSection />
             </div>
           </div>
+        ) : !hasSubmitted && userResponseId ? (
+          // Edit mode - user is editing their existing response
+          <div className="h-full flex flex-col space-y-4">
+            <div className="flex-1 min-h-0">
+              <WriteSection
+                userInput={userInput}
+                setUserInput={setUserInput}
+                handleSubmit={handleEditResponse}
+                isSubmitting={isSubmitting}
+                isEditing={true}
+              />
+            </div>
+
+            <div className="flex-shrink-0">
+              <button
+                onClick={() => setHasSubmitted(true)}
+                className="w-full text-cyan-600 hover:text-cyan-700 text-sm font-medium py-2 rounded-md hover:bg-cyan-50 transition-colors"
+              >
+                ← Back to Discussion
+              </button>
+            </div>
+          </div>
         ) : (
+          // Discussion view - showing all responses
           <div className="h-full flex flex-col">
-            <div className="flex-shrink-0 text-lg font-semibold text-gray-700 mb-3 text-center">
-              {responses.length + 1} Response{responses.length !== 0 ? 's' : ''}
+            <div className="flex-shrink-0 flex items-center justify-between mb-3">
+              <div className="w-24"></div> {/* Spacer for balance */}
+              <div className="text-lg font-semibold text-gray-700 text-center">
+                {responses.length + 1} Response{responses.length !== 0 ? 's' : ''}
+              </div>
+              <button
+                onClick={handleBackToEdit}
+                className="text-cyan-600 hover:text-cyan-700 text-sm font-medium px-3 py-1 rounded-md hover:bg-cyan-50 transition-colors whitespace-nowrap"
+              >
+                Edit Response
+              </button>
             </div>
 
             {isLoadingResponses ? (
@@ -113,28 +207,52 @@ export default function DiscussionContent({ content }) {
                 <div className="text-gray-500 text-sm">Loading responses...</div>
               </div>
             ) : (
-              <div className="h-150 overflow-y-auto no-scrollbar border border-gray-200 rounded-lg">
+              <div className="h-150 flex-1 overflow-y-auto no-scrollbar  border border-gray-200 rounded-lg">
                 <div className="h-full space-y-3 p-3" id="responseContainer">
-                  {userInput && (
-                    <ResponseContainer
-                      active={true}
-                      content={userInput}
-                      user="You"
-                    />
-                  )}
-                  {responses.map((response, index) => (
-                    <ResponseContainer
-                      key={response.id || index}
-                      content={response.content}
-                      user={response.author || `User ${index + 1}`}
-                    />
-                  ))}
+                  {responses
+                    .sort((a, b) => {
+                      // Put user's response first, then others
+                      if (a.id == userResponseId) return -1;
+                      if (b.id == userResponseId) return 1;
+                      return 0;
+                    })
+                    .map((response, index) => (
+                      <ResponseContainer
+                        key={response.id || index}
+                        active={response.id == userResponseId}
+                        content={response.content}
+                        user={response.id == userResponseId ? "You" : (response.author || `User ${index + 1}`)}
+                      />
+                    ))}
                 </div>
               </div>
             )}
           </div>
         )}
       </div>
+
+      {/* Floating back button - only show when submitted */}
+      {hasSubmitted && (
+        <button
+          onClick={handleBackToArticle}
+          className="fixed bottom-6 right-6 bg-cyan-600 hover:bg-cyan-700 text-white p-3 rounded-full shadow-lg transition-colors z-50"
+          aria-label="Back to article"
+        >
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
+          </svg>
+        </button>
+      )}
     </div>
   );
 }

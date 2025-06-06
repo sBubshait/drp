@@ -1,4 +1,4 @@
-export default function WriteSection({ userInput, setUserInput, handleSubmit }) {
+export default function WriteSection({ userInput, setUserInput, handleSubmit, isEditing }) {
     return (
         <div className="bg-white rounded-xl p-5 mb-2 flex-1 flex flex-col h-full">
             <textarea
@@ -11,7 +11,7 @@ export default function WriteSection({ userInput, setUserInput, handleSubmit }) 
                 onClick={handleSubmit}
                 className="w-full bg-cyan-600 hover:bg-cyan-700 active:bg-cyan-800 text-white py-4 rounded-lg text-base font-medium mt-4 transition-colors"
             >
-                Share
+                {isEditing ? 'Edit' : 'Share'}
             </button>
         </div>
     )
