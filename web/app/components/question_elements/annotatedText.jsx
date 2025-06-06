@@ -15,7 +15,6 @@ export default function AnnotatedText({ text, annotations }) {
 
   const handleAnnotationClick = (id) => {
     setTimeout(() => {
-      ApiService.upvoteAnnotation(id);
       const ref = annotationRefs.current[id];
       if (ref) {
         ref.scrollIntoView({ behavior: activeId ? "smooth" : "auto", inline: "center" });
@@ -87,14 +86,14 @@ export default function AnnotatedText({ text, annotations }) {
              }}
         >
           <div className="flex gap-6">
-          {annotations.map((ann, i) => (
+          {annotations.map((ann) => (
             <div
               key={ann.id}
               ref={(el) => (annotationRefs.current[ann.id] = el)}
               className={`min-w-[250px] p-3 rounded shadow-sm cursor-pointer transition-all duration-200 ${
                 activeId === ann.id
                   ? "bg-blue-100 border border-blue-500"
-                  : "bg-white border border-transparent"
+                  : "hidden bg-white border border-transparent"
               }`}
               onClick={() => setActiveId(ann.id)}
             >
@@ -102,10 +101,6 @@ export default function AnnotatedText({ text, annotations }) {
                 {ann.authorName}
               </p>
               <p className="text-gray-800 text-sm">{ann.content}</p>
-              <button onClick={() => {localUpvotes[i] = true; setLocalUpvotes(localUpvotes); ApiService.upvoteAnnotation(ann.id)}} className="text-xl" style={{ padding: '8px 12px', cursor: 'pointer' }}>
-                👍
-              </button>
-              <span> {localUpvotes[i] ? ann.upvotes + 1 : ann.upvotes} </span>
             </div>
           ))}
           </div>
