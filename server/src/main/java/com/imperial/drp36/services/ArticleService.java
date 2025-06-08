@@ -6,8 +6,10 @@ import com.imperial.drp36.entity.Question;
 import com.imperial.drp36.entity.Info;
 import com.imperial.drp36.entity.Segment;
 import com.imperial.drp36.entity.Poll;
+import com.imperial.drp36.entity.GapFill;
 import com.imperial.drp36.model.ArticleContent;
 import com.imperial.drp36.model.DiscussionContent;
+import com.imperial.drp36.model.GapFillContent;
 import com.imperial.drp36.model.PollContent;
 import com.imperial.drp36.model.QuestionContent;
 import com.imperial.drp36.model.InfoContent;
@@ -23,7 +25,6 @@ import org.springframework.data.domain.*;
 @Service
 @Transactional
 public class ArticleService {
-
   @Autowired
   private ArticleRepository articleRepository;
 
@@ -44,6 +45,9 @@ public class ArticleService {
 
   @Autowired
   private AnnotationRepository annotationRepository;
+
+  @Autowired
+  private GapFillRepository gapFillRepository;
 
   public Article getArticleById(Long id) {
     return articleRepository.findById(id).orElse(null);
@@ -134,6 +138,20 @@ public class ArticleService {
           );
         }
         break;
+
+      case "gap_fill":
+        GapFill gapFill = gapFillRepository.findById(segment.getId()).orElse(null);
+        if (gapFill != null) {
+          return new GapFillContent(
+              gapFill.getId(),
+              gapFill.getTitle(),
+              gapFill.getContext(),
+              gapFill.getOptions(),
+              gapFill.getCorrectOptions(),
+              gapFill.getGapCount(),
+              gapFill.getFeedback()
+          );
+        }
     }
     return null;
   }
