@@ -98,21 +98,21 @@ export default function AnnotatedText({ text, annotations: fetchedAnnotations, s
             transform: activeId ? "translateY(-350px)" : ""
           }}
         >
-          <div className="flex gap-6">
+          <div className="flex items-center gap-6">
             {annotations.map((ann, i) => (
               <div
                 key={ann.id}
                 ref={(el) => (annotationRefs.current[ann.id] = el)}
-                className={`min-w-[250px] p-3 rounded shadow-sm cursor-pointer transition-all duration-200 ${activeId === ann.id
+                className={`min-w-[250px] h-[100%] p-3 rounded shadow-sm cursor-pointer transition-all duration-200 ${activeId === ann.id
                   ? "bg-blue-100 border border-blue-500"
                   : "bg-white border border-transparent"
                   }`}
                 onClick={() => setActiveId(ann.id)}
               >
-                <p className="text-sm text-gray-600 font-bold mb-1">
-                  {ann.authorName}
-                </p>
-                <p className="text-gray-600 text-sm mb-3">{ann.authorCredentials}</p>
+                <span className="text-sm text-gray-600 font-bold mb-1">
+                  {ann.authorName + " "}
+                </span>
+                <span className="text-gray-600 text-sm mb-3">{ann.authorCredentials}</span>
                 <p className="text-gray-800 text-sm">{ann.content}</p>
                 <div
                   onClick={(e) => {
@@ -120,7 +120,7 @@ export default function AnnotatedText({ text, annotations: fetchedAnnotations, s
                   }}
                   className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100 transition-colors cursor-pointer mt-2"
                 >
-                  <button className="text-xl" style={{ padding: '8px 12px', cursor: 'pointer' }}>
+                  <button className="text-xl" style={{ cursor: 'pointer' }}>
                     👍
                   </button>
                   <span className="text-sm font-bold text-gray-600"> {localUpvotes[i] ? ann.upvotes : ann.upvotes} </span>
