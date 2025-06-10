@@ -41,16 +41,18 @@ export default function AnnotatedText({ text, annotations: fetchedAnnotations, s
   }, [handleClick])
 
   useEffect(() => {
-    fetch(API_URL + `/getSegment?segmentId=${segmentId}`)
-      .then(response => response.json())
-      .then(data => {
-        console.log(data);
-        // Handle the fetched data  
-        // Set the annotations state with the fetched data
-        if (data.status === 200) {
-          setAnnotations(data.segment.annotations || []);
-        }
-      });
+    const fetchSegment = async () => {
+      try {
+        const data = await ApiService.getSegment(segmentId);
+        setAnnotations(data.segment.annotations || []);
+      } catch (error) {
+        console.error('Failed to fetch segment:', error);
+      }
+    };
+
+    if (segmentId) {
+      fetchSegment();
+    }
   }, [activeId]);
 
   const renderText = () => {

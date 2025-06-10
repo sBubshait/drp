@@ -111,6 +111,22 @@ class ApiService {
     return data;
   }
 
+  /**
+   * Get segment by ID
+   * @param {number} segmentId - Segment ID
+   * @returns {Promise<object>} - Segment data
+   */
+  static async getSegment(segmentId) {
+    const endpoint = `/getSegment?segmentId=${segmentId}`;
+    const data = await this.request(endpoint);
+    
+    if (data.status !== 200) {
+      throw new Error(`Failed to fetch segment: ${data.status}`);
+    }
+    
+    return data;
+  }
+
   static async editDiscussionResponse(id, responseId, content) {
     return this.request('/discussions/editResponse', {
       method: 'POST',
