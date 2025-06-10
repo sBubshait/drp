@@ -44,4 +44,19 @@ public class UserController {
           );
     }
   }
+
+  @Tag(name = "Get user data")
+  @GetMapping("/")
+  public ResponseEntity<User> getUser(@RequestParam Long id) {
+    try {
+      Optional<User> user = userRepository.findById(id);
+      if (user.isPresent()) {
+        return ResponseEntity.ok(user.get());
+      } else {
+        return ResponseEntity.notFound().build();
+      }
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+  }
 }
