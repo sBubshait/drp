@@ -2,10 +2,18 @@ import ApiService from "./api";
 
 // On first visit to a site, generate a unique user ID and add ent
 export async function initUid() {
-  if (!getCookie("uid")) {
-    const uid = await generateUid();
-    setCookie("uid", uid.id);
+  let uid = getCookie("uid");
+  if (!uid) {
+    uid = (await generateUid()).id;
+    setCookie("uid", uid);
   }
+
+  return uid
+}
+
+// Retrieve public user data
+export function getUserData(uid) {
+  return ApiService.request(`/user/?uid=${uid}`);
 }
 
 // Generate unique user id
