@@ -33,7 +33,8 @@ public class MetricsService {
   @Autowired
   private SegmentRepository segmentRepository;
 
-  private ArticleService articleService = new ArticleService();
+  @Autowired
+  private ArticleService articleService;
 
   public User createUser() {
     User user = new User();
@@ -77,7 +78,7 @@ public class MetricsService {
   public MetricsResponse getEngagementMetrics() {
     List<User> users = userRepository.findAll();
     if (users.isEmpty()) {
-      return new MetricsResponse(200, 0.0);
+      return new MetricsResponse(404, -1.0, "No users found");
     }
 
     double totalEDI = 0.0;
@@ -107,8 +108,11 @@ public class MetricsService {
         }
       }
     }
+    if (usersWithData == 0) {
+      return new MetricsResponse(200, -1.0, "No engagement data available");
+    }
 
-    Double averageEDI = usersWithData > 0 ? totalEDI / usersWithData : -1.0;
+    Double averageEDI = totalEDI / usersWithData;
     return new MetricsResponse(200, averageEDI);
   }
 }
