@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback, act } from "react";
 import ApiService from '../../services/api.js'
 import { API_URL } from "../../config.js";
+import { interactWithSegment } from "../../services/other.js";
 
 export default function AnnotatedText({ text, annotations: fetchedAnnotations, segmentId }) {
   const [activeId, setActiveId] = useState(null);
@@ -16,6 +17,8 @@ export default function AnnotatedText({ text, annotations: fetchedAnnotations, s
   }, [])
 
   const handleAnnotationClick = (id) => {
+    interactWithSegment(segmentId);
+
     setTimeout(() => {
       const ref = annotationRefs.current[id];
       if (ref) {

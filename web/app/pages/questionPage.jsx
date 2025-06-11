@@ -6,6 +6,7 @@ import QuestionContent from "../components/site_layout/questionContent.jsx";
 import PollContent from "../components/site_layout/pollContent.jsx";
 import InfoContent from '../components/site_layout/infoContent.jsx';
 import DiscussionContent from "../components/site_layout/discussionContent.jsx";
+import GapfillContent from '../components/site_layout/gapFillContent.jsx';
 import ApiService from '../services/api.js';
 import StreakMeter from '../components/streak/streakMeter.jsx';
 import Flame from '../components/streak/flame.jsx'
@@ -15,7 +16,8 @@ const CONTENT_COMPONENTS = {
   question: QuestionContent,
   poll: PollContent,
   discussion: DiscussionContent,
-  info: InfoContent
+  info: InfoContent,
+  gap_fill: GapfillContent
 };
 
 export function QuestionPage() {

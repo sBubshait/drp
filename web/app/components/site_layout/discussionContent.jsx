@@ -5,6 +5,7 @@ import PinkContainer from "../discussions/PinkContainer.jsx";
 import WriteSection from "../discussions/WriteSection.jsx";
 import ResponseContainer from "../discussions/ResponseContainer.jsx";
 import ApiService from '../../services/api.js';
+import { interactWithSegment } from "../../services/other.js";
 
 export default function DiscussionContent({ content }) {
   const [userInput, setUserInput] = useState('');
@@ -23,6 +24,7 @@ export default function DiscussionContent({ content }) {
     );
   }
 
+  const segmentId = content.id;
   const { id, context, prompt, totalResponses } = content;
 
   // Check localStorage on component mount
@@ -63,6 +65,9 @@ export default function DiscussionContent({ content }) {
       alert('Please share your thoughts before unlocking the discussion!');
       return;
     }
+
+    interactWithSegment(segmentId);
+
 
     setIsSubmitting(true);
 

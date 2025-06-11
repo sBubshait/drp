@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import { useNavigate, useParams } from 'react-router';
-import QuestionHeader from "../components/question_elements/questionHeader.jsx";
 import VerticalVideoPlayer from "../components/site_layout/videoPlayer.jsx";
 import ArticlePreview from '../components/site_layout/articlePreview.jsx';
 import ApiService from '../services/api.js';
 import { initUid, getUserData } from '../services/userApi.js';
 import StreakBeginTip from '../components/streak/streakBeginTip.jsx';'../components/streak/streakBeginTip.jsx'
+import { swipeRight } from '../services/other.js';
 
 export function ArticlePage() {
   const navigate = useNavigate();
@@ -18,10 +18,6 @@ export function ArticlePage() {
   const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
-    initUid().then ((uid) => {
-      checkStreak(uid);
-    });
-
     initTip();
   }, []);
 
@@ -104,6 +100,8 @@ export function ArticlePage() {
     const questionUrl = articleId
       ? `/articles/${articleId}/questions`
       : `/articles/${fetchedArticle.article.id}/questions`;
+
+    swipeRight(articleId);
 
     navigate(questionUrl, {
       state: {
@@ -192,9 +190,8 @@ export function ArticlePage() {
 
       {/* Main Content Area */}
       <div
-        className={`flex-1 flex flex-col justify-center items-center relative transition-all duration-300 ease-out ${
-          isAnimating ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'
-        }`}
+        className={`flex-1 flex flex-col justify-center items-center relative transition-all duration-300 ease-out ${isAnimating ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'
+          }`}
       >
         {isVideoArticle ? (
           /* Video Article Layout - Full Screen */
