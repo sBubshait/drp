@@ -20,6 +20,8 @@ export default function GapfillContent({ content }) {
   const [hasSubmitted, setSubmitted] = useState(false);
   const [feedbackTitle, setFeedbackTitle] = useState("");
   const [feedbackBody, setFeedbackBody] = useState("");
+  const [isIncorrectFlash, setIsIncorrectFlash] = useState(false);
+
 
   // Reset state when a new question is loaded (content id changes)
   useEffect(() => {
@@ -27,6 +29,7 @@ export default function GapfillContent({ content }) {
   setSubmitted(false);
   setFeedbackTitle("");
   setFeedbackBody("");
+  setIsIncorrectFlash(false);
   }, [id]);
 
 
@@ -52,11 +55,14 @@ export default function GapfillContent({ content }) {
       if (filledGaps.every((word, idx) => word === correctOptions[idx])) {
         setFeedbackTitle("Correct!");
         setFeedbackBody(feedback);
+        setSubmitted(true);
       } else {
-        setFeedbackTitle("Not quite...");
-        setFeedbackBody("reread the article/video and have another go!");
+        setIsIncorrectFlash(true);
+        setTimeout(() => {
+          setFilledGaps([]);
+          setIsIncorrectFlash(false);
+        }, 1000);
       }
-      setSubmitted(true);
     }
   };
 
@@ -66,7 +72,16 @@ export default function GapfillContent({ content }) {
       <span key={idx}>
         {part}
         {idx < gapCount && (
-          <span className="inline-block min-w-[3rem] mx-1 border-b-2 text-center text-teal-400 font-bold">
+          <span
+            className={clsx(
+              "inline-block min-w-[3rem] mx-1 border-b-2 text-center font-bold transition-colors duration-300",
+              filledGaps[idx]
+                ? isIncorrectFlash
+                  ? "border-red-500 text-red-500"
+                  : "text-teal-400 border-teal-400"
+                : "border-gray-300 text-gray-400"
+            )}
+          >
             {filledGaps[idx] || ""}
           </span>
         )}
@@ -116,7 +131,7 @@ export default function GapfillContent({ content }) {
         ))}
       </div>
       
-      {hasSubmitted && <FeedbackBox title={feedbackTitle} body={feedbackBody} />}
+      {hasSubmitted && <FeedbackBox title={feedbackTitle} body={feedbackBody}/>}
    
     </div>
   );
