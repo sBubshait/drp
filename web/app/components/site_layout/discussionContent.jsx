@@ -5,6 +5,7 @@ import PinkContainer from "../discussions/PinkContainer.jsx";
 import WriteSection from "../discussions/WriteSection.jsx";
 import ResponseContainer from "../discussions/ResponseContainer.jsx";
 import ApiService from '../../services/api.js';
+import { interactWithSegment } from "../../services/other.js";
 
 export default function DiscussionContent({ content }) {
   const [userInput, setUserInput] = useState('');
