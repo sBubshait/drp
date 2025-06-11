@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import GapfillButton from "../question_elements/gapFillButton";
 import ContextBox from "../question_elements/contextBox.jsx";
 import FeedbackBox from "../question_elements/feedbackBox.jsx";
 import clsx from "clsx";
 
 export default function GapfillContent({ content }) {
+
   const {
     id,
     title,
@@ -19,6 +20,15 @@ export default function GapfillContent({ content }) {
   const [hasSubmitted, setSubmitted] = useState(false);
   const [feedbackTitle, setFeedbackTitle] = useState("");
   const [feedbackBody, setFeedbackBody] = useState("");
+
+  // Reset state when a new question is loaded (content id changes)
+  useEffect(() => {
+  setFilledGaps([]);
+  setSubmitted(false);
+  setFeedbackTitle("");
+  setFeedbackBody("");
+  }, [id]);
+
 
   if (!content) {
     return (
