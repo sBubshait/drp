@@ -5,6 +5,7 @@ import QuestionHeader from "../components/question_elements/questionHeader.jsx";
 import VerticalVideoPlayer from "../components/site_layout/videoPlayer.jsx";
 import ArticlePreview from '../components/site_layout/articlePreview.jsx';
 import ApiService from '../services/api.js';
+import { initUid } from '../services/userApi.js';
 
 export function ArticlePage() {
   const navigate = useNavigate();
@@ -16,11 +17,16 @@ export function ArticlePage() {
   const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
+    initUid();
+    initTip();
+  }, []);
+
+  const initTip = () => {
     const tipDismissed = localStorage.getItem('tipDismissed');
     if (tipDismissed === 'true') {
       setShowTip(false);
     }
-  }, []);
+  }
 
   const handleCloseTip = () => {
     setShowTip(false);
