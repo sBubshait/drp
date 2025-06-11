@@ -3,7 +3,7 @@ import ContextBox from "../question_elements/contextBox.jsx";
 import MultipleChoiceQuestion from "../question_elements/multipleChoiceQuestion.jsx";
 import FeedbackBox from "../question_elements/feedbackBox.jsx";
 import ChoicesButtons from "../question_elements/choicesButtons.jsx";
-
+import { interactWithSegment } from "../../services/other.js";
 export default function QuestionContent({ content }) {
 
   const [hasAnswered, setHasAnswered] = useState(false);
@@ -16,9 +16,12 @@ export default function QuestionContent({ content }) {
     )
   }
 
+  const segmentId = content.id;
   const { title, options, context, hasAnswer, answer, correctAnswerFeedback, wrongAnswerFeedback, generalAnswer } = content;
 
   function handleOptionClick(index) {
+    interactWithSegment(segmentId);
+
     if (hasAnswer) {
       if (index === answer) {
         setFeedbackTitle("Correct!");
