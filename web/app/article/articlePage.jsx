@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router';
 import QuestionHeader from "../components/question_elements/questionHeader.jsx";
 import VerticalVideoPlayer from "../components/site_layout/videoPlayer.jsx";
 import ArticlePreview from '../components/site_layout/articlePreview.jsx';
+import NoMatchingArticles from '../components/site_layout/noMatchingArticles.jsx';
 import ApiService from '../services/api.js';
 import { calculateArticleCategories } from '../utils/categoryUtils.js';
 
@@ -17,6 +18,7 @@ export function ArticlePage() {
   const [isAnimating, setIsAnimating] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [showFilterMenu, setShowFilterMenu] = useState(false);
+  const [noMatchingArticles, setNoMatchingArticles] = useState(false);
 
   // Available filter options
   const filterOptions = ['All', 'Popular', 'Recent', 'Hot', 'Technology', 'Health', 'Politics', 'Science'];
@@ -44,18 +46,27 @@ export function ArticlePage() {
   };
 
   // Function to fetch article by ID from API using the service layer
-  const fetchArticle = async (id) => {
+  const fetchArticle = async (id, visitedIds = new Set()) => {
     setLoading(true);
     setError(null);
+    setNoMatchingArticles(false);
 
     try {
       const data = await ApiService.getArticle(id);
       
       // Check if the article matches the current filter
       if (!articleMatchesFilter(data.article)) {
+        // Add current article ID to visited set to prevent infinite loops
+        visitedIds.add(id);
+        
         // If it doesn't match, automatically navigate to the next article
-        if (data.next) {
-          navigate(`/articles/${data.next}`);
+        if (data.next && !visitedIds.has(data.next)) {
+          await fetchArticle(data.next, visitedIds);
+          return;
+        } else {
+          // No more articles to check and no matches found
+          setNoMatchingArticles(true);
+          setLoading(false);
           return;
         }
       }
@@ -124,6 +135,23 @@ export function ArticlePage() {
     });
   };
 
+  // Handle filter selection
+  const handleFilterSelect = (filter) => {
+    setSelectedFilter(filter);
+    setShowFilterMenu(false);
+    
+    // Reset to article 1 when filter changes (unless it's 'All')
+    if (filter !== 'All') {
+      navigate('/articles/1');
+    }
+  };
+
+  // Handle go to first article
+  const handleGoToFirstArticle = () => {
+    setSelectedFilter('All');
+    navigate('/articles/1');
+  };
+
   // Swipe handlers
   const handlers = useSwipeable({
     onSwipedLeft: goToQuestions,
@@ -136,7 +164,7 @@ export function ArticlePage() {
 
   // Fetch article when component mounts or articleId changes
   useEffect(() => {
-    fetchArticle(articleId);
+    fetchArticle(articleId || 1);
   }, [articleId, selectedFilter]);
 
   // Keyboard event handler
@@ -174,12 +202,26 @@ export function ArticlePage() {
         <p className="text-red-600 font-semibold">Error loading article</p>
         <p className="text-gray-500 text-sm mt-2">{error}</p>
         <button
-          onClick={() => fetchArticle(articleId)}
+          onClick={() => fetchArticle(articleId || 1)}
           className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
           Retry
         </button>
       </div>
+    );
+  }
+
+  // No matching articles found
+  if (noMatchingArticles) {
+    return (
+      <NoMatchingArticles
+        selectedFilter={selectedFilter}
+        filterOptions={filterOptions}
+        showFilterMenu={showFilterMenu}
+        setShowFilterMenu={setShowFilterMenu}
+        handleFilterSelect={handleFilterSelect}
+        onGoToFirstArticle={handleGoToFirstArticle}
+      />
     );
   }
 
@@ -197,6 +239,9 @@ export function ArticlePage() {
   const articleCategories = calculateArticleCategories(fetchedArticle.article);
 
   console.log('Fetched Article:', fetchedArticle);
+  console.log('Article Categories:', articleCategories);
+  console.log('Current Filter:', selectedFilter);
+
   return (
     <div {...handlers} className="w-full bg-gray-200 flex flex-col min-h-screen overflow-hidden relative">
       {/* Header with Filter */}
@@ -219,10 +264,7 @@ export function ArticlePage() {
                 {filterOptions.map((filter) => (
                   <button
                     key={filter}
-                    onClick={() => {
-                      setSelectedFilter(filter);
-                      setShowFilterMenu(false);
-                    }}
+                    onClick={() => handleFilterSelect(filter)}
                     className={`block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 ${
                       selectedFilter === filter ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700'
                     }`}
@@ -249,6 +291,7 @@ export function ArticlePage() {
             <div className="w-full h-full p-4">
               <VerticalVideoPlayer
                 videoUrl={fetchedArticle.article.content}
+                categories={articleCategories}
               />
             </div>
           </div>
@@ -271,6 +314,11 @@ export function ArticlePage() {
             <p className="text-blue-800 font-medium pr-6">
               💡 Tip: {fetchedArticle.article.segments.length} interactive segment{fetchedArticle.article.segments.length !== 1 ? 's' : ''} available for this article. Swipe left!
               Swipe up and down to move between articles!
+              {isVideoArticle && (
+                <span className="block mt-1 text-xs">
+                  Categories: {articleCategories.join(', ')}
+                </span>
+              )}
             </p>
           </div>
         </div>
