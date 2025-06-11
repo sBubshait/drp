@@ -10,7 +10,7 @@ export default function StreakBeginTip({className}) {
         </span>
       </div>
       <p className="text-xl text-center text-red-600 leading-tight">
-          Complete this article to earn bonus XP and start a streak
+          Complete this article to start a streak
       </p>
     </div>)
 }

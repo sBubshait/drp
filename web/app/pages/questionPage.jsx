@@ -7,6 +7,8 @@ import PollContent from "../components/site_layout/pollContent.jsx";
 import InfoContent from '../components/site_layout/infoContent.jsx';
 import DiscussionContent from "../components/site_layout/discussionContent.jsx";
 import ApiService from '../services/api.js';
+import StreakMeter from '../components/streak/streakMeter.jsx';
+import Flame from '../components/streak/flame.jsx'
 
 // Component map for different content types
 const CONTENT_COMPONENTS = {
@@ -21,6 +23,7 @@ export function QuestionPage() {
   const [segments, setSegments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [streakProgress, setStreakProgress] = useState(1);
   const navigate = useNavigate();
   const params = useParams();
   const location = useLocation();
@@ -207,6 +210,15 @@ export function QuestionPage() {
         totalQuestions={segments.length}
         taskType={capitalise(contentType)}
       />
+
+      <div className='text-center pt-[5%]'>
+        <Flame className="inline-block px-[7%] scale-50"/>
+        <StreakMeter className='inline-block max-w-78/100'
+                     height="h-7"
+                     barColor="bg-red-400"
+                     value={streakProgress / 4 * 100}
+        />
+      </div>
 
       <div className="flex-1 flex flex-col min-h-0 relative overflow-hidden">
         <div
