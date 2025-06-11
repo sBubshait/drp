@@ -4,7 +4,6 @@ import { useNavigate, useParams } from 'react-router';
 import VerticalVideoPlayer from "../components/site_layout/videoPlayer.jsx";
 import ArticlePreview from '../components/site_layout/articlePreview.jsx';
 import ApiService from '../services/api.js';
-import { getUserData } from '../services/userApi.js';
 import StreakBeginTip from '../components/streak/streakBeginTip.jsx';'../components/streak/streakBeginTip.jsx'
 import { swipeRight } from '../services/other.js';
 
@@ -20,10 +19,6 @@ export function ArticlePage() {
   useEffect(() => {
     initTip();
   }, []);
-
-  const checkStreak = (uid) => {
-    const userData = getUserData(uid);
-  }
 
   const initTip = () => {
     const tipDismissed = localStorage.getItem('tipDismissed');

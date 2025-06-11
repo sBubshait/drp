@@ -179,6 +179,15 @@ class ApiService {
       })
     });
   }
+
+
+  static async getUserData(userId) {
+    return this.request(`/users/get?id=${userId}`);
+  }
+
+  static async getUserInteractedSegments(userId, articleId) {
+    return this.request(`/metrics/getUserSegments?userId=${userId}&articleId=${articleId}`);
+  }
 }
 
 /**

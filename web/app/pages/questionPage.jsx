@@ -10,6 +10,8 @@ import GapfillContent from '../components/site_layout/gapFillContent.jsx';
 import ApiService from '../services/api.js';
 import StreakMeter from '../components/streak/streakMeter.jsx';
 import Flame from '../components/streak/flame.jsx'
+import { getInteractedSegments, interactWithSegment } from '../services/other.js';
+import PollResults from '../components/question_elements/pollResults.jsx';
 
 // Component map for different content types
 const CONTENT_COMPONENTS = {
@@ -25,13 +27,14 @@ export function QuestionPage() {
   const [segments, setSegments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [streakProgress, setStreakProgress] = useState(1);
   const navigate = useNavigate();
   const params = useParams();
   const location = useLocation();
 
   const articleId = params.id ? parseInt(params.id, 10) : null;
   const nextArticleId = location.state?.nextArticleId;
+
+  const [answeredSegments, setAnsweredSegments] = useState([]);
 
   function capitalise(s) {
     return s && String(s[0]).toUpperCase() + String(s).slice(1);
@@ -41,15 +44,27 @@ export function QuestionPage() {
   useEffect(() => {
     if (location.state?.segments) {
       setSegments(location.state.segments);
-      setLoading(false);
+      try {
+        getInteractedSegments(location.state?.articleId).then(
+          resp => {setAnsweredSegments(resp.segments); setLoading(false)}
+        )
+      } catch { setLoading(false) }
     } else if (articleId) {
       fetchArticleData(articleId);
+        try {
+            getInteractedSegments(articleId).then(
+            resp => { setAnsweredSegments(resp.segments); }
+          )
+        } catch {}
     } else {
       setLoading(false);
     }
 
     setCurrentIndex(0);
   }, [location.state, articleId]);
+
+  // Effect that runs when a streak is completed
+  
 
   // Fallback function to fetch article data using API service
   const fetchArticleData = async (id) => {
@@ -204,12 +219,18 @@ export function QuestionPage() {
   const currentSegment = segments[currentIndex];
   const contentType = currentSegment?.content?.type || currentSegment?.type;
   const ContentComponent = CONTENT_COMPONENTS[contentType];
+  const totalSegments = segments.length;
+
+  var progress;
+  for (progress = 0; progress < totalSegments; progress++) {
+    if (!answeredSegments.includes(segments[progress].id)) break;
+  }
 
   return (
     <div {...handlers} className="h-screen w-full bg-gray-200 flex flex-col overflow-hidden">
       <QuestionHeader
         questionNumber={currentIndex + 1}
-        totalQuestions={segments.length}
+        totalQuestions={totalSegments}
         taskType={capitalise(contentType)}
       />
 
@@ -218,7 +239,7 @@ export function QuestionPage() {
         <StreakMeter className='inline-block max-w-78/100'
                      height="h-7"
                      barColor="bg-red-400"
-                     value={streakProgress / 4 * 100}
+                     value={progress / totalSegments * 100}
         />
       </div>
 
@@ -228,7 +249,12 @@ export function QuestionPage() {
             }`}
         >
           {ContentComponent ? (
-            <ContentComponent content={currentSegment} />
+            <ContentComponent content={currentSegment} 
+                              interactCallback={(segmentId) => {
+                                interactWithSegment(segmentId);
+                                setAnsweredSegments(answeredSegments + segmentId);
+                              }}
+            />
           ) : (
             <div className="flex-1 flex items-center justify-center">
               <p className="text-red-600 text-sm">Unknown content type: {contentType}</p>

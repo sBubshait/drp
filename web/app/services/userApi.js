@@ -10,10 +10,6 @@ export async function getUserId() {
   return userId;
 }
 
-export function getUserData(userId) {
-  return ApiService.request(`/users/get?id=${userId}`);
-}
-
 // Helper Functions
 async function createUserId() {
   // request and return a new user ID

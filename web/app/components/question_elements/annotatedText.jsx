@@ -1,9 +1,7 @@
-import { useState, useRef, useEffect, useCallback, act } from "react";
+import { useState, useRef, useEffect, useCallback} from "react";
 import ApiService from '../../services/api.js'
-import { API_URL } from "../../config.js";
-import { interactWithSegment } from "../../services/other.js";
 
-export default function AnnotatedText({ text, annotations: fetchedAnnotations, segmentId }) {
+export default function AnnotatedText({ text, annotations: fetchedAnnotations, segmentId, interactCallback }) {
   const [activeId, setActiveId] = useState(null);
   const [annotations, setAnnotations] = useState(fetchedAnnotations);
   const [localUpvotes, setLocalUpvotes] = useState(annotations.map((ann) => false))
@@ -17,7 +15,7 @@ export default function AnnotatedText({ text, annotations: fetchedAnnotations, s
   }, [])
 
   const handleAnnotationClick = (id) => {
-    interactWithSegment(segmentId);
+    interactCallback(segmentId);
 
     setTimeout(() => {
       const ref = annotationRefs.current[id];

@@ -2,7 +2,7 @@ import {useState} from 'react';
 import AnnotatedText from "../question_elements/annotatedText"
 import ContextBox from '../question_elements/contextBox';
 
-export default function InfoContent({content}) {
+export default function InfoContent({content, interactCallback}) {
 
   if (!content) {
     return (
@@ -15,7 +15,7 @@ export default function InfoContent({content}) {
   return (
     <>
       <div className="block p-6">
-          <AnnotatedText text={body} annotations={annotations} segmentId={id}/>
+          <AnnotatedText text={body} annotations={annotations} segmentId={id} interactCallback={interactCallback}/>
         </div>
     </>
   );

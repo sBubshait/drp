@@ -6,6 +6,7 @@ import com.imperial.drp36.model.InteractedSegmentsResponse;
 import com.imperial.drp36.model.MetricsResponse;
 import jakarta.transaction.Transactional;
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 @Service
@@ -73,8 +74,8 @@ public class MetricsService {
   }
 
   public InteractedSegmentsResponse getInteractedSegments(Long userId, Long articleId) {
-      List<UserArticleSegment> segments = userArticleSegmentRepository.findByUserIdAndArticleSegmentArticleId(userId, articleId);
-      return new InteractedSegmentsResponse(200, "ok", segments.stream().map(it -> it.getId()).toList());
+      List<UserArticleSegment> segments = userArticleSegmentRepository.findByUserIdAndArticleSegmentArticleIdOrderBySegmentIdAsc(userId, articleId);
+      return new InteractedSegmentsResponse(200, "ok", segments.stream().map(it -> it.getSegmentId()).toList());
   }
 
   public MetricsResponse getEngagementMetrics() {

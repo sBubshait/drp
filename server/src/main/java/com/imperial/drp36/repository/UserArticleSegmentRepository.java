@@ -10,5 +10,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserArticleSegmentRepository extends JpaRepository<UserArticleSegment, Long> {
-  List<UserArticleSegment> findByUserIdAndArticleSegmentArticleId (Long userId, Long articleId);
+  List<UserArticleSegment> findByUserIdAndArticleSegmentArticleIdOrderBySegmentIdAsc (Long userId, Long articleId);
 }
