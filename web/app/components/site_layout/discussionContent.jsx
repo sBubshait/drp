@@ -23,6 +23,7 @@ export default function DiscussionContent({ content }) {
     );
   }
 
+  const segmentId = content.id;
   const { id, context, prompt, totalResponses } = content;
 
   // Check localStorage on component mount
@@ -63,6 +64,9 @@ export default function DiscussionContent({ content }) {
       alert('Please share your thoughts before unlocking the discussion!');
       return;
     }
+
+    interactWithSegment(segmentId);
+
 
     setIsSubmitting(true);
 

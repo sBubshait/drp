@@ -4,8 +4,10 @@ import ViewResultsButton from "../question_elements/viewResultsButton.jsx";
 import PollResults from "../question_elements/pollResults.jsx";
 import { useState } from 'react';
 import ApiService from '../../services/api.js';
+import { interactWithSegment } from "../../services/other.js";
 
 export default function PollContent({ content }) {
+  const segmentId = content.id;
   const { context, title, options, id } = content;
   const [showResults, setShowResults] = useState(false);
 
@@ -14,6 +16,8 @@ export default function PollContent({ content }) {
   }
 
   async function onSelectOption(index) {
+    interactWithSegment(segmentId);
+
     try {
       await ApiService.submitVote(id, index);
 
