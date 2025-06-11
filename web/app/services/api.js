@@ -139,6 +139,46 @@ class ApiService {
       })
     });
   }
+
+  /**
+   * Record a swipe right action
+   * @param {number} userId - User ID
+   * @param {number} articleId - Article ID
+   * @returns {Promise<object>} - Status response
+   */
+  static async swipeRight(userId, articleId) {
+    const endpoint = `/metrics/swipedRight`;
+    return this.request(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        userId: userId,
+        articleId: articleId
+      })
+    });
+  }
+
+  /**
+   * Record interaction with a segment
+   * @param {number} userId - User ID
+   * @param {number} segmentId - Segment ID
+   * @returns {Promise<object>} - Status response
+   */
+  static async interactWithSegment(userId, segmentId) {
+    const endpoint = `/metrics/interactWithSegment`;
+    return this.request(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        userId: userId,
+        segmentId: segmentId
+      })
+    });
+  }
 }
 
 /**
