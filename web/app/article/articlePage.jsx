@@ -5,6 +5,7 @@ import QuestionHeader from "../components/question_elements/questionHeader.jsx";
 import VerticalVideoPlayer from "../components/site_layout/videoPlayer.jsx";
 import ArticlePreview from '../components/site_layout/articlePreview.jsx';
 import ApiService from '../services/api.js';
+import { calculateArticleCategories } from '../utils/categoryUtils.js';
 
 export function ArticlePage() {
   const navigate = useNavigate();
@@ -14,6 +15,11 @@ export function ArticlePage() {
   const [error, setError] = useState(null);
   const [showTip, setShowTip] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState('All');
+  const [showFilterMenu, setShowFilterMenu] = useState(false);
+
+  // Available filter options
+  const filterOptions = ['All', 'Popular', 'Recent', 'Hot', 'Technology', 'Health', 'Politics', 'Science'];
 
   useEffect(() => {
     const tipDismissed = localStorage.getItem('tipDismissed');
@@ -30,6 +36,13 @@ export function ArticlePage() {
   // Get article ID from URL params, null if not provided
   const articleId = params.id ? parseInt(params.id, 10) : null;
 
+  // Helper function to check if article matches the current filter
+  const articleMatchesFilter = (article) => {
+    if (selectedFilter === 'All') return true;
+    const categories = calculateArticleCategories(article);
+    return categories.includes(selectedFilter);
+  };
+
   // Function to fetch article by ID from API using the service layer
   const fetchArticle = async (id) => {
     setLoading(true);
@@ -37,6 +50,16 @@ export function ArticlePage() {
 
     try {
       const data = await ApiService.getArticle(id);
+      
+      // Check if the article matches the current filter
+      if (!articleMatchesFilter(data.article)) {
+        // If it doesn't match, automatically navigate to the next article
+        if (data.next) {
+          navigate(`/articles/${data.next}`);
+          return;
+        }
+      }
+      
       setFetchedArticle(data);
     } catch (error) {
       console.error('Error fetching article:', error);
@@ -114,7 +137,7 @@ export function ArticlePage() {
   // Fetch article when component mounts or articleId changes
   useEffect(() => {
     fetchArticle(articleId);
-  }, [articleId]);
+  }, [articleId, selectedFilter]);
 
   // Keyboard event handler
   useEffect(() => {
@@ -137,7 +160,10 @@ export function ArticlePage() {
   if (loading) {
     return (
       <div className="w-full bg-gray-200 flex flex-col min-h-screen items-center justify-center">
-        {/* Loading state */}
+        <p className="text-gray-600">Loading articles...</p>
+        {selectedFilter !== 'All' && (
+          <p className="text-gray-500 text-sm mt-2">Filtering by: {selectedFilter}</p>
+        )}
       </div>
     );
   }
@@ -166,14 +192,47 @@ export function ArticlePage() {
   }
 
   const isVideoArticle = fetchedArticle.article.type === 'video';
+  
+  // Calculate categories for the current article
+  const articleCategories = calculateArticleCategories(fetchedArticle.article);
 
   console.log('Fetched Article:', fetchedArticle);
   return (
     <div {...handlers} className="w-full bg-gray-200 flex flex-col min-h-screen overflow-hidden relative">
-      {/* Header */}
+      {/* Header with Filter */}
       <div className="flex">
-        <div className="bg-gray-800 px-6 py-3 text-white font-bold text-lg flex-1">
-          PoliticoApp
+        <div className="bg-gray-800 px-6 py-3 text-white font-bold text-lg flex-1 flex justify-between items-center">
+          <span>PoliticoApp</span>
+          <div className="relative">
+            <button
+              onClick={() => setShowFilterMenu(!showFilterMenu)}
+              className="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded text-sm flex items-center gap-2"
+            >
+              <span>Filter: {selectedFilter}</span>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            
+            {showFilterMenu && (
+              <div className="absolute right-0 top-full mt-1 bg-white rounded-md shadow-lg border z-50 min-w-[120px]">
+                {filterOptions.map((filter) => (
+                  <button
+                    key={filter}
+                    onClick={() => {
+                      setSelectedFilter(filter);
+                      setShowFilterMenu(false);
+                    }}
+                    className={`block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 ${
+                      selectedFilter === filter ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700'
+                    }`}
+                  >
+                    {filter}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -195,7 +254,7 @@ export function ArticlePage() {
           </div>
         ) : (
           /* Text Article Layout - Centered */
-          <ArticlePreview article={fetchedArticle.article} />
+          <ArticlePreview article={fetchedArticle.article} categories={articleCategories} />
         )}
       </div>
 
