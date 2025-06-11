@@ -16,12 +16,12 @@ export function ArticlePage() {
   const [error, setError] = useState(null);
   const [showTip, setShowTip] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState('All');
+  const [selectedFilters, setSelectedFilters] = useState([]); // Changed to array
   const [showFilterMenu, setShowFilterMenu] = useState(false);
   const [noMatchingArticles, setNoMatchingArticles] = useState(false);
 
-  // Available filter options
-  const filterOptions = ['All', 'Popular', 'Recent', 'Hot', 'Technology', 'Health', 'Politics', 'Science'];
+  // Available filter options (removed 'All' since we'll handle it differently)
+  const filterOptions = ['Popular', 'Recent', 'Hot', 'Technology', 'Health', 'Politics', 'Science'];
 
   useEffect(() => {
     const tipDismissed = localStorage.getItem('tipDismissed');
@@ -38,11 +38,14 @@ export function ArticlePage() {
   // Get article ID from URL params, null if not provided
   const articleId = params.id ? parseInt(params.id, 10) : null;
 
-  // Helper function to check if article matches the current filter
+  // Helper function to check if article matches ALL selected filters
   const articleMatchesFilter = (article) => {
-    if (selectedFilter === 'All') return true;
+    if (selectedFilters.length === 0) return true; // No filters = show all
+    
     const categories = calculateArticleCategories(article);
-    return categories.includes(selectedFilter);
+    
+    // Article must match ALL selected filters
+    return selectedFilters.every(filter => categories.includes(filter));
   };
 
   // Function to fetch article by ID from API using the service layer
@@ -54,7 +57,7 @@ export function ArticlePage() {
     try {
       const data = await ApiService.getArticle(id);
       
-      // Check if the article matches the current filter
+      // Check if the article matches the current filters
       if (!articleMatchesFilter(data.article)) {
         // Add current article ID to visited set to prevent infinite loops
         visitedIds.add(id);
@@ -135,20 +138,31 @@ export function ArticlePage() {
     });
   };
 
-  // Handle filter selection
-  const handleFilterSelect = (filter) => {
-    setSelectedFilter(filter);
+  // Handle filter toggle
+  const handleFilterToggle = (filter) => {
+    setSelectedFilters(prev => {
+      const newFilters = prev.includes(filter)
+        ? prev.filter(f => f !== filter) // Remove if already selected
+        : [...prev, filter]; // Add if not selected
+      
+      // Reset to article 1 when filters change (unless no filters selected)
+      if (newFilters.length > 0) {
+        navigate('/articles/1');
+      }
+      
+      return newFilters;
+    });
+  };
+
+  // Handle clear all filters
+  const handleClearFilters = () => {
+    setSelectedFilters([]);
     setShowFilterMenu(false);
-    
-    // Reset to article 1 when filter changes (unless it's 'All')
-    if (filter !== 'All') {
-      navigate('/articles/1');
-    }
   };
 
   // Handle go to first article
   const handleGoToFirstArticle = () => {
-    setSelectedFilter('All');
+    setSelectedFilters([]);
     navigate('/articles/1');
   };
 
@@ -165,7 +179,7 @@ export function ArticlePage() {
   // Fetch article when component mounts or articleId changes
   useEffect(() => {
     fetchArticle(articleId || 1);
-  }, [articleId, selectedFilter]);
+  }, [articleId, selectedFilters]);
 
   // Keyboard event handler
   useEffect(() => {
@@ -185,12 +199,21 @@ export function ArticlePage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [fetchedArticle, loading, isAnimating]);
 
+  // Format filter display text
+  const getFilterDisplayText = () => {
+    if (selectedFilters.length === 0) return 'All';
+    if (selectedFilters.length === 1) return selectedFilters[0];
+    return `${selectedFilters.length} filters`;
+  };
+
   if (loading) {
     return (
       <div className="w-full bg-gray-200 flex flex-col min-h-screen items-center justify-center">
         <p className="text-gray-600">Loading articles...</p>
-        {selectedFilter !== 'All' && (
-          <p className="text-gray-500 text-sm mt-2">Filtering by: {selectedFilter}</p>
+        {selectedFilters.length > 0 && (
+          <p className="text-gray-500 text-sm mt-2">
+            Filtering by: {selectedFilters.join(' + ')}
+          </p>
         )}
       </div>
     );
@@ -215,11 +238,12 @@ export function ArticlePage() {
   if (noMatchingArticles) {
     return (
       <NoMatchingArticles
-        selectedFilter={selectedFilter}
+        selectedFilters={selectedFilters}
         filterOptions={filterOptions}
         showFilterMenu={showFilterMenu}
         setShowFilterMenu={setShowFilterMenu}
-        handleFilterSelect={handleFilterSelect}
+        handleFilterToggle={handleFilterToggle}
+        handleClearFilters={handleClearFilters}
         onGoToFirstArticle={handleGoToFirstArticle}
       />
     );
@@ -240,7 +264,7 @@ export function ArticlePage() {
 
   console.log('Fetched Article:', fetchedArticle);
   console.log('Article Categories:', articleCategories);
-  console.log('Current Filter:', selectedFilter);
+  console.log('Selected Filters:', selectedFilters);
 
   return (
     <div {...handlers} className="w-full bg-gray-200 flex flex-col min-h-screen overflow-hidden relative">
@@ -253,25 +277,50 @@ export function ArticlePage() {
               onClick={() => setShowFilterMenu(!showFilterMenu)}
               className="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded text-sm flex items-center gap-2"
             >
-              <span>Filter: {selectedFilter}</span>
+              <span>Filter: {getFilterDisplayText()}</span>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
             
             {showFilterMenu && (
-              <div className="absolute right-0 top-full mt-1 bg-white rounded-md shadow-lg border z-50 min-w-[120px]">
+              <div className="absolute right-0 top-full mt-1 bg-white rounded-md shadow-lg border z-50 min-w-[180px]">
+                {/* Clear all filters option */}
+                {selectedFilters.length > 0 && (
+                  <>
+                    <button
+                      onClick={handleClearFilters}
+                      className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-red-600 font-medium border-b"
+                    >
+                      Clear All Filters
+                    </button>
+                  </>
+                )}
+                
+                {/* Filter options with checkboxes */}
                 {filterOptions.map((filter) => (
                   <button
                     key={filter}
-                    onClick={() => handleFilterSelect(filter)}
-                    className={`block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 ${
-                      selectedFilter === filter ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700'
-                    }`}
+                    onClick={() => handleFilterToggle(filter)}
+                    className="flex items-center w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-gray-700"
                   >
-                    {filter}
+                    <input
+                      type="checkbox"
+                      checked={selectedFilters.includes(filter)}
+                      onChange={() => {}} // Handled by button click
+                      className="mr-2 rounded"
+                      tabIndex={-1}
+                    />
+                    <span>{filter}</span>
                   </button>
                 ))}
+                
+                {/* Show selected filters count */}
+                {selectedFilters.length > 0 && (
+                  <div className="px-4 py-2 text-xs text-gray-500 border-t">
+                    {selectedFilters.length} filter{selectedFilters.length !== 1 ? 's' : ''} selected
+                  </div>
+                )}
               </div>
             )}
           </div>
