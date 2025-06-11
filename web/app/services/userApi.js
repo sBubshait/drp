@@ -13,7 +13,7 @@ export async function initUid() {
 
 // Retrieve public user data
 export function getUserData(uid) {
-  return ApiService.request(`/user/?uid=${uid}`);
+  return ApiService.request(`/user/?id=${uid}`);
 }
 
 // Generate unique user id

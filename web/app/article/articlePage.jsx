@@ -5,7 +5,8 @@ import QuestionHeader from "../components/question_elements/questionHeader.jsx";
 import VerticalVideoPlayer from "../components/site_layout/videoPlayer.jsx";
 import ArticlePreview from '../components/site_layout/articlePreview.jsx';
 import ApiService from '../services/api.js';
-import { initUid } from '../services/userApi.js';
+import { initUid, getUserData } from '../services/userApi.js';
+import StreakBeginTip from '../components/streak/streakBeginTip.jsx';'../components/streak/streakBeginTip.jsx'
 
 export function ArticlePage() {
   const navigate = useNavigate();
@@ -17,9 +18,16 @@ export function ArticlePage() {
   const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
-    initUid();
+    initUid().then ((uid) => {
+      checkStreak(uid);
+    });
+
     initTip();
   }, []);
+
+  const checkStreak = (uid) => {
+    const userData = getUserData(uid);
+  }
 
   const initTip = () => {
     const tipDismissed = localStorage.getItem('tipDismissed');
@@ -199,8 +207,10 @@ export function ArticlePage() {
             </div>
           </div>
         ) : (
-          /* Text Article Layout - Centered */
-          <ArticlePreview article={fetchedArticle.article} />
+          <div className="flex flex-col">
+            <StreakBeginTip className="relative bottom-42" />
+            <ArticlePreview article={fetchedArticle.article} />
+          </div>
         )}
       </div>
 
