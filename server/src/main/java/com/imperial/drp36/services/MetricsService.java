@@ -1,14 +1,8 @@
 package com.imperial.drp36.services;
 
-import com.imperial.drp36.entity.Article;
-import com.imperial.drp36.entity.User;
-import com.imperial.drp36.entity.UserArticle;
-import com.imperial.drp36.entity.UserSegment;
-import com.imperial.drp36.repository.ArticleRepository;
-import com.imperial.drp36.repository.SegmentRepository;
-import com.imperial.drp36.repository.UserArticleRepository;
-import com.imperial.drp36.repository.UserRepository;
-import com.imperial.drp36.repository.UserSegmentRepository;
+import com.imperial.drp36.entity.*;
+import com.imperial.drp36.repository.*;
+import com.imperial.drp36.model.InteractedSegmentsResponse;
 import com.imperial.drp36.model.MetricsResponse;
 import jakarta.transaction.Transactional;
 import java.util.List;
@@ -35,6 +29,9 @@ public class MetricsService {
 
   @Autowired
   private ArticleService articleService;
+
+  @Autowired
+  private UserArticleSegmentRepository userArticleSegmentRepository;
 
   public User createUser() {
     User user = new User();
@@ -73,6 +70,11 @@ public class MetricsService {
 
     UserSegment userSegment = new UserSegment(userId, segmentId);
     userSegmentRepository.save(userSegment);
+  }
+
+  public InteractedSegmentsResponse getInteractedSegments(Long userId, Long articleId) {
+      List<UserArticleSegment> segments = userArticleSegmentRepository.findByUserIdAndArticleSegmentArticleId(userId, articleId);
+      return new InteractedSegmentsResponse(200, "ok", segments.stream().map(it -> it.getId()).toList());
   }
 
   public MetricsResponse getEngagementMetrics() {

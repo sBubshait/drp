@@ -1,5 +1,6 @@
 package com.imperial.drp36;
 
+import com.imperial.drp36.model.InteractedSegmentsResponse;
 import com.imperial.drp36.model.MetricsResponse;
 import com.imperial.drp36.model.StatusResponse;
 import com.imperial.drp36.services.ArticleService;
@@ -38,6 +39,20 @@ public class MetricsController {
   }
 
   @Tag(name = "Metrics")
+  @GetMapping("/getUserSegments")
+  public ResponseEntity<InteractedSegmentsResponse> getUserSegments(@RequestParam Long userId, @RequestParam Long articleId) {
+    try {
+      InteractedSegmentsResponse interactedSegmentsResponse = metricsService.getInteractedSegments(userId, articleId);
+      return ResponseEntity.ok(interactedSegmentsResponse);
+    } catch (Exception e) {
+      System.err.println("Error fetching interacted segments: " + e.getMessage());
+      e.printStackTrace();
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(new InteractedSegmentsResponse(500, "Internal Server Error", null));
+    }
+  }
+
+  @Tag(name = "Metrics")
   @PostMapping("/swipedRight")
   public ResponseEntity<StatusResponse> swipedRight(
       @RequestParam Long userId,
@@ -72,6 +87,4 @@ public class MetricsController {
           .body(new StatusResponse(500, "Error recording interaction: " + e.getMessage()));
     }
   }
-
-
 }

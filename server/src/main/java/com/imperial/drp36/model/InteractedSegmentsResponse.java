@@ -1,20 +1,18 @@
 package com.imperial.drp36.model;
 
+import java.util.List;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "Standard response object containing status information")
-public record IdStatusResponse(
+public record InteractedSegmentsResponse(
     @Schema(description = "HTTP status code", example = "200")
     int status,
 
     @Schema(description = "Status message", example = "API fully operational")
     String message,
 
-    @Schema(description = "ID of the affected resource", example = "12345")
-    Long id
+    @Schema(description = "List of segments a given user interacted with", example = "[1, 2, 4]")
+    List<Long> segments
 ) {
-  public IdStatusResponse(int status, String message) {
-    this(status, message, null);
-  }
-
 }
