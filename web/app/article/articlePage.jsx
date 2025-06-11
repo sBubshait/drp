@@ -167,6 +167,7 @@ export function ArticlePage() {
 
   const isVideoArticle = fetchedArticle.article.type === 'video';
 
+  console.log('Fetched Article:', fetchedArticle);
   return (
     <div {...handlers} className="w-full bg-gray-200 flex flex-col min-h-screen overflow-hidden relative">
       {/* Header */}
