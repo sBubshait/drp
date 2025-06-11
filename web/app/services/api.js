@@ -19,7 +19,6 @@ class ApiService {
     };
 
     try {
-      console.log(`API Request: ${defaultOptions.method} ${url}`);
       
       const response = await fetch(url, defaultOptions);
       
@@ -28,7 +27,6 @@ class ApiService {
       }
       
       const data = await response.json();
-      console.log(`API Response: ${url}`, data);
       
       return data;
     } catch (error) {
@@ -85,6 +83,18 @@ class ApiService {
     });
   }
 
+  static async upvoteAnnotation(annotationId) {
+    return this.request('/info/upvote', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        annotationId: annotationId.toString()
+      })
+    });
+  }
+
   /**
    * Get discussion responses
    * @param {number} discussionId - Discussion ID
@@ -99,6 +109,35 @@ class ApiService {
     }
     
     return data;
+  }
+
+  /**
+   * Get segment by ID
+   * @param {number} segmentId - Segment ID
+   * @returns {Promise<object>} - Segment data
+   */
+  static async getSegment(segmentId) {
+    const endpoint = `/getSegment?segmentId=${segmentId}`;
+    const data = await this.request(endpoint);
+    
+    if (data.status !== 200) {
+      throw new Error(`Failed to fetch segment: ${data.status}`);
+    }
+    
+    return data;
+  }
+
+  static async editDiscussionResponse(id, responseId, content) {
+    return this.request('/discussions/editResponse', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        responseId: responseId.toString(),
+        content: content.trim()
+      })
+    });
   }
 }
 

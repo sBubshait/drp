@@ -4,6 +4,8 @@ import com.imperial.drp36.entity.Article;
 import com.imperial.drp36.model.ArticleContent;
 import com.imperial.drp36.model.ArticleResponse;
 import com.imperial.drp36.model.SegmentContent;
+import com.imperial.drp36.model.SegmentResponse;
+import com.imperial.drp36.repository.SegmentRepository;
 import com.imperial.drp36.services.ArticleService;
 import com.imperial.drp36.entity.Segment;
 import com.imperial.drp36.model.StatusResponse;
@@ -15,6 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,6 +32,8 @@ public class ArticleController {
 
 @Autowired
   private ArticleService articleService;
+@Autowired
+  private SegmentRepository segmentRepository;
 
   @Operation(
       summary = "Check API Status",
@@ -77,6 +82,7 @@ public class ArticleController {
           ))
       )
   })
+
   @Tag(name = "Articles")
   @GetMapping("/getArticle")
   public ResponseEntity<ArticleResponse> getArticle(@RequestParam(required = false) Long id) {
@@ -102,6 +108,32 @@ public class ArticleController {
         id < articleService.getTotalArticleCount() ? id + 1 : null,
         articleContent
     ));
+  }
+
+  @Tag(name = "Articles")
+  @GetMapping("/getSegment")
+  public ResponseEntity<SegmentResponse> getSegment(@RequestParam Long segmentId) {
+    try {
+      Segment segment = segmentRepository.findById(segmentId).orElse(null);
+
+      if (segment == null) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body(new SegmentResponse(404, "Segment not found"));
+      }
+
+      SegmentContent segmentContent = articleService.getSegmentContent(segment);
+
+      if (segmentContent == null) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(new SegmentResponse(500, "Error processing segment content"));
+      }
+
+      return ResponseEntity.ok(new SegmentResponse(200, segmentContent));
+
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(new SegmentResponse(500, "Error retrieving segment: " + e.getMessage()));
+    }
   }
 
   @Operation(

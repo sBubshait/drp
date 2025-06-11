@@ -10,7 +10,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonSubTypes({
     @JsonSubTypes.Type(value = QuestionContent.class, name = "question"),
     @JsonSubTypes.Type(value = PollContent.class, name = "poll"),
-    @JsonSubTypes.Type(value = DiscussionContent.class, name = "discussion")
+    @JsonSubTypes.Type(value = DiscussionContent.class, name = "discussion"),
+    @JsonSubTypes.Type(value = InfoContent.class, name = "info"),
+    @JsonSubTypes.Type(value = GapFillContent.class, name = "gap_fill"),
 })
 public abstract class SegmentContent {
   @Schema(description = "Segment ID", example = "1")

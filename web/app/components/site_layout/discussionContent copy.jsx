@@ -95,7 +95,6 @@ export default function DiscussionContent({ content }) {
     try {
       await ApiService.editDiscussionResponse(id, userResponseId, userInput);
       await fetchResponses();
-      setHasSubmitted(true);
     } catch (error) {
       console.error('Error editing response:', error);
       alert('There was an error updating your response. Please try again.');
@@ -127,133 +126,39 @@ export default function DiscussionContent({ content }) {
 
   return (
     <div className="h-full flex flex-col relative">
-      {/* Context section - fixed height */}
       <div className="flex-shrink-0 p-3">
         <div className="max-h-32 overflow-y-auto">
           <ContextBox text={context} />
         </div>
       </div>
 
-      {/* Prompt section - fixed height */}
       <div className="flex-shrink-0 px-3 mb-3">
         <PinkContainer text={prompt} />
       </div>
 
-      {/* Main content area - takes remaining space */}
       <div className="flex-1 flex flex-col min-h-0 px-3 pb-3">
-        {showWriteSection ? (
-          <div className="h-full flex flex-col space-y-4">
-            {/* Write section - takes all available space */}
-            <div className="flex-1 min-h-0">
-              <WriteSection
-                userInput={userInput}
-                setUserInput={setUserInput}
-                handleSubmit={handleSubmit}
-                isSubmitting={isSubmitting}
-                isEditing={false}
-              />
-            </div>
-
-            {/* Bottom sections - fixed size */}
-            <div className="flex-shrink-0 space-y-4">
-              <ParticipationSection
-                avatarLetters={avatarLetters}
-                avatarColors={avatarColors}
-                responseCount={totalResponses || 0}
-              />
-
-              <LockedDiscussionSection />
-            </div>
-          </div>
-        ) : !hasSubmitted && userResponseId ? (
-          // Edit mode - user is editing their existing response
-          <div className="h-full flex flex-col space-y-4">
-            <div className="flex-1 min-h-0">
-              <WriteSection
-                userInput={userInput}
-                setUserInput={setUserInput}
-                handleSubmit={handleEditResponse}
-                isSubmitting={isSubmitting}
-                isEditing={true}
-              />
-            </div>
-
-            <div className="flex-shrink-0">
-              <button
-                onClick={() => setHasSubmitted(true)}
-                className="w-full text-cyan-600 hover:text-cyan-700 text-sm font-medium py-2 rounded-md hover:bg-cyan-50 transition-colors"
-              >
-                ← Back to Discussion
-              </button>
-            </div>
-          </div>
-        ) : (
-          // Discussion view - showing all responses
-          <div className="h-full flex flex-col">
-            <div className="flex-shrink-0 flex items-center justify-between mb-3">
-              <div className="w-24"></div> {/* Spacer for balance */}
-              <div className="text-lg font-semibold text-gray-700 text-center">
-                {responses.length + 1} Response{responses.length !== 0 ? 's' : ''}
-              </div>
-              <button
-                onClick={handleBackToEdit}
-                className="text-cyan-600 hover:text-cyan-700 text-sm font-medium px-3 py-1 rounded-md hover:bg-cyan-50 transition-colors whitespace-nowrap"
-              >
-                Edit Response
-              </button>
-            </div>
-
-            {isLoadingResponses ? (
-              <div className="flex-1 flex items-center justify-center">
-                <div className="text-gray-500 text-sm">Loading responses...</div>
-              </div>
-            ) : (
-              <div className="h-full flex-1 overflow-y-auto no-scrollbar  border border-gray-200 rounded-lg">
-                <div className="h-96 space-y-3 p-3" id="responseContainer">
-                  {responses
-                    .sort((a, b) => {
-                      // Put user's response first, then others
-                      if (a.id == userResponseId) return -1;
-                      if (b.id == userResponseId) return 1;
-                      return 0;
-                    })
-                    .map((response, index) => (
-                      <ResponseContainer
-                        key={response.id || index}
-                        active={response.id == userResponseId}
-                        content={response.content}
-                        user={response.id == userResponseId ? "You" : (response.author || `User ${index + 1}`)}
-                      />
-                    ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Floating back button - only show when submitted */}
-      {hasSubmitted && (
-        <button
-          onClick={handleBackToArticle}
-          className="fixed bottom-6 right-6 bg-cyan-600 hover:bg-cyan-700 text-white p-3 rounded-full shadow-lg transition-colors z-50"
-          aria-label="Back to article"
-        >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+        <div className="h-full flex flex-col space-y-4">
+          <div className="flex-1 min-h-0">
+            <WriteSection
+              userInput={userInput}
+              setUserInput={setUserInput}
+              handleSubmit={handleEditResponse}
+              isSubmitting={isSubmitting}
+              isEditing={true}
             />
-          </svg>
-        </button>
-      )}
+          </div>
+
+          <div className="flex-shrink-0">
+            <button
+              onClick={() => setHasSubmitted(true)}
+              className="w-full text-cyan-600 hover:text-cyan-700 text-sm 
+                font-medium py-2 rounded-md hover:bg-cyan-50 transition-colors"
+            >
+              ← Back to Discussion
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

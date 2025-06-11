@@ -1,8 +1,8 @@
-export default function ViewResultsButton({resultsClickHandler}) {
+export default function ViewResultsButton({ resultsClickHandler }) {
   return (
-      <button
-        onClick={resultsClickHandler}
-        className={`
+    <button
+      onClick={resultsClickHandler}
+      className={`
           w-1/2
           px-6
           py-4
@@ -22,8 +22,8 @@ export default function ViewResultsButton({resultsClickHandler}) {
           focus:ring-gray-500
           focus:ring-offset-2
         `}
-      >
-        View Results
-      </button>
-    );
+    >
+      View Results
+    </button>
+  );
 }

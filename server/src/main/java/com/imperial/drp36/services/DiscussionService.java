@@ -42,6 +42,14 @@ public class DiscussionService {
     return savedResponse;
   }
 
+  public DiscussionResponse editResponse(Long responseId, String newContent) {
+    DiscussionResponse response = discussionResponseRepository.findById(responseId)
+        .orElseThrow(() -> new RuntimeException("Response not found"));
+
+    response.setContent(newContent);
+    return discussionResponseRepository.save(response);
+  }
+
   public Discussion getDiscussionById(Long id) {
     return discussionRepository.findById(id).orElse(null);
   }

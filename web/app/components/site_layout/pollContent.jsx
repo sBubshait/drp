@@ -16,7 +16,7 @@ export default function PollContent({ content }) {
   async function onSelectOption(index) {
     try {
       await ApiService.submitVote(id, index);
-      
+
       // Update local counts on successful vote
       content.responseCounts[index]++;
       content.totalResponses++;
@@ -29,25 +29,30 @@ export default function PollContent({ content }) {
   }
 
   return (
-    <>
-      <div className="flex-1 p-6">
+    <div className="flex flex-col h-full justify-between">
+      <div className="p-3 max-h-32 overflow-y-auto">
         <ContextBox text={context} />
       </div>
-      <div className="mb-6">
-        <div className="text-3xl font-medium text-gray-800 text-center mb-24">
+
+      <div className="flex flex-col justify-center">
+        <div className="text-2xl font-medium text-gray-800 text-center p-3">
           {title}
         </div>
       </div>
-      {showResults ? (
-        <PollResults content={content} />
-      ) : (
-        <>
+
+      {showResults &&
+        <div className="p-3 flex flex-col space-y-4 mb-5">
+          <PollResults content={content} />
+        </div>
+      }
+      {!showResults && (
+        <div className="p-3 flex flex-col space-y-4">
           <ChoicesButtons options={options} onSelectOption={onSelectOption} />
-          <div className="flex justify-center py-5">
+          <div className="flex justify-center">
             <ViewResultsButton resultsClickHandler={resultsClickHandler} />
           </div>
-        </>
+        </div>
       )}
-    </>
+    </div>
   );
 }

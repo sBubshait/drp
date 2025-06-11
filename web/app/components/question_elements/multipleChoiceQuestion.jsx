@@ -5,16 +5,14 @@ export default function MultipleChoiceQuestion({
   options,
   onSelectOption,
 }) {
-  
+
   return (
     <div className="p-6">
-      <div className="mb-6">
-        <div className="text-3xl font-medium text-gray-800 text-center mb-24">
-          {questionText}
-        </div>
+      <div className="text-2xl font-medium text-gray-800 text-center mb-24">
+        {questionText}
       </div>
 
-      <ChoicesButtons options={options} onSelectOption={onSelectOption}/>
+      <ChoicesButtons options={options} onSelectOption={onSelectOption} />
 
     </div>
   );
