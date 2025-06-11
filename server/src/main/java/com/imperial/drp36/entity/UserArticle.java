@@ -18,7 +18,7 @@ public class UserArticle {
   private Long articleId;
 
   @Column(name = "completed", nullable = false)
-  private Boolean completed = true;
+  private Boolean completed = false;
 
   // Constructors
   public UserArticle() {}
@@ -26,7 +26,7 @@ public class UserArticle {
   public UserArticle(Long userId, Long articleId) {
     this.userId = userId;
     this.articleId = articleId;
-    this.completed = true;
+    this.completed = false;
   }
 
   // Getters and Setters
