@@ -6,17 +6,19 @@ import clsx from "clsx";
 export default function GapfillContent({ content }) {
   const {
     id,
+    title,
     context,
-    sentenceTemplate,
     options,
-    correctAnswers
+    correctOptions,
+    gapCount,
+    feedback
   } = content;
 
   const [filledGaps, setFilledGaps] = useState([]);
   const [submitted, setSubmitted] = useState(false);
 
   const handleOptionClick = (word) => {
-    if (submitted || filledGaps.length >= correctAnswers.length) return;
+    if (submitted || filledGaps.length >= correctOptions.length) return;
     setFilledGaps([...filledGaps, word]);
   };
 
@@ -27,17 +29,17 @@ export default function GapfillContent({ content }) {
   };
 
   const handleSubmit = () => {
-    if (filledGaps.length === correctAnswers.length) {
+    if (filledGaps.length === correctOptions.length) {
       setSubmitted(true);
     }
   };
 
   const renderSentence = () => {
-    const parts = sentenceTemplate.split("___");
+    const parts = title.split("___");
     return parts.map((part, idx) => (
       <span key={idx}>
         {part}
-        {idx < correctAnswers.length && (
+        {idx < correctOptions.length && (
           <span className="inline-block min-w-[3rem] mx-1 border-b-2 text-center text-teal-400 font-bold">
             {filledGaps[idx] || ""}
           </span>
@@ -50,8 +52,8 @@ export default function GapfillContent({ content }) {
 
   const isCorrect =
     submitted &&
-    filledGaps.length === correctAnswers.length &&
-    filledGaps.every((word, idx) => word === correctAnswers[idx]);
+    filledGaps.length === correctOptions.length &&
+    filledGaps.every((word, idx) => word === correctOptions[idx]);
 
   return (
     <div className="p-4 space-y-6 flex flex-col items-center">
@@ -77,7 +79,7 @@ export default function GapfillContent({ content }) {
         <GapfillButton
           label="Submit"
           onClick={handleSubmit}
-          disabled={filledGaps.length !== correctAnswers.length || submitted}
+          disabled={filledGaps.length !== correctOptions.length || submitted}
           type="success"
         />
       </div>

@@ -14,7 +14,8 @@ const CONTENT_COMPONENTS = {
   question: QuestionContent,
   poll: PollContent,
   discussion: DiscussionContent,
-  info: InfoContent
+  info: InfoContent,
+  gap_fill: GapfillContent
 };
 
 export function QuestionPage() {
