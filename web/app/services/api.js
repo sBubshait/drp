@@ -180,6 +180,21 @@ class ApiService {
     });
   }
 
+  static async getUserData(userId) {
+    return this.request(`/users/get?id=${userId}`);
+  }
+
+  static async getUserStreakCond(userId) {
+    return this.request(`/users/streakCond?id=${userId}`);
+  }
+
+  static async userCompleteStreak(userId) {
+    return this.request(`/users/completeStreak?id=${userId}`, {method: `POST`});
+  }
+
+  static async getUserInteractedSegments(userId, articleId) {
+    return this.request(`/metrics/getUserSegments?userId=${userId}&articleId=${articleId}`);
+  }
   /**
  * Get sources for a segment
  * @param {number} segmentId - Segment ID

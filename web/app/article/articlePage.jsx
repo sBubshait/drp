@@ -4,7 +4,8 @@ import { useNavigate, useParams } from 'react-router';
 import VerticalVideoPlayer from "../components/site_layout/videoPlayer.jsx";
 import ArticlePreview from '../components/site_layout/articlePreview.jsx';
 import ApiService from '../services/api.js';
-import { swipeRight } from '../services/other.js';
+import StreakBeginTip from '../components/streak/streakBeginTip.jsx';'../components/streak/streakBeginTip.jsx'
+import { getStreakCond, swipeRight } from '../services/other.js';
 
 export function ArticlePage() {
   const navigate = useNavigate();
@@ -14,9 +15,11 @@ export function ArticlePage() {
   const [error, setError] = useState(null);
   const [showTip, setShowTip] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [streakStatus, setStreakStatus] = useState(0);
 
   useEffect(() => {
     initTip();
+    getStreakCond().then((resp) => {setStreakStatus(resp.id)});
   }, []);
 
   const initTip = () => {
@@ -102,7 +105,8 @@ export function ArticlePage() {
         segments: fetchedArticle.article.segments,
         nextArticleId: fetchedArticle.next,
         articleId: articleId || fetchedArticle.article.id,
-        articleTitle: fetchedArticle.article.content
+        articleTitle: fetchedArticle.article.content,
+        initStreak: streakStatus > 0
       }
     });
   };
@@ -198,8 +202,10 @@ export function ArticlePage() {
             </div>
           </div>
         ) : (
-          /* Text Article Layout - Centered */
-          <ArticlePreview article={fetchedArticle.article} />
+          <div className="flex flex-col">
+            <StreakBeginTip className="relative bottom-42" streakStatus={streakStatus} />
+            <ArticlePreview article={fetchedArticle.article} />
+          </div>
         )}
       </div>
 

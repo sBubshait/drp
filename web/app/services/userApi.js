@@ -10,12 +10,7 @@ export async function getUserId() {
   return userId;
 }
 
-export function getUserData(userId) {
-  return ApiService.request(`/users/get?id=${userId}`);
-}
-
 // Helper Functions
-
 async function createUserId() {
   // request and return a new user ID
   const response = await ApiService.request("/users/create", {
@@ -42,3 +37,4 @@ function setCookie(name, value, days = 365, path = "/") {
   const cookieStr = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; expires=${expires}; path=${path}`;
   document.cookie = cookieStr;
 }
+

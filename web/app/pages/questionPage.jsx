@@ -8,6 +8,10 @@ import InfoContent from '../components/site_layout/infoContent.jsx';
 import DiscussionContent from "../components/site_layout/discussionContent.jsx";
 import GapfillContent from '../components/site_layout/gapFillContent.jsx';
 import ApiService from '../services/api.js';
+import StreakMeter from '../components/streak/streakMeter.jsx';
+import Flame from '../components/streak/flame.jsx'
+import { StreakCompletedPage } from '../components/streak/streakCompletedPage.jsx';
+import { completeStreak, getInteractedSegments, getMyData, interactWithSegment } from '../services/other.js';
 import { SourcesContent } from "../components/question_elements/SourcesContent.jsx"
 
 // Component map for different content types
@@ -34,6 +38,20 @@ export function QuestionPage() {
   const articleId = params.id ? parseInt(params.id, 10) : null;
   const nextArticleId = location.state?.nextArticleId;
 
+  const [answeredSegments, setAnsweredSegments] = useState([]);
+  const [streakArticle, setStreakArticle] = useState(location.state.initStreak === null ? false : location.state.initStreak);
+  const [streakCompleted, setStreakCompleted] = useState(false);
+  const currentSegment = segments[currentIndex];
+  const totalSegments = segments.length;
+
+  const [displayedStreak, setDisplayedStreak] = useState(null);
+
+  var progress;
+  for (progress = 0; progress < totalSegments; progress++) {
+    if (!answeredSegments.includes(segments[progress].id)) break;
+  }
+  const fract = progress / totalSegments
+
   function capitalise(s) {
     return s && String(s[0]).toUpperCase() + String(s).slice(1);
   }
@@ -42,9 +60,18 @@ export function QuestionPage() {
   useEffect(() => {
     if (location.state?.segments) {
       setSegments(location.state.segments);
-      setLoading(false);
+      try {
+        getInteractedSegments(location.state?.articleId).then(
+          resp => {setAnsweredSegments(resp.segments); setLoading(false)}
+        )
+      } catch { setLoading(false) }
     } else if (articleId) {
       fetchArticleData(articleId);
+        try {
+            getInteractedSegments(articleId).then(
+            resp => { setAnsweredSegments(resp.segments); }
+          )
+        } catch {}
     } else {
       setLoading(false);
     }
@@ -102,7 +129,20 @@ export function QuestionPage() {
         setIsAnimating(false);
       }, 150);
     } else {
-      if (nextArticleId) {
+
+      if (streakArticle && fract == 1 && !streakCompleted) {
+
+        // Streak completion code (should probably be a function)
+        setStreakArticle(false);
+        setStreakCompleted(true);
+
+        getMyData().then((dat) => {
+          setDisplayedStreak(dat.streak);
+          setTimeout(() => {setDisplayedStreak(dat.streak + 1)}, 400)
+          completeStreak();
+        });
+
+      } else if (nextArticleId) {
         navigate(`/articles/${nextArticleId}`);
       } else {
         navigate(`/articles/${articleId}`);
@@ -226,7 +266,6 @@ export function QuestionPage() {
     );
   }
 
-  const currentSegment = segments[currentIndex];
   const contentType = currentSegment?.content?.type || currentSegment?.type;
   const ContentComponent = CONTENT_COMPONENTS[contentType];
 
@@ -234,23 +273,37 @@ export function QuestionPage() {
     <div {...handlers} className="h-screen w-full bg-gray-200 flex flex-col overflow-hidden">
       <QuestionHeader
         questionNumber={currentIndex + 1}
-        totalQuestions={segments.length}
+        totalQuestions={totalSegments}
         taskType={capitalise(contentType)}
         onSourcesClick={() => setShowSourcesSheet(true)}
         hasSourcesData={currentSources.length > 0}
       />
+
+      {streakArticle && <div className='text-center pt-[5%]'>
+        <Flame className="inline-block px-[7%] scale-50" doBurst={fract == 1} burstDelay={900}/>
+        <StreakMeter className='inline-block max-w-78/100'
+                     height="h-7"
+                     barColor="bg-red-400"
+                     value={fract * 100}
+                     duration={1000}
+        />
+      </div>}
 
       <div className="flex-1 flex flex-col min-h-0 relative overflow-hidden">
         <div
           className={`flex-1 flex flex-col ${contentType !== 'info' ? 'transition-all duration-300 ease-out' : ''} ${isAnimating && contentType !== 'info' ? 'opacity-0 transform translate-x-4' : (contentType !== 'info' ? 'opacity-100 transform translate-x-0' : '')
             }`}
         >
-          {ContentComponent ? (
-            <ContentComponent content={currentSegment} />
-          ) : (
-            <div className="flex-1 flex items-center justify-center">
-              <p className="text-red-600 text-sm">Unknown content type: {contentType}</p>
-            </div>
+          {streakCompleted ? <StreakCompletedPage streakNo={displayedStreak}/> :
+           ContentComponent ? (<ContentComponent content={currentSegment} 
+                              interactCallback={(segmentId) => {
+                                interactWithSegment(segmentId);
+                                setAnsweredSegments(answeredSegments + segmentId);
+                              }}
+            />) :
+              (<div className="flex-1 flex items-center justify-center">
+                 <p className="text-red-600 text-sm">Unknown content type: {contentType}</p>
+               </div>
           )}
         </div>
       </div>
