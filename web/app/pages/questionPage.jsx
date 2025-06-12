@@ -10,8 +10,8 @@ import GapfillContent from '../components/site_layout/gapFillContent.jsx';
 import ApiService from '../services/api.js';
 import StreakMeter from '../components/streak/streakMeter.jsx';
 import Flame from '../components/streak/flame.jsx'
+import { StreakCompletedPage } from '../components/streak/streakCompletedPage.jsx';
 import { getInteractedSegments, interactWithSegment } from '../services/other.js';
-import PollResults from '../components/question_elements/pollResults.jsx';
 
 // Component map for different content types
 const CONTENT_COMPONENTS = {
@@ -35,6 +35,16 @@ export function QuestionPage() {
   const nextArticleId = location.state?.nextArticleId;
 
   const [answeredSegments, setAnsweredSegments] = useState([]);
+  const [streakArticle, setStreakArticle] = useState(true);
+  const [streakCompleted, setStreakCompleted] = useState(false);
+  const currentSegment = segments[currentIndex];
+  const totalSegments = segments.length;
+
+  var progress;
+  for (progress = 0; progress < totalSegments; progress++) {
+    if (!answeredSegments.includes(segments[progress].id)) break;
+  }
+  const fract = progress / totalSegments
 
   function capitalise(s) {
     return s && String(s[0]).toUpperCase() + String(s).slice(1);
@@ -63,9 +73,6 @@ export function QuestionPage() {
     setCurrentIndex(0);
   }, [location.state, articleId]);
 
-  // Effect that runs when a streak is completed
-  
-
   // Fallback function to fetch article data using API service
   const fetchArticleData = async (id) => {
     setLoading(true);
@@ -91,7 +98,11 @@ export function QuestionPage() {
         setIsAnimating(false);
       }, 150);
     } else {
-      if (nextArticleId) {
+
+      if (fract == 1 && !streakCompleted) {
+        setStreakArticle(false);
+        setStreakCompleted(true);
+      } else if (nextArticleId) {
         navigate(`/articles/${nextArticleId}`);
       } else {
         navigate(`/articles/${articleId}`);
@@ -216,16 +227,8 @@ export function QuestionPage() {
     );
   }
 
-  const currentSegment = segments[currentIndex];
   const contentType = currentSegment?.content?.type || currentSegment?.type;
   const ContentComponent = CONTENT_COMPONENTS[contentType];
-  const totalSegments = segments.length;
-
-  var progress;
-  for (progress = 0; progress < totalSegments; progress++) {
-    if (!answeredSegments.includes(segments[progress].id)) break;
-  }
-  const fract = progress / totalSegments
 
   return (
     <div {...handlers} className="h-screen w-full bg-gray-200 flex flex-col overflow-hidden">
@@ -235,7 +238,7 @@ export function QuestionPage() {
         taskType={capitalise(contentType)}
       />
 
-      <div className='text-center pt-[5%]'>
+      {streakArticle && <div className='text-center pt-[5%]'>
         <Flame className="inline-block px-[7%] scale-50" doBurst={fract == 1} burstDelay={900}/>
         <StreakMeter className='inline-block max-w-78/100'
                      height="h-7"
@@ -243,24 +246,23 @@ export function QuestionPage() {
                      value={fract * 100}
                      duration={1000}
         />
-      </div>
+      </div>}
 
       <div className="flex-1 flex flex-col min-h-0 relative overflow-hidden">
         <div
           className={`flex-1 flex flex-col ${contentType !== 'info' ? 'transition-all duration-300 ease-out' : ''} ${isAnimating && contentType !== 'info' ? 'opacity-0 transform translate-x-4' : (contentType !== 'info' ? 'opacity-100 transform translate-x-0' : '')
             }`}
         >
-          {ContentComponent ? (
-            <ContentComponent content={currentSegment} 
+          {streakCompleted ? <StreakCompletedPage/> :
+           ContentComponent ? (<ContentComponent content={currentSegment} 
                               interactCallback={(segmentId) => {
                                 interactWithSegment(segmentId);
                                 setAnsweredSegments(answeredSegments + segmentId);
                               }}
-            />
-          ) : (
-            <div className="flex-1 flex items-center justify-center">
-              <p className="text-red-600 text-sm">Unknown content type: {contentType}</p>
-            </div>
+            />) :
+              (<div className="flex-1 flex items-center justify-center">
+                 <p className="text-red-600 text-sm">Unknown content type: {contentType}</p>
+               </div>
           )}
         </div>
       </div>
