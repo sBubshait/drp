@@ -88,26 +88,30 @@ public class MetricsService {
       List<UserArticle> userArticles = userArticleRepository.findByUserId(user.getId());
 
       if (!userArticles.isEmpty()) {
-        long totalSegments = 0;
-        long interactedSegments = 0;
+        double userTotalPercentage = 0.0;
+        int articlesProcessed = 0;
 
         for (UserArticle userArticle : userArticles) {
           Article article = articleService.getArticleById(userArticle.getArticleId());
           if (article != null) {
             List<Long> segmentIds = article.getSegments();
-            totalSegments += segmentIds.size();
-
-            interactedSegments += userSegmentRepository.countByUserIdAndSegmentIdIn(user.getId(), segmentIds);
+            if (segmentIds.size() > 0) {
+              long interactedSegments = userSegmentRepository.countByUserIdAndSegmentIdIn(user.getId(), segmentIds);
+              double articlePercentage = (interactedSegments * 100.0) / segmentIds.size();
+              userTotalPercentage += articlePercentage;
+              articlesProcessed++;
+            }
           }
         }
 
-        if (totalSegments > 0) {
-          double userEDI = (interactedSegments * 100.0) / totalSegments;
+        if (articlesProcessed > 0) {
+          double userEDI = userTotalPercentage / articlesProcessed;
           totalEDI += userEDI;
           usersWithData++;
         }
       }
     }
+
     if (usersWithData == 0) {
       return new MetricsResponse(200, -1.0, "No engagement data available");
     }
