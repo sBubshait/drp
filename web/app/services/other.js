@@ -17,3 +17,8 @@ export async function getInteractedSegments(articleId) {
     return ApiService.getUserInteractedSegments(userId, articleId);
 }
 
+export async function getMyData() {
+    const userId = await getUserId();
+    return ApiService.getUserData(userId);
+}
+

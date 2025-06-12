@@ -11,7 +11,7 @@ import ApiService from '../services/api.js';
 import StreakMeter from '../components/streak/streakMeter.jsx';
 import Flame from '../components/streak/flame.jsx'
 import { StreakCompletedPage } from '../components/streak/streakCompletedPage.jsx';
-import { getInteractedSegments, interactWithSegment } from '../services/other.js';
+import { getInteractedSegments, getMyData, interactWithSegment } from '../services/other.js';
 
 // Component map for different content types
 const CONTENT_COMPONENTS = {
@@ -39,6 +39,8 @@ export function QuestionPage() {
   const [streakCompleted, setStreakCompleted] = useState(false);
   const currentSegment = segments[currentIndex];
   const totalSegments = segments.length;
+
+  const [displayedStreak, setDisplayedStreak] = useState(null);
 
   var progress;
   for (progress = 0; progress < totalSegments; progress++) {
@@ -100,8 +102,16 @@ export function QuestionPage() {
     } else {
 
       if (fract == 1 && !streakCompleted) {
+
+        // Streak completion code (should probably be a function)
         setStreakArticle(false);
         setStreakCompleted(true);
+
+        getMyData().then((dat) => {
+          setDisplayedStreak(dat.streak);
+          setTimeout(() => {setDisplayedStreak(dat.streak + 1)}, 400)
+        });
+
       } else if (nextArticleId) {
         navigate(`/articles/${nextArticleId}`);
       } else {
@@ -253,7 +263,7 @@ export function QuestionPage() {
           className={`flex-1 flex flex-col ${contentType !== 'info' ? 'transition-all duration-300 ease-out' : ''} ${isAnimating && contentType !== 'info' ? 'opacity-0 transform translate-x-4' : (contentType !== 'info' ? 'opacity-100 transform translate-x-0' : '')
             }`}
         >
-          {streakCompleted ? <StreakCompletedPage/> :
+          {streakCompleted ? <StreakCompletedPage streakNo={displayedStreak}/> :
            ContentComponent ? (<ContentComponent content={currentSegment} 
                               interactCallback={(segmentId) => {
                                 interactWithSegment(segmentId);
