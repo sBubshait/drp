@@ -7,6 +7,7 @@ import com.imperial.drp36.entity.Info;
 import com.imperial.drp36.entity.Segment;
 import com.imperial.drp36.entity.Poll;
 import com.imperial.drp36.entity.GapFill;
+import com.imperial.drp36.entity.Source;
 import com.imperial.drp36.model.ArticleContent;
 import com.imperial.drp36.model.DiscussionContent;
 import com.imperial.drp36.model.GapFillContent;
@@ -14,6 +15,7 @@ import com.imperial.drp36.model.PollContent;
 import com.imperial.drp36.model.QuestionContent;
 import com.imperial.drp36.model.InfoContent;
 import com.imperial.drp36.model.SegmentContent;
+import com.imperial.drp36.model.SourceContent;
 import com.imperial.drp36.repository.*;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
@@ -48,6 +50,9 @@ public class ArticleService {
 
   @Autowired
   private GapFillRepository gapFillRepository;
+
+  @Autowired
+  private SourceRepository sourceRepository;
 
   public Article getArticleById(Long id) {
     return articleRepository.findById(id).orElse(null);
@@ -174,5 +179,24 @@ public class ArticleService {
       System.err.println("Error voting on poll: " + e.getMessage());
       return false;
     }
+  }
+
+  public List<SourceContent> getSourcesForSegment(Long segmentId) {
+    List<Source> sources = sourceRepository.findBySegmentId(segmentId);
+    List<SourceContent> sourceContents = new ArrayList<>();
+
+    for (Source source : sources) {
+      sourceContents.add(new SourceContent(
+          source.getId(),
+          source.getTitle(),
+          source.getOutletName(),
+          source.getOutletShortcode(),
+          source.getOutletDomain(),
+          source.getUrl(),
+          source.getTag()
+      ));
+    }
+
+    return sourceContents;
   }
 }
