@@ -8,7 +8,11 @@ export default function NoMatchingArticles({
   handleFilterToggle,
   handleClearFilters,
   onGoToFirstArticle,
-  getFilterDisplayText
+  getFilterDisplayText,
+  selectedSort,
+  setSelectedSort,
+  showSortMenu,
+  setShowSortMenu
 }) {
   const getFilterDescription = () => {
     if (selectedFilters.length === 0) return 'any filters';
@@ -34,6 +38,10 @@ export default function NoMatchingArticles({
         handleFilterToggle={handleFilterToggle}
         handleClearFilters={handleClearFilters}
         getFilterDisplayText={getFilterDisplayText}
+        selectedSort={selectedSort}
+        setSelectedSort={setSelectedSort}
+        showSortMenu={showSortMenu}
+        setShowSortMenu={setShowSortMenu}
       />
 
       {/* No Matching Articles Content */}

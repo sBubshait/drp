@@ -22,8 +22,12 @@ export function ArticlePage() {
   const [noMatchingArticles, setNoMatchingArticles] = useState(false);
   const [matchingArticleIds, setMatchingArticleIds] = useState(new Set()); // Track matching articles
 
-  // Available filter options
-  const filterOptions = ['Popular', 'Recent', 'Hot', 'Technology', 'Environment', 'Global Politics', 'Economics', 'Social Issues'];
+  // Sort by state
+  const [selectedSort, setSelectedSort] = useState('Popular');
+  const [showSortMenu, setShowSortMenu] = useState(false);
+
+  // Available filter options (removed Popular, Recent, Hot)
+  const filterOptions = ['Technology', 'Environment', 'Global Politics', 'Economics', 'Social Issues'];
 
   useEffect(() => {
     const tipDismissed = localStorage.getItem('tipDismissed');
@@ -281,6 +285,10 @@ export function ArticlePage() {
         handleClearFilters={handleClearFilters}
         onGoToFirstArticle={handleGoToFirstArticle}
         getFilterDisplayText={getFilterDisplayText}
+        selectedSort={selectedSort}
+        setSelectedSort={setSelectedSort}
+        showSortMenu={showSortMenu}
+        setShowSortMenu={setShowSortMenu}
       />
     );
   }
@@ -301,6 +309,7 @@ export function ArticlePage() {
   console.log('Fetched Article:', fetchedArticle);
   console.log('Article Categories:', articleCategories);
   console.log('Selected Filters:', selectedFilters);
+  console.log('Selected Sort:', selectedSort);
   console.log('Matching Article IDs:', Array.from(matchingArticleIds));
 
   return (
@@ -321,6 +330,10 @@ export function ArticlePage() {
         handleFilterToggle={handleFilterToggle}
         handleClearFilters={handleClearFilters}
         getFilterDisplayText={getFilterDisplayText}
+        selectedSort={selectedSort}
+        setSelectedSort={setSelectedSort}
+        showSortMenu={showSortMenu}
+        setShowSortMenu={setShowSortMenu}
       />
 
       {/* Main Content Area */}
