@@ -16,12 +16,13 @@ export function ArticlePage() {
   const [error, setError] = useState(null);
   const [showTip, setShowTip] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [selectedFilters, setSelectedFilters] = useState([]); // Changed to array
+  const [selectedFilters, setSelectedFilters] = useState([]);
   const [showFilterMenu, setShowFilterMenu] = useState(false);
   const [noMatchingArticles, setNoMatchingArticles] = useState(false);
+  const [matchingArticleIds, setMatchingArticleIds] = useState(new Set()); // Track matching articles
 
-  // Available filter options (removed 'All' since we'll handle it differently)
-  const filterOptions = ['Popular', 'Recent', 'Hot', 'Technology', 'Health', 'Politics', 'Science'];
+  // Available filter options
+  const filterOptions = ['Popular', 'Recent', 'Hot', 'Technology', 'Environment', 'Global Politics', 'Economics', 'Social Issues'];
 
   useEffect(() => {
     const tipDismissed = localStorage.getItem('tipDismissed');
@@ -48,8 +49,13 @@ export function ArticlePage() {
     return selectedFilters.every(filter => categories.includes(filter));
   };
 
+  // Reset matching articles when filters change
+  useEffect(() => {
+    setMatchingArticleIds(new Set());
+  }, [selectedFilters]);
+
   // Function to fetch article by ID from API using the service layer
-  const fetchArticle = async (id, visitedIds = new Set()) => {
+  const fetchArticle = async (id, visitedIds = new Set(), direction = 'forward') => {
     setLoading(true);
     setError(null);
     setNoMatchingArticles(false);
@@ -62,19 +68,39 @@ export function ArticlePage() {
         // Add current article ID to visited set to prevent infinite loops
         visitedIds.add(id);
         
-        // If it doesn't match, automatically navigate to the next article
-        if (data.next && !visitedIds.has(data.next)) {
-          await fetchArticle(data.next, visitedIds);
+        // If it doesn't match, try to navigate to the next/previous article
+        const nextId = direction === 'forward' ? data.next : data.prev;
+        
+        if (nextId && !visitedIds.has(nextId)) {
+          await fetchArticle(nextId, visitedIds, direction);
           return;
         } else {
-          // No more articles to check and no matches found
-          setNoMatchingArticles(true);
-          setLoading(false);
-          return;
+          // No more articles in this direction
+          if (direction === 'forward' && matchingArticleIds.size > 0) {
+            // We've reached the end, cycle back to the earliest matching article
+            const earliestMatchingId = Math.min(...Array.from(matchingArticleIds));
+            console.log(`Cycling back to earliest matching article: ${earliestMatchingId}`);
+            navigate(`/articles/${earliestMatchingId}`);
+            return;
+          } else if (direction === 'backward' && matchingArticleIds.size > 0) {
+            // We've reached the beginning, cycle to the latest matching article
+            const latestMatchingId = Math.max(...Array.from(matchingArticleIds));
+            console.log(`Cycling forward to latest matching article: ${latestMatchingId}`);
+            navigate(`/articles/${latestMatchingId}`);
+            return;
+          } else {
+            // No matching articles found at all
+            setNoMatchingArticles(true);
+            setLoading(false);
+            return;
+          }
         }
       }
       
+      // Article matches - add to matching articles set and display it
+      setMatchingArticleIds(prev => new Set([...prev, data.article.id]));
       setFetchedArticle(data);
+      
     } catch (error) {
       console.error('Error fetching article:', error);
       setError(error.message);
@@ -99,13 +125,17 @@ export function ArticlePage() {
     }
   };
 
-  // Navigation functions with animation
+  // Navigation functions with animation and direction awareness
   const goToNext = () => {
     if (isAnimating || !fetchedArticle?.next) return;
 
     setIsAnimating(true);
     setTimeout(() => {
-      navigate(`/articles/${fetchedArticle.next}`);
+      // Use fetchArticle to handle filtering and cycling
+      const nextId = fetchedArticle.next;
+      if (nextId) {
+        fetchArticle(nextId, new Set(), 'forward');
+      }
       setIsAnimating(false);
     }, 150);
   };
@@ -115,7 +145,11 @@ export function ArticlePage() {
 
     setIsAnimating(true);
     setTimeout(() => {
-      navigate(`/articles/${fetchedArticle.prev}`);
+      // Use fetchArticle to handle filtering and cycling
+      const prevId = fetchedArticle.prev;
+      if (prevId) {
+        fetchArticle(prevId, new Set(), 'backward');
+      }
       setIsAnimating(false);
     }, 150);
   };
@@ -145,7 +179,7 @@ export function ArticlePage() {
         ? prev.filter(f => f !== filter) // Remove if already selected
         : [...prev, filter]; // Add if not selected
       
-      // Reset to article 1 when filters change (unless no filters selected)
+      // Reset to article 1 when filters change
       if (newFilters.length > 0) {
         navigate('/articles/1');
       }
@@ -265,65 +299,70 @@ export function ArticlePage() {
   console.log('Fetched Article:', fetchedArticle);
   console.log('Article Categories:', articleCategories);
   console.log('Selected Filters:', selectedFilters);
+  console.log('Matching Article IDs:', Array.from(matchingArticleIds));
 
   return (
     <div {...handlers} className="w-full bg-gray-200 flex flex-col min-h-screen overflow-hidden relative">
-      {/* Header with Filter */}
+      {/* Header - simplified without filter */}
       <div className="flex">
-        <div className="bg-gray-800 px-6 py-3 text-white font-bold text-lg flex-1 flex justify-between items-center">
+        <div className="bg-gray-800 px-6 py-3 text-white font-bold text-lg flex-1">
           <span>PoliticoApp</span>
-          <div className="relative">
-            <button
-              onClick={() => setShowFilterMenu(!showFilterMenu)}
-              className="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded text-sm flex items-center gap-2"
-            >
-              <span>Filter: {getFilterDisplayText()}</span>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            
-            {showFilterMenu && (
-              <div className="absolute right-0 top-full mt-1 bg-white rounded-md shadow-lg border z-50 min-w-[180px]">
-                {/* Clear all filters option */}
-                {selectedFilters.length > 0 && (
-                  <>
-                    <button
-                      onClick={handleClearFilters}
-                      className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-red-600 font-medium border-b"
-                    >
-                      Clear All Filters
-                    </button>
-                  </>
-                )}
-                
-                {/* Filter options with checkboxes */}
-                {filterOptions.map((filter) => (
+        </div>
+      </div>
+
+      {/* Filter Section - below header, on the left */}
+      <div className="bg-gray-200 px-6 py-3">
+        <div className="relative w-fit">
+          <button
+            onClick={() => setShowFilterMenu(!showFilterMenu)}
+            className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm flex items-center gap-2"
+          >
+            <span>Filter: {getFilterDisplayText()}</span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          
+          {showFilterMenu && (
+            <div className="absolute left-0 top-full mt-1 bg-white rounded-md shadow-lg border z-50 min-w-[180px]">
+              {/* Clear all filters option */}
+              {selectedFilters.length > 0 && (
+                <>
                   <button
-                    key={filter}
-                    onClick={() => handleFilterToggle(filter)}
-                    className="flex items-center w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-gray-700"
+                    onClick={handleClearFilters}
+                    className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-red-600 font-medium border-b"
                   >
-                    <input
-                      type="checkbox"
-                      checked={selectedFilters.includes(filter)}
-                      onChange={() => {}} // Handled by button click
-                      className="mr-2 rounded"
-                      tabIndex={-1}
-                    />
-                    <span>{filter}</span>
+                    Clear All Filters
                   </button>
-                ))}
-                
-                {/* Show selected filters count */}
-                {selectedFilters.length > 0 && (
-                  <div className="px-4 py-2 text-xs text-gray-500 border-t">
-                    {selectedFilters.length} filter{selectedFilters.length !== 1 ? 's' : ''} selected
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+                </>
+              )}
+              
+              {/* Filter options with checkboxes */}
+              {filterOptions.map((filter) => (
+                <button
+                  key={filter}
+                  onClick={() => handleFilterToggle(filter)}
+                  className="flex items-center w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-gray-700"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedFilters.includes(filter)}
+                    onChange={() => {}} // Handled by button click
+                    className="mr-2 rounded"
+                    tabIndex={-1}
+                  />
+                  <span>{filter}</span>
+                </button>
+              ))}
+              
+              {/* Show selected filters count */}
+              {selectedFilters.length > 0 && (
+                <div className="px-4 py-2 text-xs text-gray-500 border-t">
+                  {selectedFilters.length} filter{selectedFilters.length !== 1 ? 's' : ''} selected
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
