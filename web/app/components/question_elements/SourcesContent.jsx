@@ -35,7 +35,7 @@ export function SourcesContent({ sources }) {
             </div>
         )}
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto no-scrollbar">
             <div className="space-y-4 max-w-2xl mx-auto">
                 {filteredSources.map((source, index) => (
                     <SourceCard
