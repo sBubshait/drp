@@ -17,6 +17,16 @@ export async function getInteractedSegments(articleId) {
     return ApiService.getUserInteractedSegments(userId, articleId);
 }
 
+export async function getStreakCond() {
+    const userId = await getUserId();
+    return ApiService.getUserStreakCond(userId);
+}
+
+export async function completeStreak() {
+    const userId = await getUserId();
+    return ApiService.userCompleteStreak(userId);
+}
+
 export async function getMyData() {
     const userId = await getUserId();
     return ApiService.getUserData(userId);

@@ -11,7 +11,7 @@ import ApiService from '../services/api.js';
 import StreakMeter from '../components/streak/streakMeter.jsx';
 import Flame from '../components/streak/flame.jsx'
 import { StreakCompletedPage } from '../components/streak/streakCompletedPage.jsx';
-import { getInteractedSegments, getMyData, interactWithSegment } from '../services/other.js';
+import { completeStreak, getInteractedSegments, getMyData, interactWithSegment } from '../services/other.js';
 
 // Component map for different content types
 const CONTENT_COMPONENTS = {
@@ -35,7 +35,7 @@ export function QuestionPage() {
   const nextArticleId = location.state?.nextArticleId;
 
   const [answeredSegments, setAnsweredSegments] = useState([]);
-  const [streakArticle, setStreakArticle] = useState(true);
+  const [streakArticle, setStreakArticle] = useState(location.state.initStreak === null ? false : location.state.initStreak);
   const [streakCompleted, setStreakCompleted] = useState(false);
   const currentSegment = segments[currentIndex];
   const totalSegments = segments.length;
@@ -110,6 +110,7 @@ export function QuestionPage() {
         getMyData().then((dat) => {
           setDisplayedStreak(dat.streak);
           setTimeout(() => {setDisplayedStreak(dat.streak + 1)}, 400)
+          completeStreak();
         });
 
       } else if (nextArticleId) {
