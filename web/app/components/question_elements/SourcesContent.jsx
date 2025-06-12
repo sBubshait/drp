@@ -1,5 +1,19 @@
 import { useState, useMemo } from 'react';
 
+const tagColors = [
+    'bg-blue-100 text-blue-800',
+    'bg-green-100 text-green-800',
+    'bg-purple-100 text-purple-800',
+    'bg-orange-100 text-orange-800',
+    'bg-gray-100 text-gray-800',
+    'bg-red-100 text-red-800',
+    'bg-yellow-100 text-yellow-800',
+    'bg-pink-100 text-pink-800'
+].map(value => ({ value, sort: Math.random() }))
+    .sort((a, b) => a.sort - b.sort)
+    .map(({ value }) => value);
+
+
 export function SourcesContent({ sources }) {
     const [selectedTag, setSelectedTag] = useState('All');
 
@@ -29,6 +43,7 @@ export function SourcesContent({ sources }) {
                             tag={tag}
                             isSelected={selectedTag === tag}
                             onClick={() => setSelectedTag(tag)}
+                            sources={sources}
                         />
                     ))}
                 </div>
@@ -43,6 +58,7 @@ export function SourcesContent({ sources }) {
                         key={source.id}
                         source={source}
                         onSourceClick={handleSourceClick}
+                        sources={sources}
                     />
                 ))}
             </div>
@@ -51,7 +67,7 @@ export function SourcesContent({ sources }) {
 }
 
 
-function TagButton({ tag, isSelected, onClick }) {
+function TagButton({ tag, isSelected, onClick, sources }) {
     return (
         <button
             onClick={onClick}
@@ -65,7 +81,7 @@ function TagButton({ tag, isSelected, onClick }) {
     );
 }
 
-function SourceCard({ index, source, onSourceClick }) {
+function SourceCard({ index, source, onSourceClick, sources }) {
     const { title, outletName, outletDomain, outletShortcode, url, tag } = source;
 
     return (
@@ -76,7 +92,7 @@ function SourceCard({ index, source, onSourceClick }) {
                     <h3 className="font-semibold text-gray-900 truncate text-lg">{outletName}</h3>
                     <p className="text-sm text-gray-500 truncate">{outletDomain}</p>
                 </div>
-                <TagBadge tag={tag} />
+                <TagBadge tag={tag} sources={sources} />
             </div>
 
             <h4 className="text-lg font-medium text-gray-800 mb-4 leading-snug">
@@ -132,20 +148,20 @@ function SourceAvatar({ outletShortcode, index }) {
     );
 }
 
-function TagBadge({ tag }) {
-    const getTagColor = (tag) => {
-        const colorMap = {
-            'News Source': 'bg-blue-100 text-blue-800',
-            'Primary Source': 'bg-green-100 text-green-800',
-            'Publications': 'bg-purple-100 text-purple-800',
-            'Research': 'bg-orange-100 text-orange-800',
-            'Government': 'bg-gray-100 text-gray-800',
-        };
-        return colorMap[tag] || 'bg-gray-100 text-gray-800';
+function TagBadge({ tag, sources }) {
+    const getTagColor = (tag, sources) => {
+        // Get all unique tags from sources
+        const uniqueTags = [...new Set(sources.map(source => source.tag))];
+
+        // Find the index of the current tag
+        const tagIndex = uniqueTags.indexOf(tag);
+
+        // Return the color based on the tag's position in the unique tags array
+        return tagColors[tagIndex % tagColors.length];
     };
 
     return (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTagColor(tag)}`}>
+        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTagColor(tag, sources)}`}>
             {tag}
         </span>
     );
