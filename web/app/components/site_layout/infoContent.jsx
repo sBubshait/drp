@@ -1,6 +1,6 @@
-import {useState} from 'react';
+import { useState } from 'react';
 import AnnotatedText from "../question_elements/annotatedText"
-import ContextBox from '../question_elements/contextBox';
+import ContextBox from '../common/contextBox';
 
 export default function InfoContent({content, interactCallback}) {
 
@@ -10,7 +10,7 @@ export default function InfoContent({content, interactCallback}) {
     )
   }
 
-  const {body, annotations, id} = content;
+  const { body, annotations, id } = content;
 
   return (
     <>

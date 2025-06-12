@@ -1,4 +1,4 @@
-import ContextBox from "../question_elements/contextBox.jsx";
+import ContextBox from "../common/contextBox.jsx";
 import ChoicesButtons from "../question_elements/choicesButtons.jsx";
 import ViewResultsButton from "../question_elements/viewResultsButton.jsx";
 import PollResults from "../question_elements/pollResults.jsx";

@@ -38,7 +38,7 @@ export default function QuestionContent({ content, interactCallback }) {
 
   return (
     <div className="flex flex-col h-full justify-between">
-      <div className="p-3 max-h-32 overflow-y-auto">
+      <div className="p-3 max-h-80 overflow-y-auto">
         <ContextBox text={context} />
       </div>
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import ContextBox from "../question_elements/contextBox.jsx";
+import ContextBox from "../common/contextBox.jsx";
 import PinkContainer from "../discussions/PinkContainer.jsx";
 import WriteSection from "../discussions/WriteSection.jsx";
 import ResponseContainer from "../discussions/ResponseContainer.jsx";

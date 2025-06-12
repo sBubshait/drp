@@ -4,6 +4,8 @@ import com.imperial.drp36.entity.User;
 import com.imperial.drp36.model.IdStatusResponse;
 import com.imperial.drp36.model.StatusResponse;
 import com.imperial.drp36.repository.UserRepository;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.time.LocalDateTime;
@@ -17,6 +19,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @RestController
 @RequestMapping("/users")
@@ -131,5 +137,80 @@ public class UserController {
 
     // User is continuing an existing streak
     return 2L;
+  }
+  @Operation(
+      summary = "Add XP to User",
+      description = "Adds the specified amount of XP to a user's total XP"
+  )
+  @ApiResponses(value = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "XP added successfully",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(implementation = StatusResponse.class)
+          )
+      ),
+      @ApiResponse(
+          responseCode = "404",
+          description = "User not found",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(implementation = StatusResponse.class)
+          )
+      ),
+      @ApiResponse(
+          responseCode = "400",
+          description = "Invalid XP amount",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(implementation = StatusResponse.class)
+          )
+      )
+  })
+  @Tag(name = "Users")
+  @PostMapping("/addXP")
+  public ResponseEntity<StatusResponse> addXP(
+      @Parameter(
+          description = "ID of the user to add XP to",
+          required = true,
+          example = "1"
+      )
+      @RequestParam Long userId,
+
+      @Parameter(
+          description = "Amount of XP to add (must be positive)",
+          required = true,
+          example = "10"
+      )
+      @RequestParam Integer amount) {
+
+    try {
+      // Validate amount
+      if (amount == null || amount <= 0) {
+        return ResponseEntity.badRequest()
+            .body(new StatusResponse(400, "XP amount must be positive"));
+      }
+
+      // Find user
+      Optional<User> userOptional = userRepository.findById(userId);
+      if (!userOptional.isPresent()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body(new StatusResponse(404, "User not found"));
+      }
+
+      // Add XP and save
+      User user = userOptional.get();
+      user.addXp(amount);
+      userRepository.save(user);
+
+      return ResponseEntity.ok(
+          new StatusResponse(200, "Successfully added " + amount + " XP to user " + userId)
+      );
+
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(new StatusResponse(500, "Error adding XP: " + e.getMessage()));
+    }
   }
 }

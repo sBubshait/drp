@@ -195,6 +195,21 @@ class ApiService {
   static async getUserInteractedSegments(userId, articleId) {
     return this.request(`/metrics/getUserSegments?userId=${userId}&articleId=${articleId}`);
   }
+  /**
+ * Get sources for a segment
+ * @param {number} segmentId - Segment ID
+ * @returns {Promise<object>} - Sources data
+ */
+static async getSources(segmentId) {
+  const endpoint = `/getSources?segmentId=${segmentId}`;
+  const data = await this.request(endpoint);
+  
+  if (data.status !== 200) {
+    throw new Error(`Failed to fetch sources: ${data.status}`);
+  }
+  
+  return data;
+}
 }
 
 /**
