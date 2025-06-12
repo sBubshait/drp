@@ -7,6 +7,7 @@ import PollContent from "../components/site_layout/pollContent.jsx";
 import InfoContent from '../components/site_layout/infoContent.jsx';
 import DiscussionContent from "../components/site_layout/discussionContent.jsx";
 import ApiService from '../services/api.js';
+import { SourcesContent } from "../components/question_elements/SourcesContent.jsx"
 
 // Component map for different content types
 const CONTENT_COMPONENTS = {
@@ -21,6 +22,7 @@ export function QuestionPage() {
   const [segments, setSegments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [showSourcesSheet, setShowSourcesSheet] = useState(false);
   const navigate = useNavigate();
   const params = useParams();
   const location = useLocation();
@@ -196,9 +198,87 @@ export function QuestionPage() {
     );
   }
 
+  function getCurrentSegmentSources() {
+    return [
+      {
+        id: 1,
+        title: "Climate Change Report Shows Accelerating Global Warming Trends",
+        outletName: "BBC News",
+        outletShortcode: "BBC",
+        outletDomain: "bbc.co.uk",
+        url: "https://www.bbc.co.uk/news/science-environment-12345678",
+        tag: "News Source"
+      },
+      {
+        id: 2,
+        title: "IPCC Sixth Assessment Report on Climate Change 2023",
+        outletName: "IPCC",
+        outletShortcode: "IP",
+        outletDomain: "ipcc.ch",
+        url: "https://www.ipcc.ch/report/ar6/wg1/",
+        tag: "Primary Source"
+      },
+      {
+        id: 3,
+        title: "The Economics of Climate Action: A Comprehensive Analysis",
+        outletName: "Nature Climate Change",
+        outletShortcode: "NC",
+        outletDomain: "nature.com",
+        url: "https://www.nature.com/articles/climate-economics-2023",
+        tag: "Publications"
+      },
+      {
+        id: 4,
+        title: "Renewable Energy Investment Reaches Record High in 2023",
+        outletName: "Reuters",
+        outletShortcode: "RT",
+        outletDomain: "reuters.com",
+        url: "https://www.reuters.com/business/energy/renewable-investment-2023",
+        tag: "News Source"
+      },
+      {
+        id: 5,
+        title: "Global Temperature Anomaly Data 1880-2023",
+        outletName: "NASA GISS",
+        outletShortcode: "NS",
+        outletDomain: "nasa.gov",
+        url: "https://data.giss.nasa.gov/gistemp/",
+        tag: "Primary Source"
+      },
+      {
+        id: 6,
+        title: "Carbon Pricing Mechanisms and Their Effectiveness",
+        outletName: "Journal of Environmental Economics",
+        outletShortcode: "JE",
+        outletDomain: "sciencedirect.com",
+        url: "https://www.sciencedirect.com/science/article/carbon-pricing",
+        tag: "Publications"
+      },
+      {
+        id: 7,
+        title: "Arctic Sea Ice Decline Accelerates Beyond Predictions",
+        outletName: "The Guardian",
+        outletShortcode: "GU",
+        outletDomain: "theguardian.com",
+        url: "https://www.theguardian.com/environment/arctic-ice-decline",
+        tag: "News Source"
+      },
+      {
+        id: 8,
+        title: "World Bank Climate Change Action Plan 2021-2025",
+        outletName: "World Bank",
+        outletShortcode: "WB",
+        outletDomain: "worldbank.org",
+        url: "https://www.worldbank.org/climate-action-plan",
+        tag: "Primary Source"
+      }
+    ];
+  }
+
   const currentSegment = segments[currentIndex];
   const contentType = currentSegment?.content?.type || currentSegment?.type;
   const ContentComponent = CONTENT_COMPONENTS[contentType];
+  const currentSources = getCurrentSegmentSources();
 
   return (
     <div {...handlers} className="h-screen w-full bg-gray-200 flex flex-col overflow-hidden">
@@ -206,6 +286,8 @@ export function QuestionPage() {
         questionNumber={currentIndex + 1}
         totalQuestions={segments.length}
         taskType={capitalise(contentType)}
+        onSourcesClick={() => setShowSourcesSheet(true)}
+        hasSourcesData={currentSources.length > 0}
       />
 
       <div className="flex-1 flex flex-col min-h-0 relative overflow-hidden">
@@ -220,6 +302,48 @@ export function QuestionPage() {
               <p className="text-red-600 text-sm">Unknown content type: {contentType}</p>
             </div>
           )}
+        </div>
+      </div>
+
+      {showSourcesSheet && (
+        <SourcesBottomSheet
+          sources={currentSources}
+          onClose={() => setShowSourcesSheet(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+function SourcesBottomSheet({ sources, onClose }) {
+
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/30 z-50 flex items-end justify-center"
+      onClick={handleBackdropClick}
+    >
+      <div
+        id="sourcesBottomSheet"
+        className="bg-gray-200 w-full md:max-w-md lg:max-w-2xl h-3/4 rounded-t-2xl flex flex-col animate-slide-up relative"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Floating Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 w-8 h-8 bg-white hover:bg-gray-100 text-black rounded-full flex items-center justify-center transition-colors shadow-md z-10"
+        >
+          ✕
+        </button>
+
+        {/* Content */}
+        <div className="flex-1 flex flex-col min-h-0 p-4 pt-12">
+          <SourcesContent sources={sources} />
         </div>
       </div>
     </div>
