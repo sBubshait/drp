@@ -225,6 +225,7 @@ export function QuestionPage() {
   for (progress = 0; progress < totalSegments; progress++) {
     if (!answeredSegments.includes(segments[progress].id)) break;
   }
+  const fract = progress / totalSegments
 
   return (
     <div {...handlers} className="h-screen w-full bg-gray-200 flex flex-col overflow-hidden">
@@ -235,11 +236,12 @@ export function QuestionPage() {
       />
 
       <div className='text-center pt-[5%]'>
-        <Flame className="inline-block px-[7%] scale-50"/>
+        <Flame className="inline-block px-[7%] scale-50" doBurst={fract == 1} burstDelay={900}/>
         <StreakMeter className='inline-block max-w-78/100'
                      height="h-7"
                      barColor="bg-red-400"
-                     value={progress / totalSegments * 100}
+                     value={fract * 100}
+                     duration={1000}
         />
       </div>
 
