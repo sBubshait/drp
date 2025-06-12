@@ -280,8 +280,8 @@ export function QuestionPage() {
       />
 
       {streakArticle && <div className='text-center pt-[5%]'>
-        <Flame className="inline-block px-[7%] scale-50" doBurst={fract == 1} burstDelay={900}/>
-        <StreakMeter className='inline-block max-w-78/100'
+        <Flame className="hidden px-[7%] scale-50" doBurst={fract == 1} burstDelay={900}/>
+        <StreakMeter className='hidden max-w-78/100'
                      height="h-7"
                      barColor="bg-red-400"
                      value={fract * 100}
