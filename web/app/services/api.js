@@ -179,6 +179,22 @@ class ApiService {
       })
     });
   }
+
+  /**
+ * Get sources for a segment
+ * @param {number} segmentId - Segment ID
+ * @returns {Promise<object>} - Sources data
+ */
+static async getSources(segmentId) {
+  const endpoint = `/getSources?segmentId=${segmentId}`;
+  const data = await this.request(endpoint);
+  
+  if (data.status !== 200) {
+    throw new Error(`Failed to fetch sources: ${data.status}`);
+  }
+  
+  return data;
+}
 }
 
 /**

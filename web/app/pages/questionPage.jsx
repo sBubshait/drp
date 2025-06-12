@@ -23,6 +23,8 @@ export function QuestionPage() {
   const [loading, setLoading] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
   const [showSourcesSheet, setShowSourcesSheet] = useState(false);
+  const [currentSources, setCurrentSources] = useState([]);
+  const [sourcesLoading, setSourcesLoading] = useState(false);
   const navigate = useNavigate();
   const params = useParams();
   const location = useLocation();
@@ -48,6 +50,12 @@ export function QuestionPage() {
     setCurrentIndex(0);
   }, [location.state, articleId]);
 
+  useEffect(() => {
+    if (segments.length > 0 && segments[currentIndex]) {
+      fetchSourcesForCurrentSegment();
+    }
+  }, [currentIndex, segments]);
+
   // Fallback function to fetch article data using API service
   const fetchArticleData = async (id) => {
     setLoading(true);
@@ -59,6 +67,25 @@ export function QuestionPage() {
       setSegments([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Fetch sources for the current segment
+  const fetchSourcesForCurrentSegment = async () => {
+    if (!segments[currentIndex]?.id) {
+      setCurrentSources([]);
+      return;
+    }
+
+    setSourcesLoading(true);
+    try {
+      const data = await ApiService.getSources(segments[currentIndex].id);
+      setCurrentSources(data.sources || []);
+    } catch (error) {
+      console.error('Error fetching sources:', error);
+      setCurrentSources([]);
+    } finally {
+      setSourcesLoading(false);
     }
   };
 
@@ -96,7 +123,6 @@ export function QuestionPage() {
   };
 
   // Add this helper function at the top of your QuestionPage component:
-
   const isSwipeExcluded = (target) => {
     const excludedElements = [
       document.getElementById('annotationSidebar'),
@@ -133,9 +159,9 @@ export function QuestionPage() {
       }
     },
     swipeDuration: 500,
-    preventScrollOnSwipe: true, // Don't prevent scrolling globally
+    preventScrollOnSwipe: true,
     trackMouse: true,
-    delta: 50, // Higher threshold for intentional swipes
+    delta: 50,
     preventDefaultTouchmoveEvent: false,
     touchEventOptions: { passive: true }
   });
@@ -198,87 +224,9 @@ export function QuestionPage() {
     );
   }
 
-  function getCurrentSegmentSources() {
-    return [
-      {
-        id: 1,
-        title: "Climate Change Report Shows Accelerating Global Warming Trends",
-        outletName: "BBC News",
-        outletShortcode: "BBC",
-        outletDomain: "bbc.co.uk",
-        url: "https://www.bbc.co.uk/news/science-environment-12345678",
-        tag: "News Source"
-      },
-      {
-        id: 2,
-        title: "IPCC Sixth Assessment Report on Climate Change 2023",
-        outletName: "IPCC",
-        outletShortcode: "IP",
-        outletDomain: "ipcc.ch",
-        url: "https://www.ipcc.ch/report/ar6/wg1/",
-        tag: "Primary Source"
-      },
-      {
-        id: 3,
-        title: "The Economics of Climate Action: A Comprehensive Analysis",
-        outletName: "Nature Climate Change",
-        outletShortcode: "NC",
-        outletDomain: "nature.com",
-        url: "https://www.nature.com/articles/climate-economics-2023",
-        tag: "Publications"
-      },
-      {
-        id: 4,
-        title: "Renewable Energy Investment Reaches Record High in 2023",
-        outletName: "Reuters",
-        outletShortcode: "RT",
-        outletDomain: "reuters.com",
-        url: "https://www.reuters.com/business/energy/renewable-investment-2023",
-        tag: "News Source"
-      },
-      {
-        id: 5,
-        title: "Global Temperature Anomaly Data 1880-2023",
-        outletName: "NASA GISS",
-        outletShortcode: "NS",
-        outletDomain: "nasa.gov",
-        url: "https://data.giss.nasa.gov/gistemp/",
-        tag: "Primary Source"
-      },
-      {
-        id: 6,
-        title: "Carbon Pricing Mechanisms and Their Effectiveness",
-        outletName: "Journal of Environmental Economics",
-        outletShortcode: "JE",
-        outletDomain: "sciencedirect.com",
-        url: "https://www.sciencedirect.com/science/article/carbon-pricing",
-        tag: "Publications"
-      },
-      {
-        id: 7,
-        title: "Arctic Sea Ice Decline Accelerates Beyond Predictions",
-        outletName: "The Guardian",
-        outletShortcode: "GU",
-        outletDomain: "theguardian.com",
-        url: "https://www.theguardian.com/environment/arctic-ice-decline",
-        tag: "News Source"
-      },
-      {
-        id: 8,
-        title: "World Bank Climate Change Action Plan 2021-2025",
-        outletName: "World Bank",
-        outletShortcode: "WB",
-        outletDomain: "worldbank.org",
-        url: "https://www.worldbank.org/climate-action-plan",
-        tag: "Primary Source"
-      }
-    ];
-  }
-
   const currentSegment = segments[currentIndex];
   const contentType = currentSegment?.content?.type || currentSegment?.type;
   const ContentComponent = CONTENT_COMPONENTS[contentType];
-  const currentSources = getCurrentSegmentSources();
 
   return (
     <div {...handlers} className="h-screen w-full bg-gray-200 flex flex-col overflow-hidden">
@@ -308,6 +256,7 @@ export function QuestionPage() {
       {showSourcesSheet && (
         <SourcesBottomSheet
           sources={currentSources}
+          loading={sourcesLoading}
           onClose={() => setShowSourcesSheet(false)}
         />
       )}
@@ -315,8 +264,7 @@ export function QuestionPage() {
   );
 }
 
-function SourcesBottomSheet({ sources, onClose }) {
-
+function SourcesBottomSheet({ sources, loading, onClose }) {
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) {
       onClose();
@@ -343,7 +291,17 @@ function SourcesBottomSheet({ sources, onClose }) {
 
         {/* Content */}
         <div className="flex-1 flex flex-col min-h-0 p-4 pt-12">
-          <SourcesContent sources={sources} />
+          {loading ? (
+            <div className="flex-1 flex items-center justify-center">
+              <p className="text-gray-600">Loading sources...</p>
+            </div>
+          ) : sources.length > 0 ? (
+            <SourcesContent sources={sources} />
+          ) : (
+            <div className="flex-1 flex items-center justify-center">
+              <p className="text-gray-600">No sources available for this segment.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
