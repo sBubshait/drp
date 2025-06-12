@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import ContextBox from "../question_elements/contextBox.jsx";
+import ContextBox from "../common/contextBox.jsx";
 import MultipleChoiceQuestion from "../question_elements/multipleChoiceQuestion.jsx";
 import FeedbackBox from "../question_elements/feedbackBox.jsx";
 import ChoicesButtons from "../question_elements/choicesButtons.jsx";
@@ -40,7 +40,7 @@ export default function QuestionContent({ content }) {
 
   return (
     <div className="flex flex-col h-full justify-between">
-      <div className="p-3 max-h-32 overflow-y-auto">
+      <div className="p-3 max-h-80 overflow-y-auto">
         <ContextBox text={context} />
       </div>
 

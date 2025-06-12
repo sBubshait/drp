@@ -1,8 +1,8 @@
-import {useState} from 'react';
+import { useState } from 'react';
 import AnnotatedText from "../question_elements/annotatedText"
-import ContextBox from '../question_elements/contextBox';
+import ContextBox from '../common/contextBox';
 
-export default function InfoContent({content}) {
+export default function InfoContent({ content }) {
 
   if (!content) {
     return (
@@ -10,13 +10,13 @@ export default function InfoContent({content}) {
     )
   }
 
-  const {body, annotations, id} = content;
+  const { body, annotations, id } = content;
 
   return (
     <>
       <div className="block p-6">
-          <AnnotatedText text={body} annotations={annotations} segmentId={id}/>
-        </div>
+        <AnnotatedText text={body} annotations={annotations} segmentId={id} />
+      </div>
     </>
   );
 }
