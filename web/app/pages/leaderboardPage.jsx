@@ -57,6 +57,19 @@ export function LeaderboardPage() {
     trackMouse: true
   });
 
+  const getRankIcon = (position) => {
+    switch (position) {
+      case 0:
+        return '🏆';
+      case 1:
+        return '🥈';
+      case 2:
+        return '🥉';
+      default:
+        return `${position + 1}.`;
+    }
+  };
+
   return (
     <div {...handlers} className="h-screen w-full bg-gray-100 flex flex-col">
       {/* Header */}
@@ -79,17 +92,23 @@ export function LeaderboardPage() {
           <p className="text-gray-500">No users to display.</p>
         )}
 
-        {users.map((user) => (
+        {users.map((user, index) => (
           <div
             key={user.userId}
             className="flex items-center bg-white shadow-md rounded-lg p-3 mb-2"
           >
+            <div className="w-8 text-center text-lg font-semibold text-gray-700 mr-3">
+              {getRankIcon(index)}
+            </div>
+
             <div className={`flex items-center justify-center w-10 h-10 rounded-full ${user.color} text-white font-bold text-sm`}>
               {user.name?.charAt(0).toUpperCase() || '?'}
             </div>
+
             <div className="ml-4 flex-1">
               <p className="font-semibold text-gray-800">{user.name}</p>
             </div>
+
             <div className="text-cyan-600 font-bold">{user.score} xp</div>
           </div>
         ))}
