@@ -22,7 +22,7 @@ export function LeaderboardPage() {
 
   const fetchLeaderboard = async () => {
     try {
-      // const response = await ApiService.getLeaderboard(); // You need to define this API method
+      // const response = await ApiService.getLeaderboard();
       const response = [
         { userId: 1, name: 'Alice Carter', score: 89 },
         { userId: 2, name: 'Benjamin Lee', score: 77 },
@@ -58,9 +58,9 @@ export function LeaderboardPage() {
   });
 
   return (
-    <div {...handlers} className="min-h-screen w-full bg-gray-100 flex flex-col">
+    <div {...handlers} className="h-screen w-full bg-gray-100 flex flex-col">
       {/* Header */}
-      <div className="flex justify-between items-center bg-gray-800 text-white px-4 py-3">
+      <div className="flex justify-between items-center bg-gray-800 text-white px-4 py-3 sticky top-0 z-10">
         <h1 className="text-lg font-bold">Leaderboard</h1>
         <button
           onClick={() => navigate(returnTo)}
@@ -70,8 +70,7 @@ export function LeaderboardPage() {
         </button>
       </div>
 
-
-      {/* Content */}
+      {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto px-4 py-2">
         {loading && <p className="text-gray-500">Loading leaderboard...</p>}
         {error && <p className="text-red-500">{error}</p>}
@@ -80,7 +79,7 @@ export function LeaderboardPage() {
           <p className="text-gray-500">No users to display.</p>
         )}
 
-        {users.map((user, index) => (
+        {users.map((user) => (
           <div
             key={user.userId}
             className="flex items-center bg-white shadow-md rounded-lg p-3 mb-2"
@@ -91,7 +90,6 @@ export function LeaderboardPage() {
             <div className="ml-4 flex-1">
               <p className="font-semibold text-gray-800">{user.name}</p>
             </div>
-
             <div className="text-cyan-600 font-bold">{user.score} xp</div>
           </div>
         ))}
