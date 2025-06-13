@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import ContextBox from "../question_elements/contextBox.jsx";
+import ContextBox from "../common/contextBox.jsx";
 import PinkContainer from "../discussions/PinkContainer.jsx";
 import WriteSection from "../discussions/WriteSection.jsx";
 import ResponseContainer from "../discussions/ResponseContainer.jsx";
 import ApiService from '../../services/api.js';
 
-export default function DiscussionContent({ content }) {
+export default function DiscussionContent({ content, interactCallback }) {
   const [userInput, setUserInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [responses, setResponses] = useState([]);
@@ -23,6 +23,7 @@ export default function DiscussionContent({ content }) {
     );
   }
 
+  const segmentId = content.id;
   const { id, context, prompt, totalResponses } = content;
 
   // Check localStorage on component mount
@@ -63,6 +64,8 @@ export default function DiscussionContent({ content }) {
       alert('Please share your thoughts before unlocking the discussion!');
       return;
     }
+
+    interactCallback(segmentId);
 
     setIsSubmitting(true);
 

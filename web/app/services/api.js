@@ -139,6 +139,77 @@ class ApiService {
       })
     });
   }
+
+  /**
+   * Record a swipe right action
+   * @param {number} userId - User ID
+   * @param {number} articleId - Article ID
+   * @returns {Promise<object>} - Status response
+   */
+  static async swipeRight(userId, articleId) {
+    const endpoint = `/metrics/swipedRight`;
+    return this.request(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        userId: userId,
+        articleId: articleId
+      })
+    });
+  }
+
+  /**
+   * Record interaction with a segment
+   * @param {number} userId - User ID
+   * @param {number} segmentId - Segment ID
+   * @returns {Promise<object>} - Status response
+   */
+  static async interactWithSegment(userId, segmentId) {
+    const endpoint = `/metrics/interactWithSegment`;
+    return this.request(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        userId: userId,
+        segmentId: segmentId
+      })
+    });
+  }
+
+  static async getUserData(userId) {
+    return this.request(`/users/get?id=${userId}`);
+  }
+
+  static async getUserStreakCond(userId) {
+    return this.request(`/users/streakCond?id=${userId}`);
+  }
+
+  static async userCompleteStreak(userId) {
+    return this.request(`/users/completeStreak?id=${userId}`, {method: `POST`});
+  }
+
+  static async getUserInteractedSegments(userId, articleId) {
+    return this.request(`/metrics/getUserSegments?userId=${userId}&articleId=${articleId}`);
+  }
+  /**
+ * Get sources for a segment
+ * @param {number} segmentId - Segment ID
+ * @returns {Promise<object>} - Sources data
+ */
+static async getSources(segmentId) {
+  const endpoint = `/getSources?segmentId=${segmentId}`;
+  const data = await this.request(endpoint);
+  
+  if (data.status !== 200) {
+    throw new Error(`Failed to fetch sources: ${data.status}`);
+  }
+  
+  return data;
+}
 }
 
 /**

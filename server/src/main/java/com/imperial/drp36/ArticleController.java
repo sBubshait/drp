@@ -5,6 +5,8 @@ import com.imperial.drp36.model.ArticleContent;
 import com.imperial.drp36.model.ArticleResponse;
 import com.imperial.drp36.model.SegmentContent;
 import com.imperial.drp36.model.SegmentResponse;
+import com.imperial.drp36.model.SourceContent;
+import com.imperial.drp36.model.SourcesResponse;
 import com.imperial.drp36.repository.SegmentRepository;
 import com.imperial.drp36.services.ArticleService;
 import com.imperial.drp36.entity.Segment;
@@ -16,6 +18,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.http.HttpStatus;
@@ -133,6 +137,24 @@ public class ArticleController {
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body(new SegmentResponse(500, "Error retrieving segment: " + e.getMessage()));
+    }
+  }
+
+  @Tag(name = "Articles")
+  @GetMapping("/getSources")
+  public ResponseEntity<SourcesResponse> getSources(
+      @Parameter(
+          description = "ID of the segment to get sources for",
+          required = true,
+          example = "1"
+      )
+      @RequestParam Long segmentId) {
+
+    try {
+      List<SourceContent> sources = articleService.getSourcesForSegment(segmentId);
+      return ResponseEntity.ok(new SourcesResponse(200, sources));
+    } catch (Exception e) {
+      return ResponseEntity.ok(new SourcesResponse(500, new ArrayList<>()));
     }
   }
 

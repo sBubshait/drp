@@ -1,17 +1,12 @@
 package com.imperial.drp36.services;
 
-import com.imperial.drp36.entity.Article;
-import com.imperial.drp36.entity.User;
-import com.imperial.drp36.entity.UserArticle;
-import com.imperial.drp36.entity.UserSegment;
-import com.imperial.drp36.repository.ArticleRepository;
-import com.imperial.drp36.repository.SegmentRepository;
-import com.imperial.drp36.repository.UserArticleRepository;
-import com.imperial.drp36.repository.UserRepository;
-import com.imperial.drp36.repository.UserSegmentRepository;
+import com.imperial.drp36.entity.*;
+import com.imperial.drp36.repository.*;
+import com.imperial.drp36.model.InteractedSegmentsResponse;
 import com.imperial.drp36.model.MetricsResponse;
 import jakarta.transaction.Transactional;
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 @Service
@@ -35,6 +30,9 @@ public class MetricsService {
 
   @Autowired
   private ArticleService articleService;
+
+  @Autowired
+  private UserArticleSegmentRepository userArticleSegmentRepository;
 
   public User createUser() {
     User user = new User();
@@ -75,6 +73,11 @@ public class MetricsService {
     userSegmentRepository.save(userSegment);
   }
 
+  public InteractedSegmentsResponse getInteractedSegments(Long userId, Long articleId) {
+      List<UserArticleSegment> segments = userArticleSegmentRepository.findByUserIdAndArticleSegmentArticleIdOrderBySegmentIdAsc(userId, articleId);
+      return new InteractedSegmentsResponse(200, "ok", segments.stream().map(it -> it.getSegmentId()).toList());
+  }
+
   public MetricsResponse getEngagementMetrics() {
     List<User> users = userRepository.findAll();
     if (users.isEmpty()) {
@@ -88,26 +91,30 @@ public class MetricsService {
       List<UserArticle> userArticles = userArticleRepository.findByUserId(user.getId());
 
       if (!userArticles.isEmpty()) {
-        long totalSegments = 0;
-        long interactedSegments = 0;
+        double userTotalPercentage = 0.0;
+        int articlesProcessed = 0;
 
         for (UserArticle userArticle : userArticles) {
           Article article = articleService.getArticleById(userArticle.getArticleId());
           if (article != null) {
             List<Long> segmentIds = article.getSegments();
-            totalSegments += segmentIds.size();
-
-            interactedSegments += userSegmentRepository.countByUserIdAndSegmentIdIn(user.getId(), segmentIds);
+            if (segmentIds.size() > 0) {
+              long interactedSegments = userSegmentRepository.countByUserIdAndSegmentIdIn(user.getId(), segmentIds);
+              double articlePercentage = (interactedSegments * 100.0) / segmentIds.size();
+              userTotalPercentage += articlePercentage;
+              articlesProcessed++;
+            }
           }
         }
 
-        if (totalSegments > 0) {
-          double userEDI = (interactedSegments * 100.0) / totalSegments;
+        if (articlesProcessed > 0) {
+          double userEDI = userTotalPercentage / articlesProcessed;
           totalEDI += userEDI;
           usersWithData++;
         }
       }
     }
+
     if (usersWithData == 0) {
       return new MetricsResponse(200, -1.0, "No engagement data available");
     }
