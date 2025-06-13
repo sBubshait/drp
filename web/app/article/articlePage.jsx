@@ -33,7 +33,7 @@ export function ArticlePage() {
   const [showSortMenu, setShowSortMenu] = useState(false);
 
   // Add a state to control visibility of both menus
-  const [showMenus, setShowMenus] = useState(true);
+  const [showMenus, setShowMenus] = useState(false);
 
   // Available filter options (removed Popular, Recent, Hot)
   const filterOptions = ['Technology', 'Environment', 'Global Politics', 'Economics', 'Social Issues'];
