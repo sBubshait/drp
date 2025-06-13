@@ -10,6 +10,7 @@ import { calculateArticleCategories } from '../utils/categoryUtils.js';
 import StreakBeginTip from '../components/streak/streakBeginTip.jsx';'../components/streak/streakBeginTip.jsx'
 import { getStreakCond, swipeRight } from '../services/other.js';
 import XpDisplay from '../components/common/XpDisplay.jsx';
+import { getNextArticleId } from '../utils/sortingUtils';
 
 export function ArticlePage() {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ export function ArticlePage() {
   const [matchingArticleIds, setMatchingArticleIds] = useState(new Set()); // Track matching articles
 
   // Sort by state
-  const [selectedSort, setSelectedSort] = useState('Popular');
+  const [selectedSort, setSelectedSort] = useState('Auto');
   const [showSortMenu, setShowSortMenu] = useState(false);
 
   // Add a state to control visibility of both menus
@@ -34,6 +35,9 @@ export function ArticlePage() {
   // Available filter options (removed Popular, Recent, Hot)
   const filterOptions = ['Technology', 'Environment', 'Global Politics', 'Economics', 'Social Issues'];
   const [streakStatus, setStreakStatus] = useState(0);
+
+  // Add this new state to track the current article ID independent of the URL
+  const [currentArticleId, setCurrentArticleId] = useState(params.id ? parseInt(params.id, 10) : 1);
 
   useEffect(() => {
     initTip();
@@ -73,10 +77,29 @@ export function ArticlePage() {
   // Function to fetch article by ID from API using the service layer
   const fetchArticle = async (id, visitedIds = new Set(), direction = 'forward') => {
     setLoading(true);
-    setError(null);
-    setNoMatchingArticles(false);
-
+    
     try {
+      if (selectedSort !== 'Auto') {
+        // Custom sort logic
+        const data = await ApiService.getArticle(id);
+        if (data.status === 200) {
+          setFetchedArticle(data);
+          setCurrentArticleId(id); // Update our tracking state
+          setNoMatchingArticles(false);
+          
+          /* Optional: Update URL without page reload, but less frequently
+          if (window.location.pathname !== `/articles/${id}`) {
+            navigate(`/articles/${id}`, { replace: true });
+          }
+          */
+          
+          setLoading(false);
+          return;
+        }
+      }
+      
+      // If sort is Auto or custom sort fetch failed, use the original logic
+      console.log(`Fetching article with ID: ${id}`);
       const data = await ApiService.getArticle(id);
       
       // Check if the article matches the current filters
@@ -115,8 +138,9 @@ export function ArticlePage() {
       
       // Article matches - add to matching articles set and display it
       setMatchingArticleIds(prev => new Set([...prev, data.article.id]));
+      setNoMatchingArticles(false);
       setFetchedArticle(data);
-      
+      console.log('Fetched article AND STUFF:', data);
     } catch (error) {
       console.error('Error fetching article:', error);
       setError(error.message);
@@ -143,14 +167,24 @@ export function ArticlePage() {
 
   // Navigation functions with animation and direction awareness
   const goToNext = () => {
-    if (isAnimating || !fetchedArticle?.next) return;
-
+    if (isAnimating) return;
+    
     setIsAnimating(true);
     setTimeout(() => {
-      // Use fetchArticle to handle filtering and cycling
-      const nextId = fetchedArticle.next;
-      if (nextId) {
-        fetchArticle(nextId, new Set(), 'forward');
+      if (selectedSort !== 'Auto') {
+        // Use custom sort logic with currentArticleId
+        const nextId = getNextArticleId(selectedSort, currentArticleId, 'forward');
+        if (nextId) {
+          fetchArticle(nextId, new Set(), 'forward');
+        } else {
+          setNoMatchingArticles(true);
+        }
+      } else {
+        // Use existing next ID from API
+        const nextId = fetchedArticle.next;
+        if (nextId) {
+          fetchArticle(nextId, new Set(), 'forward');
+        }
       }
       setIsAnimating(false);
     }, 150);
@@ -158,13 +192,23 @@ export function ArticlePage() {
 
   const goToPrev = () => {
     if (isAnimating || !fetchedArticle?.prev) return;
-
+    
     setIsAnimating(true);
     setTimeout(() => {
-      // Use fetchArticle to handle filtering and cycling
-      const prevId = fetchedArticle.prev;
-      if (prevId) {
-        fetchArticle(prevId, new Set(), 'backward');
+      if (selectedSort !== 'Auto') {
+        // Use custom sort logic
+        const prevId = getNextArticleId(selectedSort, articleId || fetchedArticle.article.id, 'backward');
+        if (prevId) {
+          fetchArticle(prevId, new Set(), 'backward');
+        } else {
+          setNoMatchingArticles(true);
+        }
+      } else {
+        // Use existing prev ID from API
+        const prevId = fetchedArticle.prev;
+        if (prevId) {
+          fetchArticle(prevId, new Set(), 'backward');
+        }
       }
       setIsAnimating(false);
     }, 150);
@@ -290,20 +334,23 @@ export function ArticlePage() {
   // No matching articles found
   if (noMatchingArticles) {
     return (
-      <NoMatchingArticles
-        selectedFilters={selectedFilters}
-        filterOptions={filterOptions}
-        showFilterMenu={showFilterMenu}
-        setShowFilterMenu={setShowFilterMenu}
-        handleFilterToggle={handleFilterToggle}
-        handleClearFilters={handleClearFilters}
-        onGoToFirstArticle={handleGoToFirstArticle}
-        getFilterDisplayText={getFilterDisplayText}
-        selectedSort={selectedSort}
-        setSelectedSort={setSelectedSort}
-        showSortMenu={showSortMenu}
-        setShowSortMenu={setShowSortMenu}
-      />
+      <div className="flex-1 flex flex-col justify-center items-center p-8">
+        <div className="bg-white rounded-lg shadow-md p-8 max-w-md text-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M12 2a10 10 0 110 20 10 10 0 010-20z" />
+          </svg>
+          <h2 className="text-xl font-bold text-gray-700 mb-2">No More Articles</h2>
+          <p className="text-gray-600 mb-4">
+            You've reached the end of articles for the "{selectedSort}" sort order.
+          </p>
+          <button
+            onClick={handleClearFilters}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors"
+          >
+            Reset Filters & Sort
+          </button>
+        </div>
+      </div>
     );
   }
 
@@ -379,29 +426,49 @@ export function ArticlePage() {
       </div>
 
       {/* Main Content Area */}
-      <div
-        className={`flex-1 flex flex-col justify-center items-center relative transition-all duration-300 ease-out ${isAnimating ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'
-          }`}
-      >
-        {isVideoArticle ? (
-          /* Video Article Layout - Full Screen */
-          <div className="w-full h-full relative">
-            {/* Video Player - Takes full available space */}
-            <div className="w-full h-full p-4">
-              <VerticalVideoPlayer
-                videoUrl={fetchedArticle.article.content}
-                categories={articleCategories}
-              />
+      {noMatchingArticles ? (
+        <div className="flex-1 flex flex-col justify-center items-center p-8">
+          <div className="bg-white rounded-lg shadow-md p-8 max-w-md text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M12 2a10 10 0 110 20 10 10 0 010-20z" />
+            </svg>
+            <h2 className="text-xl font-bold text-gray-700 mb-2">No More Articles</h2>
+            <p className="text-gray-600 mb-4">
+              You've reached the end of articles for the "{selectedSort}" sort order.
+            </p>
+            <button
+              onClick={handleClearFilters}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors"
+            >
+              Reset Filters & Sort
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div
+          className={`flex-1 flex flex-col justify-center items-center relative transition-all duration-300 ease-out ${isAnimating ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'
+            }`}
+        >
+          {isVideoArticle ? (
+            /* Video Article Layout - Full Screen */
+            <div className="w-full h-full relative">
+              {/* Video Player - Takes full available space */}
+              <div className="w-full h-full p-4">
+                <VerticalVideoPlayer
+                  videoUrl={fetchedArticle.article.content}
+                  categories={articleCategories}
+                />
+              </div>
             </div>
-          </div>
-        ) : (
-          /* Text Article Layout - Centered */
-          <div className="flex flex-col">
-            <StreakBeginTip className="relative bottom-42" streakStatus={streakStatus} />
-            <ArticlePreview article={fetchedArticle.article} categories={articleCategories}/>
-          </div>
-        )}
-      </div>
+          ) : (
+            /* Text Article Layout - Centered */
+            <div className="flex flex-col">
+              <StreakBeginTip className="relative bottom-42" streakStatus={streakStatus} />
+              <ArticlePreview article={fetchedArticle.article} categories={articleCategories}/>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Tip Box - Positioned absolutely over content */}
       {showTip && (

@@ -1,14 +1,19 @@
+import { sortSequences, getNextArticleId } from "../../utils/sortingUtils";
+import { useNavigate, useParams } from 'react-router';
+
 export default function SortBySection({
   selectedSort,
   setSelectedSort,
   showSortMenu,
   setShowSortMenu
 }) {
-  const sortOptions = ['Popular', 'Recent', 'Hot'];
+  const sortOptions = ['Auto', 'Popular', 'Recent', 'Hot'];
+  const navigate = useNavigate();
 
   const handleSortSelect = (sortOption) => {
     setSelectedSort(sortOption);
     setShowSortMenu(false);
+    navigate(`/articles/${sortSequences[sortOption][0]}`)
   };
 
   return (
