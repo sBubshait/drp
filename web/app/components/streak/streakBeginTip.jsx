@@ -13,7 +13,7 @@ export default function StreakBeginTip({ className, streakStatus }) {
 
         {/* Text container flex-grow, stacked vertically */}
         <div className="ml-4 flex flex-col">
-          <p className="text-sm text-red-600 font-bold leading-tight">
+          <p className="text-xl text-red-600 font-bold leading-tight">
             {streakStatus === 1
               ? <p> Ready to start your streak? <br /> Complete an article today! </p>
               : <p> Keep your streak alive! <br /> Don't miss today's article. </p>
