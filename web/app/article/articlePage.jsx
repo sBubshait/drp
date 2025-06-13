@@ -180,13 +180,14 @@ export function ArticlePage() {
   return (
     <div {...handlers} className="w-full bg-gray-200 flex flex-col min-h-screen overflow-hidden relative">
       {/* Header */}  
-        <div className="flex justify-between items-center bg-gray-800 px-4 py-3 text-white font-bold text-lg">
+        <div className="flex justify-between items-center bg-gray-800 px-4 py-3 text-white font-bold text-lg h-20">
         <>PoliticoApp</>
 
-        {/* Leaderboard */}
+        <StreakBeginTip streakStatus={streakStatus} />
+
         <button
           onClick={() => navigate(`/leaderboard`, { state: { returnTo: `/articles/${articleId}` } })}
-          className="bg-cyan-600 text-white py-4 px-6 rounded-lg text-lg font-medium hover:bg-cyan-700 active:bg-cyan-800 transition-colors">
+          className="bg-gray-700 text-white py-2 px-6 rounded-lg text-lg font-medium hover:bg-grey-800 active:bg-grey-900 transition-colors">
         Leaderboard
         </button>
       </div>
@@ -209,7 +210,6 @@ export function ArticlePage() {
           </div>
         ) : (
           <div className="flex flex-col">
-            <StreakBeginTip className="relative bottom-42" streakStatus={streakStatus} />
             <ArticlePreview article={fetchedArticle.article} />
           </div>
         )}

@@ -1,18 +1,28 @@
 import Flame from "./flame"
 
-export default function StreakBeginTip({className, streakStatus}) {
-  return(
-    <div className={(streakStatus == 0) ? "hidden" : className}>
-      <div className="text-center">
-        <Flame className="inline-block px-7 scale-50"/>
-        <span className="text-4xl font-bold text-red-600 leading-tight">
-            Streak available!
-        </span>
+export default function StreakBeginTip({ className, streakStatus }) {
+  if (streakStatus == 0) return null;
+
+  return (
+    <div className={className}>
+      <div className="flex items-end mb-4">
+        {/* Flame fixed width/height container, aligned bottom */}
+        <div className="flex-shrink-0 w-14 h-14 flex justify-center items-end">
+          <Flame className="scale-40 mb-2 ml-6" />
+        </div>
+
+        {/* Text container flex-grow, stacked vertically */}
+        <div className="ml-4 flex flex-col">
+          <p className="text-sm text-red-600 leading-tight">
+            {streakStatus === 1
+              ? <p> Ready to start your streak? <br /> Complete an article today! </p>
+              : <p> Keep your streak alive! <br /> Don't miss today's article. </p>
+            }
+          </p>
+        </div>
       </div>
-      <p className="text-xl text-center text-red-600 leading-tight">
-          {(streakStatus == 1) ? 
-          "Complete this article to start a streak" :
-          "Don't lose your streak!"}
-      </p>
-    </div>)
+    </div>
+  );
 }
+
+

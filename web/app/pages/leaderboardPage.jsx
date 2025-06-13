@@ -73,12 +73,11 @@ export function LeaderboardPage() {
   return (
     <div {...handlers} className="h-screen w-full bg-gray-100 flex flex-col">
       {/* Header */}
-      <div className="flex justify-between items-center bg-gray-800 text-white px-4 py-3 sticky top-0 z-10">
+      <div className="flex justify-between items-center bg-gray-800 text-white px-4 py-3 sticky top-0 z-10 h-20">
         <h1 className="text-lg font-bold">Leaderboard</h1>
         <button
           onClick={() => navigate(returnTo)}
-          className="bg-cyan-600 text-white py-4 px-6 rounded-lg text-lg font-medium"
-        >
+          className="bg-gray-700 text-white py-2 px-6 rounded-lg text-lg font-medium hover:bg-grey-800 active:bg-grey-900 transition-colors">
           ← Back to Feed
         </button>
       </div>
