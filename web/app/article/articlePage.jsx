@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router';
 import VerticalVideoPlayer from "../components/site_layout/videoPlayer.jsx";
 import ArticlePreview from '../components/site_layout/articlePreview.jsx';
 import ApiService from '../services/api.js';
-import StreakBeginTip from '../components/streak/streakBeginTip.jsx';'../components/streak/streakBeginTip.jsx'
+import StreakBeginTip from '../components/streak/streakBeginTip.jsx';
 import { getStreakCond, swipeRight } from '../services/other.js';
 
 export function ArticlePage() {
@@ -179,12 +179,24 @@ export function ArticlePage() {
 
   return (
     <div {...handlers} className="w-full bg-gray-200 flex flex-col min-h-screen overflow-hidden relative">
-      {/* Header */}
-      <div className="flex">
-        <div className="bg-gray-800 px-6 py-3 text-white font-bold text-lg flex-1">
-          PoliticoApp
-        </div>
+      {/* Header */}  
+        <div className="flex justify-between items-center bg-gray-800 px-4 py-3 text-white font-bold text-lg h-20">
+        <>PoliticoApp</>
+
+        <button
+          onClick={() => navigate(`/leaderboard`, { state: { returnTo: `/articles/${articleId}` } })}
+          className="bg-gray-700 text-white py-2 px-6 rounded-lg text-lg font-medium hover:bg-grey-800 active:bg-grey-900 transition-colors">
+        Leaderboard
+        </button>
       </div>
+
+      {/* Streak Tip */}
+      {isVideoArticle ? (
+        <div></div> ) : (
+          <div className="flex flex-col items-center">
+            <StreakBeginTip streakStatus={streakStatus} />
+          </div>
+        )}
 
       {/* Main Content Area */}
       <div
@@ -202,8 +214,7 @@ export function ArticlePage() {
             </div>
           </div>
         ) : (
-          <div className="flex flex-col">
-            <StreakBeginTip className="relative bottom-42" streakStatus={streakStatus} />
+          <div className="flex flex-col items-center">
             <ArticlePreview article={fetchedArticle.article} />
           </div>
         )}
