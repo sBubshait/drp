@@ -186,7 +186,7 @@ export function ArticlePage() {
           PoliticoApp
         </div>
         <div className="bg-gray-800 px-6 py-3 flex items-center">
-          <XpDisplay />
+          <XpDisplay articleId={articleId} />
         </div>
       </div>
 

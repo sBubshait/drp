@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import ApiService from '../../services/api';
 
-export default function XpDisplay() {
+export default function XpDisplay({ articleId, segmentId }) {
   const [xp, setXp] = useState(0);
 
   useEffect(() => {
@@ -11,11 +11,10 @@ export default function XpDisplay() {
       setXp(parseInt(storedXp, 10));
     }
 
-    // Then fetch the latest XP from the server
+    // Then fetch the latest XP from the server whenever articleId or segmentId changes
     const fetchXp = async () => {
       try {
         const xpData = await ApiService.getUserXp();
-        console.log('Fetched XP data:', xpData);
         if (xpData && xpData.xp !== undefined) {
           setXp(xpData.xp);
           localStorage.setItem('userXp', xpData.xp.toString());
@@ -26,7 +25,7 @@ export default function XpDisplay() {
     };
 
     fetchXp();
-  }, []);
+  }, [articleId, segmentId]); // Re-fetch when these values change
 
   return (
     <div className="flex items-center gap-1 bg-gray-700 px-3 py-1 rounded-full shadow-sm border border-gray-600">

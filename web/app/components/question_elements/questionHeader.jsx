@@ -1,6 +1,6 @@
 import XpDisplay from '../common/XpDisplay.jsx';
 
-export default function QuestionHeader({ questionNumber, totalQuestions, taskType, onSourcesClick, hasSourcesData }) {
+export default function QuestionHeader({ questionNumber, totalQuestions, taskType, onSourcesClick, hasSourcesData, articleId, segmentId }) {
   const isArticleSummary = taskType === "Article Summary";
 
   return (
@@ -12,7 +12,7 @@ export default function QuestionHeader({ questionNumber, totalQuestions, taskTyp
         {taskType}
       </div>
       <div className="px-4 py-3 flex items-center gap-4">
-        <XpDisplay />
+        <XpDisplay articleId={articleId} segmentId={segmentId} />
         {hasSourcesData && (
           <button
             onClick={onSourcesClick}

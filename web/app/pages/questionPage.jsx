@@ -285,6 +285,8 @@ export function QuestionPage() {
         taskType={capitalise(contentType)}
         onSourcesClick={() => setShowSourcesSheet(true)}
         hasSourcesData={currentSources.length > 0}
+        articleId={articleId}
+        segmentId={currentSegment?.id}
       />
 
       {streakArticle && <div className='text-center pt-[5%]'>
