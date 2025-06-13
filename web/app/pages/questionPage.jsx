@@ -56,6 +56,14 @@ export function QuestionPage() {
     return s && String(s[0]).toUpperCase() + String(s).slice(1);
   }
 
+  function incrementXp(amount) {
+    ApiService.incrementXp(amount).then(() => {
+      console.log(`Incremented XP by ${amount}`);
+    }).catch(error => {
+      console.error('Error incrementing XP:', error);
+    });
+  }
+
   // Initialize segments from navigation state or fetch from API as fallback
   useEffect(() => {
     if (location.state?.segments) {
@@ -135,6 +143,7 @@ export function QuestionPage() {
         // Streak completion code (should probably be a function)
         setStreakArticle(false);
         setStreakCompleted(true);
+        incrementXp(500);
 
         getMyData().then((dat) => {
           setDisplayedStreak(dat.streak);
@@ -143,6 +152,10 @@ export function QuestionPage() {
         });
 
       } else if (nextArticleId) {
+        if (fract == 1) {
+          // user has completed the article
+          incrementXp(100);
+        }
         navigate(`/articles/${nextArticleId}`);
       } else {
         navigate(`/articles/${articleId}`);
@@ -277,6 +290,8 @@ export function QuestionPage() {
         taskType={capitalise(contentType)}
         onSourcesClick={() => setShowSourcesSheet(true)}
         hasSourcesData={currentSources.length > 0}
+        articleId={articleId}
+        segmentId={currentSegment?.id}
       />
 
       {streakArticle && <div className='text-center pt-[5%]'>
@@ -299,6 +314,7 @@ export function QuestionPage() {
                               interactCallback={(segmentId) => {
                                 interactWithSegment(segmentId);
                                 setAnsweredSegments(answeredSegments + segmentId);
+                                incrementXp(10);
                               }}
             />) :
               (<div className="flex-1 flex items-center justify-center">

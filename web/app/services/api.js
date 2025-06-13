@@ -1,4 +1,5 @@
 import { API_URL } from '../config.js';
+import { getUserId } from './userApi.js';
 
 class ApiService {
   /**
@@ -49,6 +50,39 @@ class ApiService {
     }
     
     return data;
+  }
+
+  /**
+   * Increment user XP
+   * @param {number} amount - Amount of XP to increment
+   * @returns {Promise<object>} - Increment response
+   */
+  static async incrementXp(amount) {
+    const userId = await getUserId();
+    if (!userId) {
+      console.error('User ID not found. Cannot increment XP.');
+      return;
+    }
+
+    const endpoint = `/users/addXP?userId=${userId}&amount=${amount}`;
+    return this.request(endpoint, {
+      method: 'POST'
+    });
+  }
+
+  /**
+   * Get user XP
+   * @returns {Promise<object>} - User XP data   
+   */
+  static async getUserXp() {
+    const userId = await getUserId();
+    if (!userId) {
+      console.error('User ID not found. Cannot fetch XP.');
+      return;
+    }
+
+    const endpoint = `/users/get?id=${userId}`;
+    return this.request(endpoint);
   }
 
   /**
