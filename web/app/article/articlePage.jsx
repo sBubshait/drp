@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router';
 import VerticalVideoPlayer from "../components/site_layout/videoPlayer.jsx";
 import ArticlePreview from '../components/site_layout/articlePreview.jsx';
 import ApiService from '../services/api.js';
-import StreakBeginTip from '../components/streak/streakBeginTip.jsx';'../components/streak/streakBeginTip.jsx'
+import StreakBeginTip from '../components/streak/streakBeginTip.jsx';
 import { getStreakCond, swipeRight } from '../services/other.js';
 
 export function ArticlePage() {
