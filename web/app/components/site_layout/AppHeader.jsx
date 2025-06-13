@@ -6,17 +6,18 @@ export default function AppHeader({ articleId, title = "PoliticoApp" }) {
 
   return (
     <div className="flex">
+      {/* App title - left side */}
       <div className="bg-gray-800 px-6 py-3 text-white font-bold text-lg flex-1">
         {title}
       </div>
-      <div className="flex items-center justify-between bg-gray-800 text-white px-6 py-3">
+      
+      {/* Leaderboard and XP - right side, stacked vertically */}
+      <div className="bg-gray-800 px-6 py-3 flex flex-col items-center justify-center gap-2">
         <button
           onClick={() => navigate(`/leaderboard`, { state: { returnTo: `/articles/${articleId}` } })}
-          className="bg-gray-700 text-white py-2 px-6 rounded-lg text-lg font-medium hover:bg-gray-750 active:bg-gray-900 transition-colors">
+          className="bg-gray-700 text-white py-1 px-4 rounded-lg text-sm font-medium hover:bg-gray-700 active:bg-gray-800 transition-colors w-full">
           Leaderboard
         </button>
-      </div>
-      <div className="bg-gray-800 px-6 py-3 flex items-center">
         <XpDisplay articleId={articleId} />
       </div>
     </div>
