@@ -152,6 +152,10 @@ export function QuestionPage() {
         });
 
       } else if (nextArticleId) {
+        if (fract == 1) {
+          // user has completed the article
+          incrementXp(100);
+        }
         navigate(`/articles/${nextArticleId}`);
       } else {
         navigate(`/articles/${articleId}`);
