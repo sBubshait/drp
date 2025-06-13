@@ -6,14 +6,21 @@ import QuestionContent from "../components/site_layout/questionContent.jsx";
 import PollContent from "../components/site_layout/pollContent.jsx";
 import InfoContent from '../components/site_layout/infoContent.jsx';
 import DiscussionContent from "../components/site_layout/discussionContent.jsx";
+import GapfillContent from '../components/site_layout/gapFillContent.jsx';
 import ApiService from '../services/api.js';
+import StreakMeter from '../components/streak/streakMeter.jsx';
+import Flame from '../components/streak/flame.jsx'
+import { StreakCompletedPage } from '../components/streak/streakCompletedPage.jsx';
+import { completeStreak, getInteractedSegments, getMyData, interactWithSegment } from '../services/other.js';
+import { SourcesContent } from "../components/question_elements/SourcesContent.jsx"
 
 // Component map for different content types
 const CONTENT_COMPONENTS = {
   question: QuestionContent,
   poll: PollContent,
   discussion: DiscussionContent,
-  info: InfoContent
+  info: InfoContent,
+  gap_fill: GapfillContent
 };
 
 export function QuestionPage() {
@@ -21,6 +28,9 @@ export function QuestionPage() {
   const [segments, setSegments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [showSourcesSheet, setShowSourcesSheet] = useState(false);
+  const [currentSources, setCurrentSources] = useState([]);
+  const [sourcesLoading, setSourcesLoading] = useState(false);
   const navigate = useNavigate();
   const params = useParams();
   const location = useLocation();
@@ -28,23 +38,60 @@ export function QuestionPage() {
   const articleId = params.id ? parseInt(params.id, 10) : null;
   const nextArticleId = location.state?.nextArticleId;
 
+  const [answeredSegments, setAnsweredSegments] = useState([]);
+  const [streakArticle, setStreakArticle] = useState(location.state.initStreak === null ? false : location.state.initStreak);
+  const [streakCompleted, setStreakCompleted] = useState(false);
+  const currentSegment = segments[currentIndex];
+  const totalSegments = segments.length;
+
+  const [displayedStreak, setDisplayedStreak] = useState(null);
+
+  var progress;
+  for (progress = 0; progress < totalSegments; progress++) {
+    if (!answeredSegments.includes(segments[progress].id)) break;
+  }
+  const fract = progress / totalSegments
+
   function capitalise(s) {
     return s && String(s[0]).toUpperCase() + String(s).slice(1);
+  }
+
+  function incrementXp(amount) {
+    ApiService.incrementXp(amount).then(() => {
+      console.log(`Incremented XP by ${amount}`);
+    }).catch(error => {
+      console.error('Error incrementing XP:', error);
+    });
   }
 
   // Initialize segments from navigation state or fetch from API as fallback
   useEffect(() => {
     if (location.state?.segments) {
       setSegments(location.state.segments);
-      setLoading(false);
+      try {
+        getInteractedSegments(location.state?.articleId).then(
+          resp => {setAnsweredSegments(resp.segments); setLoading(false)}
+        )
+      } catch { setLoading(false) }
     } else if (articleId) {
       fetchArticleData(articleId);
+        try {
+            getInteractedSegments(articleId).then(
+            resp => { setAnsweredSegments(resp.segments); }
+          )
+        } catch {}
     } else {
       setLoading(false);
     }
 
     setCurrentIndex(0);
   }, [location.state, articleId]);
+
+  useEffect(() => {
+    if (segments.length > 0 && segments[currentIndex]) {
+      fetchSourcesForCurrentSegment();
+    }
+  }, [currentIndex, segments]);
 
   // Fallback function to fetch article data using API service
   const fetchArticleData = async (id) => {
@@ -60,6 +107,25 @@ export function QuestionPage() {
     }
   };
 
+  // Fetch sources for the current segment
+  const fetchSourcesForCurrentSegment = async () => {
+    if (!segments[currentIndex]?.id) {
+      setCurrentSources([]);
+      return;
+    }
+
+    setSourcesLoading(true);
+    try {
+      const data = await ApiService.getSources(segments[currentIndex].id);
+      setCurrentSources(data.sources || []);
+    } catch (error) {
+      console.error('Error fetching sources:', error);
+      setCurrentSources([]);
+    } finally {
+      setSourcesLoading(false);
+    }
+  };
+
   // Navigation functions with animation
   const goToNext = (event) => {
     if (isAnimating) return;
@@ -71,7 +137,25 @@ export function QuestionPage() {
         setIsAnimating(false);
       }, 150);
     } else {
-      if (nextArticleId) {
+
+      if (streakArticle && fract == 1 && !streakCompleted) {
+
+        // Streak completion code (should probably be a function)
+        setStreakArticle(false);
+        setStreakCompleted(true);
+        incrementXp(500);
+
+        getMyData().then((dat) => {
+          setDisplayedStreak(dat.streak);
+          setTimeout(() => {setDisplayedStreak(dat.streak + 1)}, 400)
+          completeStreak();
+        });
+
+      } else if (nextArticleId) {
+        if (fract == 1) {
+          // user has completed the article
+          incrementXp(100);
+        }
         navigate(`/articles/${nextArticleId}`);
       } else {
         navigate(`/articles/${articleId}`);
@@ -94,7 +178,6 @@ export function QuestionPage() {
   };
 
   // Add this helper function at the top of your QuestionPage component:
-
   const isSwipeExcluded = (target) => {
     const excludedElements = [
       document.getElementById('annotationSidebar'),
@@ -131,9 +214,9 @@ export function QuestionPage() {
       }
     },
     swipeDuration: 500,
-    preventScrollOnSwipe: true, // Don't prevent scrolling globally
+    preventScrollOnSwipe: true,
     trackMouse: true,
-    delta: 50, // Higher threshold for intentional swipes
+    delta: 50,
     preventDefaultTouchmoveEvent: false,
     touchEventOptions: { passive: true }
   });
@@ -196,7 +279,6 @@ export function QuestionPage() {
     );
   }
 
-  const currentSegment = segments[currentIndex];
   const contentType = currentSegment?.content?.type || currentSegment?.type;
   const ContentComponent = CONTENT_COMPONENTS[contentType];
 
@@ -204,20 +286,91 @@ export function QuestionPage() {
     <div {...handlers} className="h-screen w-full bg-gray-200 flex flex-col overflow-hidden">
       <QuestionHeader
         questionNumber={currentIndex + 1}
-        totalQuestions={segments.length}
+        totalQuestions={totalSegments}
         taskType={capitalise(contentType)}
+        onSourcesClick={() => setShowSourcesSheet(true)}
+        hasSourcesData={currentSources.length > 0}
+        articleId={articleId}
+        segmentId={currentSegment?.id}
       />
+
+      {streakArticle && <div className='text-center pt-[5%]'>
+        <Flame className="inline-block px-[7%] scale-50" doBurst={fract == 1} burstDelay={900}/>
+        <StreakMeter className='inline-block max-w-78/100'
+                     height="h-7"
+                     barColor="bg-red-400"
+                     value={fract * 100}
+                     duration={1000}
+        />
+      </div>}
 
       <div className="flex-1 flex flex-col min-h-0 relative overflow-hidden">
         <div
           className={`flex-1 flex flex-col ${contentType !== 'info' ? 'transition-all duration-300 ease-out' : ''} ${isAnimating && contentType !== 'info' ? 'opacity-0 transform translate-x-4' : (contentType !== 'info' ? 'opacity-100 transform translate-x-0' : '')
             }`}
         >
-          {ContentComponent ? (
-            <ContentComponent content={currentSegment} />
+          {streakCompleted ? <StreakCompletedPage streakNo={displayedStreak}/> :
+           ContentComponent ? (<ContentComponent content={currentSegment} 
+                              interactCallback={(segmentId) => {
+                                interactWithSegment(segmentId);
+                                setAnsweredSegments(answeredSegments + segmentId);
+                                incrementXp(10);
+                              }}
+            />) :
+              (<div className="flex-1 flex items-center justify-center">
+                 <p className="text-red-600 text-sm">Unknown content type: {contentType}</p>
+               </div>
+          )}
+        </div>
+      </div>
+
+      {showSourcesSheet && (
+        <SourcesBottomSheet
+          sources={currentSources}
+          loading={sourcesLoading}
+          onClose={() => setShowSourcesSheet(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+function SourcesBottomSheet({ sources, loading, onClose }) {
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/30 z-50 flex items-end justify-center"
+      onClick={handleBackdropClick}
+    >
+      <div
+        id="sourcesBottomSheet"
+        className="bg-gray-200 w-full md:max-w-md lg:max-w-2xl h-3/4 rounded-t-2xl flex flex-col animate-slide-up relative"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Floating Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 w-8 h-8 bg-white hover:bg-gray-100 text-black rounded-full flex items-center justify-center transition-colors shadow-md z-10"
+        >
+          ✕
+        </button>
+
+        {/* Content */}
+        <div className="flex-1 flex flex-col min-h-0 p-4 pt-12">
+          {loading ? (
+            <div className="flex-1 flex items-center justify-center">
+              <p className="text-gray-600">Loading sources...</p>
+            </div>
+          ) : sources.length > 0 ? (
+            <SourcesContent sources={sources} />
           ) : (
             <div className="flex-1 flex items-center justify-center">
-              <p className="text-red-600 text-sm">Unknown content type: {contentType}</p>
+              <p className="text-gray-600">No sources available for this segment.</p>
             </div>
           )}
         </div>

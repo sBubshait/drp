@@ -1,11 +1,12 @@
-import ContextBox from "../question_elements/contextBox.jsx";
+import ContextBox from "../common/contextBox.jsx";
 import ChoicesButtons from "../question_elements/choicesButtons.jsx";
 import ViewResultsButton from "../question_elements/viewResultsButton.jsx";
 import PollResults from "../question_elements/pollResults.jsx";
 import { useState } from 'react';
 import ApiService from '../../services/api.js';
 
-export default function PollContent({ content }) {
+export default function PollContent({ content, interactCallback }) {
+  const segmentId = content.id;
   const { context, title, options, id } = content;
   const [showResults, setShowResults] = useState(false);
 
@@ -14,6 +15,8 @@ export default function PollContent({ content }) {
   }
 
   async function onSelectOption(index) {
+    interactCallback(segmentId);
+
     try {
       await ApiService.submitVote(id, index);
 

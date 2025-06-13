@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import { useNavigate, useParams } from 'react-router';
-import QuestionHeader from "../components/question_elements/questionHeader.jsx";
 import VerticalVideoPlayer from "../components/site_layout/videoPlayer.jsx";
 import ArticlePreview from '../components/site_layout/articlePreview.jsx';
 import NoMatchingArticles from '../components/site_layout/noMatchingArticles.jsx';
 import FilterSection from '../components/site_layout/filterSection.jsx';
 import ApiService from '../services/api.js';
 import { calculateArticleCategories } from '../utils/categoryUtils.js';
+import StreakBeginTip from '../components/streak/streakBeginTip.jsx';'../components/streak/streakBeginTip.jsx'
+import { getStreakCond, swipeRight } from '../services/other.js';
+import XpDisplay from '../components/common/XpDisplay.jsx';
 
 export function ArticlePage() {
   const navigate = useNavigate();
@@ -31,13 +33,19 @@ export function ArticlePage() {
 
   // Available filter options (removed Popular, Recent, Hot)
   const filterOptions = ['Technology', 'Environment', 'Global Politics', 'Economics', 'Social Issues'];
+  const [streakStatus, setStreakStatus] = useState(0);
 
   useEffect(() => {
+    initTip();
+    getStreakCond().then((resp) => {setStreakStatus(resp.id)});
+  }, []);
+
+  const initTip = () => {
     const tipDismissed = localStorage.getItem('tipDismissed');
     if (tipDismissed === 'true') {
       setShowTip(false);
     }
-  }, []);
+  }
 
   const handleCloseTip = () => {
     setShowTip(false);
@@ -170,12 +178,15 @@ export function ArticlePage() {
       ? `/articles/${articleId}/questions`
       : `/articles/${fetchedArticle.article.id}/questions`;
 
+    swipeRight(articleId);
+
     navigate(questionUrl, {
       state: {
         segments: fetchedArticle.article.segments,
         nextArticleId: fetchedArticle.next,
         articleId: articleId || fetchedArticle.article.id,
-        articleTitle: fetchedArticle.article.content
+        articleTitle: fetchedArticle.article.content,
+        initStreak: streakStatus > 0
       }
     });
   };
@@ -320,7 +331,10 @@ export function ArticlePage() {
       {/* Header - simplified without filter */}
       <div className="flex">
         <div className="bg-gray-800 px-6 py-3 text-white font-bold text-lg flex-1">
-          <span>PoliticoApp</span>
+          PoliticoApp
+        </div>
+        <div className="bg-gray-800 px-6 py-3 flex items-center">
+          <XpDisplay articleId={articleId} />
         </div>
       </div>
 
@@ -366,9 +380,8 @@ export function ArticlePage() {
 
       {/* Main Content Area */}
       <div
-        className={`flex-1 flex flex-col justify-center items-center relative transition-all duration-300 ease-out ${
-          isAnimating ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'
-        }`}
+        className={`flex-1 flex flex-col justify-center items-center relative transition-all duration-300 ease-out ${isAnimating ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'
+          }`}
       >
         {isVideoArticle ? (
           /* Video Article Layout - Full Screen */
@@ -383,7 +396,10 @@ export function ArticlePage() {
           </div>
         ) : (
           /* Text Article Layout - Centered */
-          <ArticlePreview article={fetchedArticle.article} categories={articleCategories} />
+          <div className="flex flex-col">
+            <StreakBeginTip className="relative bottom-42" streakStatus={streakStatus} />
+            <ArticlePreview article={fetchedArticle.article} categories={articleCategories}/>
+          </div>
         )}
       </div>
 
