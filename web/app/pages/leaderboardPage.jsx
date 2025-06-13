@@ -77,7 +77,7 @@ export function LeaderboardPage() {
         <h1 className="text-lg font-bold">Leaderboard</h1>
         <button
           onClick={() => navigate(returnTo)}
-          className="bg-gray-700 text-white py-2 px-6 rounded-lg text-lg font-medium hover:bg-grey-800 active:bg-grey-900 transition-colors">
+          className="bg-gray-700 text-white py-2 px-6 rounded-lg text-lg font-medium hover:bg-grey-750 active:bg-grey-900 transition-colors">
           ← Back to Feed
         </button>
       </div>

@@ -185,7 +185,7 @@ export function ArticlePage() {
 
         <button
           onClick={() => navigate(`/leaderboard`, { state: { returnTo: `/articles/${articleId}` } })}
-          className="bg-gray-700 text-white py-2 px-6 rounded-lg text-lg font-medium hover:bg-grey-800 active:bg-grey-900 transition-colors">
+          className="bg-gray-700 text-white py-2 px-6 rounded-lg text-lg font-medium hover:bg-gray-750 active:bg-gray-900 transition-colors">
         Leaderboard
         </button>
       </div>
