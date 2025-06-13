@@ -10,7 +10,7 @@ import ArticleTip from '../components/site_layout/ArticleTip.jsx';
 import FilterMenuToggle from '../components/site_layout/FilterMenuToggle.jsx';
 import ApiService from '../services/api.js';
 import { calculateArticleCategories } from '../utils/categoryUtils.js';
-import StreakBeginTip from '../components/streak/streakBeginTip.jsx';'../components/streak/streakBeginTip.jsx'
+import StreakBeginTip from '../components/streak/streakBeginTip.jsx';
 import { getStreakCond, swipeRight } from '../services/other.js';
 import XpDisplay from '../components/common/XpDisplay.jsx';
 import { getNextArticleId } from '../utils/sortingUtils';
@@ -405,6 +405,7 @@ export function ArticlePage() {
     <div {...handlers} className="w-full bg-gray-200 flex flex-col min-h-screen overflow-hidden relative">
       {/* Header */}
       <AppHeader articleId={articleId} />
+      
 
       {/* Filter, Sort, and Toggle Button Row */}
       <div className="flex items-center gap-4 px-6 py-2">
@@ -425,12 +426,34 @@ export function ArticlePage() {
             />
           )}
         </div>
-        {/* Toggle Menus Button */}
-        <FilterMenuToggle 
-          showMenus={showMenus} 
-          onToggle={() => setShowMenus(prev => !prev)} 
-        />
+        {/* Toggle Menus Button - always right aligned */}
+        <button
+          onClick={() => setShowMenus((prev) => !prev)}
+          className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-xl flex items-center justify-center"
+          aria-label={showMenus ? 'Hide Filters & Sort' : 'Show Filters & Sort'}
+        >
+          {showMenus ? (
+            // "Eye with slash" icon for hide
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-5 0-9.27-3.11-11-7.5a11.72 11.72 0 012.91-4.36M6.53 6.53A9.98 9.98 0 0112 5c5 0 9.27 3.11 11 7.5a11.72 11.72 0 01-4.17 5.19M15 12a3 3 0 11-6 0 3 3 0 016 0zM3 3l18 18" />
+            </svg>
+          ) : (
+            // "Eye" icon for show
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M1.458 12C2.732 7.943 6.523 5 12 5c5.477 0 9.268 2.943 10.542 7-1.274 4.057-5.065 7-10.542 7-5.477 0-9.268-2.943-10.542-7z" />
+              <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth={2} fill="none"/>
+            </svg>
+          )}
+        </button>
       </div>
+
+      {/* Streak Tip */}
+      {isVideoArticle ? (
+        <div></div> ) : (
+          <div className="flex flex-col items-center">
+            <StreakBeginTip streakStatus={streakStatus} />
+          </div>
+        )}
 
       {/* Main Content Area */}
       {noMatchingArticles ? (
@@ -444,27 +467,24 @@ export function ArticlePage() {
           className={`flex-1 flex flex-col justify-center items-center relative transition-all duration-300 ease-out ${
             isAnimating ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'
           }`}
-        >
-          {isVideoArticle ? (
-            /* Video Article Layout - Full Screen */
-            <div className="w-full h-full relative">
-              {/* Video Player - Takes full available space */}
-              <div className="w-full h-full p-4">
-                <VerticalVideoPlayer
-                  videoUrl={fetchedArticle.article.content}
-                  categories={articleCategories}
-                />
-              </div>
+      >
+        {isVideoArticle ? (
+          /* Video Article Layout - Full Screen */
+          <div className="w-full h-full relative">
+            {/* Video Player - Takes full available space */}
+            <div className="w-full h-full p-4">
+              <VerticalVideoPlayer
+                videoUrl={fetchedArticle.article.content}
+                categories={articleCategories}
+              />
             </div>
-          ) : (
-            /* Text Article Layout - Centered */
-            <div className="flex flex-col">
-              <StreakBeginTip className="relative bottom-42" streakStatus={streakStatus} />
-              <ArticlePreview article={fetchedArticle.article} categories={articleCategories}/>
-            </div>
-          )}
-        </div>
-      )}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center">
+            <ArticlePreview article={fetchedArticle.article} categories={articleCategories} />
+          </div>
+        )}
+      </div>)}
 
       {/* Tip Box - Positioned absolutely over content */}
       <ArticleTip
