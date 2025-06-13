@@ -4,7 +4,7 @@ export default function QuestionHeader({ questionNumber, totalQuestions, taskTyp
   const isArticleSummary = taskType === "Article Summary";
 
   return (
-    <div className="flex w-full bg-gray-800 text-white font-semibold text-3xl">
+    <div className="flex w-full bg-gray-800 text-white font-semibold text-1xl">
       <div className="px-4 py-3 border-r-4 border-gray-200">
         {isArticleSummary ? questionNumber : `${questionNumber} / ${totalQuestions}`}
       </div>
@@ -19,7 +19,7 @@ export default function QuestionHeader({ questionNumber, totalQuestions, taskTyp
             className="w-10 h-10 bg-gray-700 hover:bg-gray-600 rounded-full flex items-center justify-center transition-colors duration-200 border border-gray-600 hover:border-gray-500"
             title="View Sources"
           >
-            <span className="text-2xl">🔗</span>
+            <span className="text-1xl">🔗</span>
           </button>
         )}
       </div>
