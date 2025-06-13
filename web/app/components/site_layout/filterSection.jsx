@@ -15,7 +15,7 @@ export default function FilterSection({
   setShowSortMenu
 }) {
   return (
-    <div className="bg-gray-200 px-6 py-3">
+    <div className="bg-gray-200 px-6">
       <div className="flex items-center gap-4">
         {/* Filter Section */}
         <div className="relative w-fit">
