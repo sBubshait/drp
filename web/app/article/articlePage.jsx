@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router';
 import VerticalVideoPlayer from "../components/site_layout/videoPlayer.jsx";
 import ArticlePreview from '../components/site_layout/articlePreview.jsx';
 import AppHeader from '../components/site_layout/AppHeader.jsx';
-import NoMatchingArticles from '../components/site_layout/NoMatchingArticles.jsx';
+import NoMatchingArticles from '../components/site_layout/noMatchingArticles.jsx';
 import FilterSection from '../components/site_layout/filterSection.jsx';
 import ArticleTip from '../components/site_layout/ArticleTip.jsx';
 import FilterMenuToggle from '../components/site_layout/FilterMenuToggle.jsx';

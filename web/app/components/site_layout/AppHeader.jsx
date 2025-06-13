@@ -1,7 +1,9 @@
-import React from 'react';
+import { useNavigate } from 'react-router';
 import XpDisplay from '../common/XpDisplay.jsx';
 
 export default function AppHeader({ articleId, title = "PoliticoApp" }) {
+  const navigate = useNavigate();
+
   return (
     <div className="flex">
       <div className="bg-gray-800 px-6 py-3 text-white font-bold text-lg flex-1">
