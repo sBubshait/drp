@@ -79,68 +79,78 @@ export function ArticlePage() {
     setLoading(true);
     
     try {
+      // First fetch the article data
+      const data = await ApiService.getArticle(id);
+      
+      // Check if the article matches the current filters
+      const matchesFilters = articleMatchesFilter(data.article);
+      
       if (selectedSort !== 'Auto') {
-        // Custom sort logic
-        const data = await ApiService.getArticle(id);
+        // Custom sort logic - but still respect filters
         if (data.status === 200) {
+          if (!matchesFilters && selectedFilters.length > 0) {
+            // If article doesn't match filters, find the next matching one in sort sequence
+            visitedIds.add(id);
+            
+            // Get next ID in the sort sequence
+            const nextIdInSequence = getNextArticleId(selectedSort, id, direction);
+            
+            if (nextIdInSequence && !visitedIds.has(nextIdInSequence)) {
+              // Try next article in sequence
+              await fetchArticle(nextIdInSequence, visitedIds, direction);
+              return;
+            } else {
+              // We've tried all articles in the sequence and none match
+              setNoMatchingArticles(true);
+              setLoading(false);
+              return;
+            }
+          }
+          
+          // Article matches filters or no filters are applied
           setFetchedArticle(data);
-          setCurrentArticleId(id); // Update our tracking state
+          setCurrentArticleId(id);
           setNoMatchingArticles(false);
           
-          /* Optional: Update URL without page reload, but less frequently
+          // Update URL without causing page reload
           if (window.location.pathname !== `/articles/${id}`) {
             navigate(`/articles/${id}`, { replace: true });
           }
-          */
           
           setLoading(false);
           return;
         }
-      }
-      
-      // If sort is Auto or custom sort fetch failed, use the original logic
-      console.log(`Fetching article with ID: ${id}`);
-      const data = await ApiService.getArticle(id);
-      
-      // Check if the article matches the current filters
-      if (!articleMatchesFilter(data.article)) {
-        // Add current article ID to visited set to prevent infinite loops
-        visitedIds.add(id);
-        
-        // If it doesn't match, try to navigate to the next/previous article
-        const nextId = direction === 'forward' ? data.next : data.prev;
-        
-        if (nextId && !visitedIds.has(nextId)) {
-          await fetchArticle(nextId, visitedIds, direction);
-          return;
-        } else {
-          // No more articles in this direction
-          if (direction === 'forward' && matchingArticleIds.size > 0) {
-            // We've reached the end, cycle back to the earliest matching article
-            const earliestMatchingId = Math.min(...Array.from(matchingArticleIds));
-            console.log(`Cycling back to earliest matching article: ${earliestMatchingId}`);
-            navigate(`/articles/${earliestMatchingId}`);
-            return;
-          } else if (direction === 'backward' && matchingArticleIds.size > 0) {
-            // We've reached the beginning, cycle to the latest matching article
-            const latestMatchingId = Math.max(...Array.from(matchingArticleIds));
-            console.log(`Cycling forward to latest matching article: ${latestMatchingId}`);
-            navigate(`/articles/${latestMatchingId}`);
+      } else {
+        // Auto sort logic (using DB next/prev) - same filter handling as before
+        if (!matchesFilters) {
+          // Add current article ID to visited set to prevent infinite loops
+          visitedIds.add(id);
+          
+          // Get next article from DB
+          const nextId = direction === 'forward' ? data.next : data.prev;
+          
+          if (nextId && !visitedIds.has(nextId)) {
+            await fetchArticle(nextId, visitedIds, direction);
             return;
           } else {
-            // No matching articles found at all
+            // No more articles matching filters
             setNoMatchingArticles(true);
             setLoading(false);
             return;
           }
         }
+        
+        // Article matches filters
+        setMatchingArticleIds(prev => new Set([...prev, data.article.id]));
+        setNoMatchingArticles(false);
+        setFetchedArticle(data);
+        setCurrentArticleId(id);
+        
+        // Update URL without causing page reload
+        if (window.location.pathname !== `/articles/${id}`) {
+          navigate(`/articles/${id}`, { replace: true });
+        }
       }
-      
-      // Article matches - add to matching articles set and display it
-      setMatchingArticleIds(prev => new Set([...prev, data.article.id]));
-      setNoMatchingArticles(false);
-      setFetchedArticle(data);
-      console.log('Fetched article AND STUFF:', data);
     } catch (error) {
       console.error('Error fetching article:', error);
       setError(error.message);
