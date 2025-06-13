@@ -11,6 +11,15 @@ export function LeaderboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const getRandomColor = () => {
+    const colors = [
+      'bg-red-500', 'bg-green-500', 'bg-blue-500', 'bg-yellow-500',
+      'bg-purple-500', 'bg-pink-500', 'bg-indigo-500', 'bg-orange-500',
+      'bg-teal-500', 'bg-emerald-500'
+    ];
+    return colors[Math.floor(Math.random() * colors.length)];
+  };
+
   const fetchLeaderboard = async () => {
     try {
       // const response = await ApiService.getLeaderboard(); // You need to define this API method
@@ -26,7 +35,9 @@ export function LeaderboardPage() {
         { userId: 9, name: 'Isabella Lopez', score: 90 },
         { userId: 10, name: 'Jack Morgan', score: 74 },
       ];
-      const sorted = response.sort((a, b) => b.score - a.score);
+      const sorted = response
+        .sort((a, b) => b.score - a.score)
+        .map(user => ({ ...user, color: getRandomColor() }));
       setUsers(sorted);
     } catch (err) {
       setError('Failed to load leaderboard');
@@ -74,7 +85,7 @@ export function LeaderboardPage() {
             key={user.userId}
             className="flex items-center bg-white shadow-md rounded-lg p-3 mb-2"
           >
-            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-cyan-600 text-white font-bold text-sm">
+            <div className={`flex items-center justify-center w-10 h-10 rounded-full ${user.color} text-white font-bold text-sm`}>
               {user.name?.charAt(0).toUpperCase() || '?'}
             </div>
             <div className="ml-4 flex-1">
