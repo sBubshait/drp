@@ -143,6 +143,7 @@ export function QuestionPage() {
         // Streak completion code (should probably be a function)
         setStreakArticle(false);
         setStreakCompleted(true);
+        incrementXp(500);
 
         getMyData().then((dat) => {
           setDisplayedStreak(dat.streak);
