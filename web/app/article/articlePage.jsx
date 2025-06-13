@@ -175,12 +175,18 @@ export function ArticlePage() {
 
   return (
     <div {...handlers} className="w-full bg-gray-200 flex flex-col min-h-screen overflow-hidden relative">
-      {/* Header */}
-      <div className="flex">
-        <div className="bg-gray-800 px-6 py-3 text-white font-bold text-lg flex-1">
-          PoliticoApp
-        </div>
+      {/* Header */}  
+        <div className="flex justify-between items-center bg-gray-800 px-4 py-3 text-white font-bold text-lg">
+        <>PoliticoApp</>
+
+        {/* Leaderboard */}
+        <button
+          onClick={() => navigate(`/leaderboard`, { state: { returnTo: `/articles/${articleId}` } })}
+          className="bg-cyan-600 text-white py-4 px-6 rounded-lg text-lg font-medium hover:bg-cyan-700 active:bg-cyan-800 transition-colors">
+        Leaderboard
+        </button>
       </div>
+
 
       {/* Main Content Area */}
       <div
