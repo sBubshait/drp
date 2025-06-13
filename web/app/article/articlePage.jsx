@@ -183,8 +183,6 @@ export function ArticlePage() {
         <div className="flex justify-between items-center bg-gray-800 px-4 py-3 text-white font-bold text-lg h-20">
         <>PoliticoApp</>
 
-        <StreakBeginTip streakStatus={streakStatus} />
-
         <button
           onClick={() => navigate(`/leaderboard`, { state: { returnTo: `/articles/${articleId}` } })}
           className="bg-gray-700 text-white py-2 px-6 rounded-lg text-lg font-medium hover:bg-grey-800 active:bg-grey-900 transition-colors">
@@ -192,6 +190,13 @@ export function ArticlePage() {
         </button>
       </div>
 
+      {/* Streak Tip */}
+      {isVideoArticle ? (
+        <div></div> ) : (
+          <div className="flex flex-col items-center">
+            <StreakBeginTip streakStatus={streakStatus} />
+          </div>
+        )}
 
       {/* Main Content Area */}
       <div
@@ -209,7 +214,7 @@ export function ArticlePage() {
             </div>
           </div>
         ) : (
-          <div className="flex flex-col">
+          <div className="flex flex-col items-center">
             <ArticlePreview article={fetchedArticle.article} />
           </div>
         )}
