@@ -1,3 +1,5 @@
+import XpDisplay from '../common/XpDisplay.jsx';
+
 export default function QuestionHeader({ questionNumber, totalQuestions, taskType, onSourcesClick, hasSourcesData }) {
   const isArticleSummary = taskType === "Article Summary";
 
@@ -9,8 +11,9 @@ export default function QuestionHeader({ questionNumber, totalQuestions, taskTyp
       <div className="px-4 py-3 flex-1">
         {taskType}
       </div>
-      {hasSourcesData && (
-        <div className="px-4 py-3 flex items-center">
+      <div className="px-4 py-3 flex items-center gap-4">
+        <XpDisplay />
+        {hasSourcesData && (
           <button
             onClick={onSourcesClick}
             className="w-10 h-10 bg-gray-700 hover:bg-gray-600 rounded-full flex items-center justify-center transition-colors duration-200 border border-gray-600 hover:border-gray-500"
@@ -18,8 +21,8 @@ export default function QuestionHeader({ questionNumber, totalQuestions, taskTyp
           >
             <span className="text-2xl">🔗</span>
           </button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

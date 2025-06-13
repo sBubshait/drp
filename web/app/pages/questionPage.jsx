@@ -56,6 +56,14 @@ export function QuestionPage() {
     return s && String(s[0]).toUpperCase() + String(s).slice(1);
   }
 
+  function incrementXp(amount) {
+    ApiService.incrementXp(amount).then(() => {
+      console.log(`Incremented XP by ${amount}`);
+    }).catch(error => {
+      console.error('Error incrementing XP:', error);
+    });
+  }
+
   // Initialize segments from navigation state or fetch from API as fallback
   useEffect(() => {
     if (location.state?.segments) {
@@ -299,6 +307,7 @@ export function QuestionPage() {
                               interactCallback={(segmentId) => {
                                 interactWithSegment(segmentId);
                                 setAnsweredSegments(answeredSegments + segmentId);
+                                incrementXp(10);
                               }}
             />) :
               (<div className="flex-1 flex items-center justify-center">

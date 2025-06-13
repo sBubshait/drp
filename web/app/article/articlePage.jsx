@@ -6,6 +6,7 @@ import ArticlePreview from '../components/site_layout/articlePreview.jsx';
 import ApiService from '../services/api.js';
 import StreakBeginTip from '../components/streak/streakBeginTip.jsx';'../components/streak/streakBeginTip.jsx'
 import { getStreakCond, swipeRight } from '../services/other.js';
+import XpDisplay from '../components/common/XpDisplay.jsx';
 
 export function ArticlePage() {
   const navigate = useNavigate();
@@ -183,6 +184,9 @@ export function ArticlePage() {
       <div className="flex">
         <div className="bg-gray-800 px-6 py-3 text-white font-bold text-lg flex-1">
           PoliticoApp
+        </div>
+        <div className="bg-gray-800 px-6 py-3 flex items-center">
+          <XpDisplay />
         </div>
       </div>
 
