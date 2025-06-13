@@ -26,8 +26,8 @@ export default function NoMatchingArticles({
     <div className="w-full bg-gray-200 flex flex-col min-h-screen overflow-hidden relative">
       {/* Header - simplified without filter */}
       <div className="flex">
-        <div className="bg-gray-800 px-6 py-3 text-white font-bold text-lg flex-1">
-          <span>PoliticoApp</span>
+        <div className="bg-gray-800 px-6 py-3 text-white font-bold text-2xl flex-1">
+          <span>Politico</span>
         </div>
       </div>
 

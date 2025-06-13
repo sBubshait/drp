@@ -28,7 +28,7 @@ export default function XpDisplay({ articleId, segmentId }) {
   }, [articleId, segmentId]); // Re-fetch when these values change
 
   return (
-    <div className="flex items-center gap-1 bg-gray-700 px-3 py-1 rounded-full shadow-sm border border-gray-600">
+    <div className="bg-gray-700 text-white py-1 px-10 rounded-lg text-sm font-medium">
       <span className="text-gray-200 font-bold">{xp}</span>
       <span className="text-amber-400 text-xl" role="img" aria-label="XP coin">
         🪙
