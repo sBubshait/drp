@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router';
 import { useSwipeable } from 'react-swipeable';
-import ApiService from '../services/api';
 
 export function LeaderboardPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const returnTo = location.state?.returnTo || '/articles/1';
   const [users, setUsers] = useState([]);
+  const [sortedUsers, setSortedUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isSortedByXP, setIsSortedByXP] = useState(true);
 
   const getRandomColor = () => {
     const colors = [
@@ -22,23 +23,22 @@ export function LeaderboardPage() {
 
   const fetchLeaderboard = async () => {
     try {
-      // const response = await ApiService.getLeaderboard();
       const response = [
-        { userId: 1, name: 'Alice Carter', score: 89 },
-        { userId: 2, name: 'Benjamin Lee', score: 77 },
-        { userId: 3, name: 'Clara Wilson', score: 93 },
-        { userId: 4, name: 'Daniel Kim', score: 84 },
-        { userId: 5, name: 'Eva Thompson', score: 71 },
-        { userId: 6, name: 'Frank Martinez', score: 95 },
-        { userId: 7, name: 'Grace Patel', score: 68 },
-        { userId: 8, name: 'Henry Nguyen', score: 82 },
-        { userId: 9, name: 'Isabella Lopez', score: 90 },
-        { userId: 10, name: 'Jack Morgan', score: 74 },
+        { userId: 1, name: 'Alice Carter', streak: 3, xp: 89 },
+        { userId: 2, name: 'Benjamin Lee', streak: 14, xp: 77 },
+        { userId: 3, name: 'Clara Wilson', streak: 8, xp: 93 },
+        { userId: 4, name: 'Daniel Kim', streak: 9, xp: 84 },
+        { userId: 5, name: 'Eva Thompson', streak: 1, xp: 71 },
+        { userId: 6, name: 'Frank Martinez', streak: 17, xp: 95 },
+        { userId: 7, name: 'Grace Patel', streak: 1, xp: 68 },
+        { userId: 8, name: 'Henry Nguyen', streak: 34, xp: 82 },
+        { userId: 9, name: 'Isabella Lopez', streak: 7, xp: 90 },
+        { userId: 10, name: 'Jack Morgan', streak: 2, xp: 74 },
       ];
-      const sorted = response
-        .sort((a, b) => b.score - a.score)
-        .map(user => ({ ...user, color: getRandomColor() }));
-      setUsers(sorted);
+
+      const withColor = response.map(user => ({ ...user, color: getRandomColor() }));
+      setUsers(withColor);
+      setSortedUsers([...withColor].sort((a, b) => b.xp - a.xp));
     } catch (err) {
       setError('Failed to load leaderboard');
     } finally {
@@ -49,6 +49,16 @@ export function LeaderboardPage() {
   useEffect(() => {
     fetchLeaderboard();
   }, []);
+
+  const sortByXP = () => {
+    setIsSortedByXP(true);
+    setSortedUsers([...users].sort((a, b) => b.xp - a.xp));
+  };
+
+  const sortByStreak = () => {
+    setIsSortedByXP(false);
+    setSortedUsers([...users].sort((a, b) => b.streak - a.streak));
+  };
 
   const handlers = useSwipeable({
     onSwipedDown: () => window.scrollBy(0, -200),
@@ -82,16 +92,32 @@ export function LeaderboardPage() {
         </button>
       </div>
 
+      {/* Sort Buttons */}
+      <div className="flex justify-center space-x-4 bg-gray-100 py-2 shadow-md z-0">
+        <button onClick={sortByXP}
+          className={`py-1 px-6 rounded-lg text-lg font-medium transition-colors ${
+            isSortedByXP ? 'bg-cyan-700 text-white cursor-not-allowed' : 'bg-cyan-600 text-white hover:bg-cyan-700 active:bg-cyan-800'
+          }`}>
+          Sort by XP
+        </button>
+        <button onClick={sortByStreak}
+          className={`py-1 px-6 rounded-lg text-lg font-medium transition-colors ${
+           (!isSortedByXP) ? 'bg-cyan-700 text-white cursor-not-allowed' : 'bg-cyan-600 text-white hover:bg-cyan-700 active:bg-cyan-800'
+          }`}>
+          Sort by Streak
+        </button>
+      </div>
+
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto px-4 py-2">
         {loading && <p className="text-gray-500">Loading leaderboard...</p>}
         {error && <p className="text-red-500">{error}</p>}
 
-        {!loading && users.length === 0 && (
+        {!loading && sortedUsers.length === 0 && (
           <p className="text-gray-500">No users to display.</p>
         )}
 
-        {users.map((user, index) => (
+        {sortedUsers.map((user, index) => (
           <div
             key={user.userId}
             className="flex items-center bg-white shadow-md rounded-lg p-3 mb-2"
@@ -106,9 +132,15 @@ export function LeaderboardPage() {
 
             <div className="ml-4 flex-1">
               <p className="font-semibold text-gray-800">{user.name}</p>
+              <p className="text-xs text-gray-500">streak: {user.streak} | xp: {user.xp}</p>
             </div>
 
-            <div className="text-cyan-600 font-bold">{user.score} xp</div>
+            <div className="text-cyan-600 font-bold">
+              {isSortedByXP 
+                ? <div className="text-cyan-600 font-bold"> {user.xp} xp </div>
+                : <div className="text-red-600 font-bold"> {user.streak} 🔥 </div>
+                }
+            </div>
           </div>
         ))}
       </div>
