@@ -3,8 +3,10 @@ import { useSwipeable } from 'react-swipeable';
 import { useNavigate, useParams } from 'react-router';
 import VerticalVideoPlayer from "../components/site_layout/videoPlayer.jsx";
 import ArticlePreview from '../components/site_layout/articlePreview.jsx';
-import NoMatchingArticles from '../components/site_layout/noMatchingArticles.jsx';
-import FilterSection from '../components/site_layout/filterSection.jsx';
+import AppHeader from '../components/site_layout/AppHeader.jsx';
+import NoMatchingArticles from '../components/site_layout/NoMatchingArticles.jsx';
+import ArticleTip from '../components/site_layout/ArticleTip.jsx';
+import FilterMenuToggle from '../components/site_layout/FilterMenuToggle.jsx';
 import ApiService from '../services/api.js';
 import { calculateArticleCategories } from '../utils/categoryUtils.js';
 import StreakBeginTip from '../components/streak/streakBeginTip.jsx';'../components/streak/streakBeginTip.jsx'
@@ -400,15 +402,8 @@ export function ArticlePage() {
 
   return (
     <div {...handlers} className="w-full bg-gray-200 flex flex-col min-h-screen overflow-hidden relative">
-      {/* Header - simplified without filter */}
-      <div className="flex">
-        <div className="bg-gray-800 px-6 py-3 text-white font-bold text-lg flex-1">
-          PoliticoApp
-        </div>
-        <div className="bg-gray-800 px-6 py-3 flex items-center">
-          <XpDisplay articleId={articleId} />
-        </div>
-      </div>
+      {/* Header */}
+      <AppHeader articleId={articleId} />
 
       {/* Filter, Sort, and Toggle Button Row */}
       <div className="flex items-center gap-4 px-6 py-2">
@@ -429,65 +424,25 @@ export function ArticlePage() {
             />
           )}
         </div>
-        {/* Toggle Menus Button - always right aligned */}
-        <button
-          onClick={() => setShowMenus((prev) => !prev)}
-          className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-xl flex items-center justify-center"
-          aria-label={showMenus ? 'Hide Filters & Sort' : 'Show Filters & Sort'}
-        >
-          {showMenus ? (
-            // "Eye with slash" icon for hide
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-5 0-9.27-3.11-11-7.5a11.72 11.72 0 012.91-4.36M6.53 6.53A9.98 9.98 0 0112 5c5 0 9.27 3.11 11 7.5a11.72 11.72 0 01-4.17 5.19M15 12a3 3 0 11-6 0 3 3 0 016 0zM3 3l18 18" />
-            </svg>
-          ) : (
-            // "Eye" icon for show
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M1.458 12C2.732 7.943 6.523 5 12 5c5.477 0 9.268 2.943 10.542 7-1.274 4.057-5.065 7-10.542 7-5.477 0-9.268-2.943-10.542-7z" />
-              <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth={2} fill="none"/>
-            </svg>
-          )}
-        </button>
+        {/* Toggle Menus Button */}
+        <FilterMenuToggle 
+          showMenus={showMenus} 
+          onToggle={() => setShowMenus(prev => !prev)} 
+        />
       </div>
 
       {/* Main Content Area */}
       {noMatchingArticles ? (
-        <div className="flex-1 flex flex-col justify-center items-center p-8">
-          <div className="bg-white rounded-lg shadow-md p-8 max-w-md text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M12 2a10 10 0 110 20 10 10 0 010-20z" />
-            </svg>
-            <h2 className="text-xl font-bold text-gray-700 mb-2">No More Articles</h2>
-            
-            {selectedFilters.length > 0 ? (
-              <p className="text-gray-600 mb-4">
-                You've reached the end of articles sorted by "{selectedSort}" 
-                and matching tags: <span className="font-medium">{selectedFilters.join(', ')}</span>.
-              </p>
-            ) : (
-              <p className="text-gray-600 mb-4">
-                You've reached the end of articles sorted by "{selectedSort}".
-              </p>
-            )}
-            
-            {selectedFilters.length > 0 && (
-              <p className="text-sm text-gray-500 mb-3">
-                Note: Articles must match ALL selected filters to be shown.
-              </p>
-            )}
-            
-            <button
-              onClick={handleClearFilters}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors"
-            >
-              Reset Filters & Sort
-            </button>
-          </div>
-        </div>
+        <NoMatchingArticles 
+          selectedSort={selectedSort}
+          selectedFilters={selectedFilters}
+          onResetFilters={handleClearFilters}
+        />
       ) : (
         <div
-          className={`flex-1 flex flex-col justify-center items-center relative transition-all duration-300 ease-out ${isAnimating ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'
-            }`}
+          className={`flex-1 flex flex-col justify-center items-center relative transition-all duration-300 ease-out ${
+            isAnimating ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'
+          }`}
         >
           {isVideoArticle ? (
             /* Video Article Layout - Full Screen */
@@ -511,27 +466,13 @@ export function ArticlePage() {
       )}
 
       {/* Tip Box - Positioned absolutely over content */}
-      {showTip && (
-        <div className="absolute bottom-4 left-4 right-4 z-40">
-          <div className="bg-blue-50 bg-opacity-95 backdrop-blur-sm rounded-lg border-l-4 border-blue-400 p-4 relative shadow-lg">
-            <button
-              onClick={handleCloseTip}
-              className="absolute top-2 right-2 text-blue-600 hover:text-blue-800 font-bold text-lg"
-            >
-              ×
-            </button>
-            <p className="text-blue-800 font-medium pr-6">
-              💡 Tip: {fetchedArticle.article.segments.length} interactive segment{fetchedArticle.article.segments.length !== 1 ? 's' : ''} available for this article. Swipe left!
-              Swipe up and down to move between articles!
-              {isVideoArticle && (
-                <span className="block mt-1 text-xs">
-                  Categories: {articleCategories.join(', ')}
-                </span>
-              )}
-            </p>
-          </div>
-        </div>
-      )}
+      <ArticleTip
+        showTip={showTip}
+        onClose={handleCloseTip}
+        segmentsCount={fetchedArticle.article.segments.length}
+        isVideoArticle={isVideoArticle}
+        categories={articleCategories}
+      />
     </div>
   );
 }
