@@ -3,12 +3,14 @@ package com.imperial.drp36;
 import com.imperial.drp36.entity.User;
 import com.imperial.drp36.model.IdStatusResponse;
 import com.imperial.drp36.model.StatusResponse;
+import com.imperial.drp36.model.UsersResponse;
 import com.imperial.drp36.repository.UserRepository;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.Local;
@@ -44,6 +46,17 @@ public class UserController {
           .body(
             new IdStatusResponse(500, e.getMessage(), 0L)
           );
+    }
+  }
+
+  @Tag(name = "Users")
+  @GetMapping("/all")
+  public ResponseEntity<UsersResponse> getUser() {
+    try {
+      List<User> users = userRepository.findAll();
+      return ResponseEntity.ok(new UsersResponse(200, "all users", users));
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
   }
 
