@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { ArticlePage } from "../article/articlePage";
+import TutorialPage from "../pages/tutorialPage";
 
 export function meta() {
   return [
@@ -8,5 +10,16 @@ export function meta() {
 }
 
 export default function Home() {
-  return <ArticlePage />;
+  const [showTutorial, setShowTutorial] = useState(true);
+
+  const handleSwipeUp = () => {
+    setShowTutorial(false);
+  };
+
+  return showTutorial ? (
+    <TutorialPage onSwipeUp={handleSwipeUp} />
+  ) : (
+    <ArticlePage />
+  );
 }
+
