@@ -11,8 +11,8 @@ html, body {
   overflow: scroll;
   scroll-snap-type: both mandatory;
   display: grid;
-  grid-template-columns: repeat(3, 100%);
-  grid-template-rows: repeat(3, 100%);
+  grid-template-columns: repeat(9, 100%);
+  grid-template-rows: repeat(9, 100%);
 }
 
 .block {
@@ -25,13 +25,3 @@ html, body {
   font-size: 3rem;
   color: white;
 }
-
-.block:nth-child(1) { background: #e63946; }
-.block:nth-child(2) { background: #457b9d; }
-.block:nth-child(3) { background: #2a9d8f; }
-.block:nth-child(4) { background: #f4a261; }
-.block:nth-child(5) { background: #264653; }
-.block:nth-child(6) { background: #8ecae6; }
-.block:nth-child(7) { background: #ffb703; }
-.block:nth-child(8) { background: #219ebc; }
-.block:nth-child(9) { background: #023047; }
