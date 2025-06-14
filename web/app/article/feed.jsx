@@ -5,17 +5,25 @@ import "./feed.css";
 export default function Feed() {
 
   const [offset, setOffset] = useState({x: 0, y: 0});
-  const load = useRef(false);
+  const fetchedPages = useRef(new Map())
 
   // Manage feed content
-  const genFeedContent = (virtualCoords) => 
-    <div className="block"> {`x: ${virtualCoords.x} y: ${virtualCoords.y}`} </div>
+  const genFeedContent = (virtualCoords) => {
+   return <div className="block"> {`x: ${virtualCoords.x} y: ${virtualCoords.y}`} </div>
+  }
 
   const feedContent =
     getCoords(offset).filter((coords) => coords.virtualCoords).reduce((content, coords) => {
-      content.set(getId(coords),
-      <div key={getId(coords)} id={`${coords.trueCoords.x}-${coords.trueCoords.y}`} className={`col-start-${coords.trueCoords.x + 1} row-start-${coords.trueCoords.y + 1}`}> 
-        {genFeedContent(coords.virtualCoords)}
+      
+      const id = getId(coords);
+
+      const cache = fetchedPages.current.get(id);
+      const data = cache ? cache : genFeedContent(coords.virtualCoords);
+      fetchedPages.current.set(id, data);
+
+      content.set(id,
+      <div key={id} id={`${coords.trueCoords.x}-${coords.trueCoords.y}`} className={`col-start-${coords.trueCoords.x + 1} row-start-${coords.trueCoords.y + 1}`}> 
+        {data}
       </div>
       )
       
@@ -24,7 +32,9 @@ export default function Feed() {
 
   // On load
   useEffect(() => {
-    document.getElementById("4-4").scrollIntoView();
+    try {
+      document.getElementById("4-4").scrollIntoView();
+    } catch (e) {}
   })
 
   return(

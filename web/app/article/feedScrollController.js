@@ -52,8 +52,8 @@ function updateBlocks() {
 }
 
 export function resetScroll(container) {
-  container.scrollLeft = container.offsetWidth;
-  container.scrollTop = container.offsetWidth;
+  viewport.scrollLeft = container.offsetWidth;
+  viewport.scrollTop = container.offsetWidth;
 }
 
 export function handleScroll(container, offset) { return () => {
