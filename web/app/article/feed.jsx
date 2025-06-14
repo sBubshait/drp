@@ -1,10 +1,14 @@
 import { useRef, useEffect, useState } from "react";
-import { getCoords, getId, resetScroll } from "./feedScrollController";
+import { getCoords, getId, getNotId, resetScroll } from "./feedScrollController";
 import "./feed.css";
 
 export default function Feed() {
 
+  // If you see a brief 'ghost image' of a future page, turn this number higher
+  const TP_TIMEOUT = 300;
+
   const [offset, setOffset] = useState({x: 0, y: 0});
+  const [specialPage, setSpecialPage] = useState({id: null, element: null});
   const fetchedPages = useRef(new Map())
 
   // Manage feed content
@@ -21,11 +25,16 @@ export default function Feed() {
       const data = cache ? cache : genFeedContent(coords.virtualCoords);
       fetchedPages.current.set(id, data);
 
-      content.set(id,
-      <div key={id} id={`${coords.trueCoords.x}-${coords.trueCoords.y}`} className={`col-start-${coords.trueCoords.x + 1} row-start-${coords.trueCoords.y + 1}`}> 
-        {data}
-      </div>
-      )
+      const element =
+          <div key={id} id={getNotId(coords)} className={`col-start-${coords.trueCoords.x + 1} row-start-${coords.trueCoords.y + 1}`}> 
+            {data}
+          </div>
+
+      if (id == specialPage.id) {
+          setTimeout(() => setSpecialPage({...specialPage, element: element}), TP_TIMEOUT);
+      } else {
+          content.set(id, element);
+    }
       
       return content;
     }, new Map())
@@ -47,11 +56,13 @@ export default function Feed() {
 
         if (col != 4 || row != 4) {
           setOffset({x: offset.x + col - 4, y: offset.y + row - 4});
+          setSpecialPage({id: getId()});
           //updateBlocks();
         }
       }, 80); // debounce
     }}>
       {[...feedContent.values()]}
+      <specialPage />
     </div>
   );
 }
