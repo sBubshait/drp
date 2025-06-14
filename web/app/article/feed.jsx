@@ -1,20 +1,30 @@
-import { useEffect, useRef, useState } from "react";
-import { getCoords } from "./feedScrollController";
+import { useRef, useEffect, useState } from "react";
+import { getCoords, getId, resetScroll } from "./feedScrollController";
 import "./feed.css";
 
 export default function Feed() {
 
-  const offset = useRef({x: 0, y: 0});
+  const [offset, setOffset] = useState({x: 0, y: 0});
+  const load = useRef(false);
+
+  // Manage feed content
+  const genFeedContent = (virtualCoords) => 
+    <div className="block"> {`x: ${virtualCoords.x} y: ${virtualCoords.y}`} </div>
 
   const feedContent =
-    getCoords({x:0, y:0}).filter((coords) => coords.virtualCoords).map((coords) => 
-      <div id={`${coords.virtualCoords.x}-${coords.virtualCoords.y}`} className={`block col-start-${coords.trueCoords.x} row-start-${coords.trueCoords.y}`}> 
-        {`x: ${coords.trueCoords.x} y: ${coords.trueCoords.y}`}
-    </div>
-    );
+    getCoords(offset).filter((coords) => coords.virtualCoords).reduce((content, coords) => {
+      content.set(getId(coords),
+      <div key={getId(coords)} id={`${coords.trueCoords.x}-${coords.trueCoords.y}`} className={`col-start-${coords.trueCoords.x + 1} row-start-${coords.trueCoords.y + 1}`}> 
+        {genFeedContent(coords.virtualCoords)}
+      </div>
+      )
+      
+      return content;
+    }, new Map())
 
+  // On load
   useEffect(() => {
-    document.getElementById("0-0").scrollIntoView();
+    document.getElementById("4-4").scrollIntoView();
   })
 
   return(
@@ -25,32 +35,13 @@ export default function Feed() {
         const col = Math.round(container.scrollLeft / container.offsetWidth);
         const row = Math.round(container.scrollTop / container.offsetHeight);
 
-        let changed = false;
-
-        if (col === 0 && false) {
-          offset.current.x--;
-          changed = true;
-        } else if (col === 2) {
-          offset.current.x++;
-          changed = true;
-        }
-
-        if (row === 0 && false) {
-          offset.current.y--;
-          changed = true;
-        } else if (row === 2) {
-          offset.current.y++;
-          changed = true;
-        }
-
-        if (changed) {
-          console.log(offset.current);
-          // updateBlocks();
-          // resetScroll();
+        if (col != 4 || row != 4) {
+          setOffset({x: offset.x + col - 4, y: offset.y + row - 4});
+          //updateBlocks();
         }
       }, 80); // debounce
     }}>
-      {feedContent}
+      {[...feedContent.values()]}
     </div>
   );
 }

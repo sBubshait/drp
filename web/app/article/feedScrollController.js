@@ -14,6 +14,10 @@ export function getCoords(origin) {
   return result;
 }
 
+export function getId(coords) {
+  return `${coords.virtualCoords.x}-${coords.virtualCoords.y}`;
+}
+
 export function initScrollController(grid) {
   const blocks = Array.from(document.querySelectorAll('.block'));
   const colors = ["#2a9d8f", "#e76f51", "#264653", "#f4a261", "#e9c46a"];
@@ -47,9 +51,9 @@ function updateBlocks() {
   }
 }
 
-function resetScroll() {
-  viewport.scrollLeft = window.innerWidth;
-  viewport.scrollTop = window.innerHeight;
+export function resetScroll(container) {
+  container.scrollLeft = container.offsetWidth;
+  container.scrollTop = container.offsetWidth;
 }
 
 export function handleScroll(container, offset) { return () => {
