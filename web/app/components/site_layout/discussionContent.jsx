@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import ContextBox from "../common/contextBox.jsx";
 import PinkContainer from "../discussions/PinkContainer.jsx";
@@ -14,6 +14,9 @@ export default function DiscussionContent({ content, interactCallback }) {
   const [isLoadingResponses, setIsLoadingResponses] = useState(false);
   const [userResponseId, setUserResponseId] = useState(null);
   const navigate = useNavigate();
+  
+  // Ref to store the polling interval
+  const pollingIntervalRef = useRef(null);
 
   if (!content) {
     return (
@@ -25,6 +28,57 @@ export default function DiscussionContent({ content, interactCallback }) {
 
   const segmentId = content.id;
   const { id, context, prompt, totalResponses } = content;
+
+  // Helper function to compare response arrays
+  const responsesAreEqual = (responses1, responses2) => {
+    if (responses1.length !== responses2.length) return false;
+    
+    return responses1.every((response1, index) => {
+      const response2 = responses2[index];
+      return response1.id === response2.id && 
+             response1.content === response2.content &&
+             response1.createdAt === response2.createdAt;
+    });
+  };
+
+  // Function to fetch segment data and update responses if different
+  const pollSegmentData = async () => {
+    try {
+      const segmentData = await ApiService.getSegment(segmentId);
+      
+      // If this is a discussion segment, fetch the latest responses
+      if (segmentData.segment && segmentData.segment.type === 'discussion') {
+        const discussionData = await ApiService.getDiscussionResponses(id);
+        const newResponses = discussionData.responses || [];
+        
+        // Only update state if responses have actually changed
+        setResponses(currentResponses => {
+          if (!responsesAreEqual(currentResponses, newResponses)) {
+            console.log('Responses updated:', newResponses.length, 'responses');
+            return newResponses;
+          }
+          return currentResponses;
+        });
+      }
+    } catch (error) {
+      console.error('Error polling segment data:', error);
+      // Don't show error to user for polling failures
+    }
+  };
+
+  // Start polling when component mounts and stop when it unmounts
+  useEffect(() => {
+    // Start polling every 250ms
+    pollingIntervalRef.current = setInterval(pollSegmentData, 250);
+
+    // Cleanup function to clear interval
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+    };
+  }, [segmentId, id]); // Restart polling if segmentId or discussion id changes
 
   // Check localStorage on component mount
   useEffect(() => {
@@ -71,7 +125,7 @@ export default function DiscussionContent({ content, interactCallback }) {
 
     try {
       const response = await ApiService.submitDiscussionResponse(id, userInput);
-      const responseId = response.id || response.responseId; // Adjust based on your API response structure
+      const responseId = response.id || response.responseId;
 
       // Save to localStorage
       localStorage.setItem(`discussion_${id}_responseId`, responseId);
