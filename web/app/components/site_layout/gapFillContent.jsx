@@ -4,8 +4,15 @@ import ContextBox from "../question_elements/contextBox.jsx";
 import FeedbackBox from "../question_elements/feedbackBox.jsx";
 import clsx from "clsx";
 
-export default function GapfillContent({ content }) {
+export default function GapfillContent({ content, interactCallback }) {
 
+  
+  const [filledGaps, setFilledGaps] = useState([]);
+  const [hasSubmitted, setSubmitted] = useState(false);
+  const [feedbackTitle, setFeedbackTitle] = useState("");
+  const [feedbackBody, setFeedbackBody] = useState("");
+  const [isIncorrectFlash, setIsIncorrectFlash] = useState(false);
+  
   const {
     id,
     title,
@@ -15,24 +22,18 @@ export default function GapfillContent({ content }) {
     gapCount,
     feedback
   } = content;
-
-  const [filledGaps, setFilledGaps] = useState([]);
-  const [hasSubmitted, setSubmitted] = useState(false);
-  const [feedbackTitle, setFeedbackTitle] = useState("");
-  const [feedbackBody, setFeedbackBody] = useState("");
-  const [isIncorrectFlash, setIsIncorrectFlash] = useState(false);
-
-
+  const segmentId = id;
+  
   // Reset state when a new question is loaded (content id changes)
   useEffect(() => {
-  setFilledGaps([]);
-  setSubmitted(false);
-  setFeedbackTitle("");
-  setFeedbackBody("");
-  setIsIncorrectFlash(false);
+    setFilledGaps([]);
+    setSubmitted(false);
+    setFeedbackTitle("");
+    setFeedbackBody("");
+    setIsIncorrectFlash(false);
   }, [id]);
-
-
+  
+  
   if (!content) {
     return (
       <p> Loading... </p>
@@ -52,6 +53,7 @@ export default function GapfillContent({ content }) {
 
   const handleSubmit = (filledGaps) => {
     if (filledGaps.length === gapCount) {
+      interactCallback(segmentId);
       if (filledGaps.every((word, idx) => word === correctOptions[idx])) {
         setFeedbackTitle("Correct!");
         setFeedbackBody(feedback);
