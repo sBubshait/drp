@@ -2,6 +2,7 @@ package com.imperial.drp36.entity;
 
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +22,12 @@ public class Article {
   @Column(name = "category")
   private String category; // e.g., "Global Politics"
 
+  @Column(name = "date_created", nullable = false)
+  private LocalDateTime dateCreated;
+
+  @Column(name = "total_interactions", nullable = false)
+  private Long totalInteractions = 0L;
+
   @ElementCollection
   @CollectionTable(name = "article_segments", joinColumns = @JoinColumn(name = "article_id"))
   @Column(name = "segment_id")
@@ -34,6 +41,8 @@ public class Article {
     this.content = content;
     this.category = category;
     this.segments = segments != null ? new ArrayList<>(segments) : new ArrayList<>();
+    this.dateCreated = LocalDateTime.now();
+    this.totalInteractions = 0L;
   }
 
   // Getters and Setters
@@ -49,6 +58,16 @@ public class Article {
   public String getCategory() { return category; }
   public void setCategory(String category) { this.category = category; }
 
+  public LocalDateTime getDateCreated() { return dateCreated; }
+  public void setDateCreated(LocalDateTime dateCreated) { this.dateCreated = dateCreated; }
+
+  public Long getTotalInteractions() { return totalInteractions; }
+  public void setTotalInteractions(Long totalInteractions) { this.totalInteractions = totalInteractions; }
+
+  public void incrementInteractions() {
+    this.totalInteractions = this.totalInteractions != null ? this.totalInteractions + 1 : 1L;
+  }
   public List<Long> getSegments() { return segments; }
   public void setSegments(List<Long> segments) { this.segments = segments; }
+
 }

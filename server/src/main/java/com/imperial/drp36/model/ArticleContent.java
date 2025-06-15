@@ -1,6 +1,7 @@
 package com.imperial.drp36.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Schema(description = "Article content with segments")
@@ -17,17 +18,22 @@ public class ArticleContent {
   @Schema(description = "Article category", example = "Global Politics")
   private String category;
 
+  private LocalDateTime dateCreated;
+  private Long totalInteractions;
+
   @Schema(description = "List of segments in this article")
   private List<SegmentContent> segments;
 
   // Constructors
   public ArticleContent() {}
 
-  public ArticleContent(Long id, String type, String content, String category, List<SegmentContent> segments) {
+  public ArticleContent(Long id, String type, String content, String category,LocalDateTime dateCreated, Long totalInteractions, List<SegmentContent> segments) {
     this.id = id;
     this.type = type;
     this.content = content;
     this.category = category;
+    this.dateCreated = dateCreated;
+    this.totalInteractions = totalInteractions;
     this.segments = segments;
   }
 
@@ -43,6 +49,14 @@ public class ArticleContent {
 
   public String getCategory() { return category; }
   public void setCategory(String category) { this.category = category; }
+
+
+  public LocalDateTime getDateCreated() { return dateCreated; }
+  public void setDateCreated(LocalDateTime dateCreated) { this.dateCreated = dateCreated; }
+
+  public Long getTotalInteractions() { return totalInteractions; }
+  public void setTotalInteractions(Long totalInteractions) { this.totalInteractions = totalInteractions; }
+
 
   public List<SegmentContent> getSegments() { return segments; }
   public void setSegments(List<SegmentContent> segments) { this.segments = segments; }

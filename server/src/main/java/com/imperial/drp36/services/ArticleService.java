@@ -84,8 +84,24 @@ public class ArticleService {
         article.getType(),
         article.getContent(),
         article.getCategory(),
+        article.getDateCreated(),
+        article.getTotalInteractions(),
         segmentContents
     );
+  }
+
+  public List<ArticleContent> getAllArticles() {
+    List<Article> articles = articleRepository.findAllByOrderByDateCreatedDesc();
+    List<ArticleContent> articleContents = new ArrayList<>();
+
+    for (Article article : articles) {
+      ArticleContent content = getArticleContent(article);
+      if (content != null) {
+        articleContents.add(content);
+      }
+    }
+
+    return articleContents;
   }
 
   public SegmentContent getSegmentContent(Segment segment) {
@@ -198,5 +214,14 @@ public class ArticleService {
     }
 
     return sourceContents;
+  }
+
+  public void incrementArticleInteractions(Long segmentId) {
+    // Find the article that contains this segment
+    Article article = articleRepository.findBySegmentsContaining(segmentId);
+    if (article != null) {
+      article.incrementInteractions();
+      articleRepository.save(article);
+    }
   }
 }

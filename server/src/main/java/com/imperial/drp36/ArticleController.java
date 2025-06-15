@@ -1,6 +1,7 @@
 package com.imperial.drp36;
 
 import com.imperial.drp36.entity.Article;
+import com.imperial.drp36.model.AllArticlesResponse;
 import com.imperial.drp36.model.ArticleContent;
 import com.imperial.drp36.model.ArticleResponse;
 import com.imperial.drp36.model.SegmentContent;
@@ -155,6 +156,24 @@ public class ArticleController {
       return ResponseEntity.ok(new SourcesResponse(200, sources));
     } catch (Exception e) {
       return ResponseEntity.ok(new SourcesResponse(500, new ArrayList<>()));
+    }
+  }
+
+  @Operation(
+      summary = "Get All Articles",
+      description = "Retrieves all articles ordered by date created (most recent first)"
+  )
+  @Tag(name = "Articles")
+  @GetMapping("/getAllArticles")
+  public ResponseEntity<AllArticlesResponse> getAllArticles() {
+    try {
+      List<ArticleContent> articles = articleService.getAllArticles();
+      long totalCount = articleService.getTotalArticleCount();
+
+      return ResponseEntity.ok(new AllArticlesResponse(200, articles, totalCount));
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(new AllArticlesResponse(500, "Error retrieving articles: " + e.getMessage()));
     }
   }
 

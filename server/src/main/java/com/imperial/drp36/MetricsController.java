@@ -77,7 +77,12 @@ public class MetricsController {
       @RequestParam Long segmentId) {
 
     try {
-      metricsService.interactWithSegment(userId, segmentId);
+      boolean addedNewEntry = metricsService.interactWithSegment(userId, segmentId);
+
+      // Increment the total interactions for the article containing this segment
+      if (addedNewEntry)
+         articleService.incrementArticleInteractions(segmentId);
+
       return ResponseEntity.ok(new StatusResponse(200, "Segment interaction recorded successfully"));
     } catch (RuntimeException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)

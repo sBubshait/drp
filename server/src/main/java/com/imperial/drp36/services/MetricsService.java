@@ -56,7 +56,7 @@ public class MetricsService {
     userArticleRepository.save(userArticle);
   }
 
-  public void interactWithSegment(Long userId, Long segmentId) {
+  public boolean interactWithSegment(Long userId, Long segmentId) {
     if (!userRepository.existsById(userId)) {
       throw new RuntimeException("User not found");
     }
@@ -66,11 +66,12 @@ public class MetricsService {
     }
 
     if (userSegmentRepository.existsByUserIdAndSegmentId(userId, segmentId)) {
-      return;
+      return false;
     }
 
     UserSegment userSegment = new UserSegment(userId, segmentId);
     userSegmentRepository.save(userSegment);
+    return true;
   }
 
   public InteractedSegmentsResponse getInteractedSegments(Long userId, Long articleId) {
