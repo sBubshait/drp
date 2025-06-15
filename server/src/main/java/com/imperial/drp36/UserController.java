@@ -1,10 +1,12 @@
 package com.imperial.drp36;
 
 import com.imperial.drp36.entity.User;
+import com.imperial.drp36.model.FriendsResponse;
 import com.imperial.drp36.model.IdStatusResponse;
 import com.imperial.drp36.model.StatusResponse;
 import com.imperial.drp36.model.UsersResponse;
 import com.imperial.drp36.repository.UserRepository;
+import com.imperial.drp36.services.FriendService;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,6 +34,11 @@ public class UserController {
 
   @Autowired
   private UserRepository userRepository;
+
+
+  @Autowired
+  private FriendService friendService;
+
 
   @Tag(name = "Users")
   @PostMapping("/create")
@@ -224,6 +231,84 @@ public class UserController {
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body(new StatusResponse(500, "Error adding XP: " + e.getMessage()));
+    }
+  }
+
+  @Operation(
+      summary = "Add Friend",
+      description = "Send a friend request to another user using their tag"
+  )
+  @Tag(name = "Friends")
+  @PostMapping("/addFriend")
+  public ResponseEntity<StatusResponse> addFriend(
+      @Parameter(description = "ID of user sending the request", required = true)
+      @RequestParam Long userId,
+
+      @Parameter(description = "Tag of user to add as friend", required = true)
+      @RequestParam String friendTag) {
+
+    try {
+      boolean success = friendService.addFriend(userId, friendTag);
+
+      if (success) {
+        return ResponseEntity.ok(new StatusResponse(200, "Friend request sent successfully"));
+      } else {
+        return ResponseEntity.badRequest()
+            .body(new StatusResponse(400, "Unable to send friend request"));
+      }
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(new StatusResponse(500, "Error sending friend request: " + e.getMessage()));
+    }
+  }
+
+  @Operation(
+      summary = "Get Friends",
+      description = "Get list of friends and pending friend requests"
+  )
+  @Tag(name = "Friends")
+  @GetMapping("/getFriends")
+  public ResponseEntity<FriendsResponse> getFriends(
+      @Parameter(description = "User ID", required = true)
+      @RequestParam Long userId) {
+
+    try {
+      FriendsResponse response = friendService.getFriends(userId);
+      return ResponseEntity.ok(response);
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(new FriendsResponse(500, "Error retrieving friends: " + e.getMessage()));
+    }
+  }
+
+  @Operation(
+      summary = "Respond to Friend Request",
+      description = "Accept or ignore a friend request"
+  )
+  @Tag(name = "Friends")
+  @PostMapping("/respondToFriend")
+  public ResponseEntity<StatusResponse> respondToFriendRequest(
+      @Parameter(description = "ID of user responding to request", required = true)
+      @RequestParam Long userId,
+
+      @Parameter(description = "ID of user who sent the request", required = true)
+      @RequestParam Long requesterId,
+
+      @Parameter(description = "Action to take: 'accept' or 'ignore'", required = true)
+      @RequestParam String action) {
+
+    try {
+      boolean success = friendService.respondToFriendRequest(userId, requesterId, action);
+
+      if (success) {
+        return ResponseEntity.ok(new StatusResponse(200, "Response recorded successfully"));
+      } else {
+        return ResponseEntity.badRequest()
+            .body(new StatusResponse(400, "Unable to process response"));
+      }
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(new StatusResponse(500, "Error processing response: " + e.getMessage()));
     }
   }
 }
