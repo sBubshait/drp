@@ -269,10 +269,28 @@ export default function DiscussionContent({ content, interactCallback }) {
                 <div className="h-96 space-y-3 p-3" id="responseContainer">
                   {responses
                     .sort((a, b) => {
-                      // Put user's response first, then others
+                      // Put user's response first
                       if (a.id == userResponseId) return -1;
                       if (b.id == userResponseId) return 1;
-                      return 0;
+                      
+                      // For other responses, sort in reverse chronological order (newest first)
+                      // Convert custom timestamp format [year, month, day, hour, minute, second, nanoseconds] to Date
+                      const getTimestamp = (createdAt) => {
+                        if (!Array.isArray(createdAt) || createdAt.length < 6) return 0;
+                        
+                        // Note: JavaScript months are 0-indexed, so subtract 1 from month
+                        return new Date(
+                          createdAt[0], // year
+                          createdAt[1] - 1, // month (subtract 1 for JS Date)
+                          createdAt[2], // day
+                          createdAt[3], // hour
+                          createdAt[4], // minute
+                          createdAt[5], // second
+                          Math.floor(createdAt[6] / 1000000) // convert nanoseconds to milliseconds
+                        ).getTime();
+                      };
+                      
+                      return getTimestamp(b.createdAt) - getTimestamp(a.createdAt);
                     })
                     .map((response, index) => (
                       <ResponseContainer
