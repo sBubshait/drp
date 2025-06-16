@@ -139,6 +139,8 @@ export function FriendsPage() {
             }
         } catch (err) {
             console.error('Error refreshing friends data:', err);
+            // Display the error message from the API response
+            alert(`Failed to refresh friends data: ${err.message}`);
         }
     };
 
@@ -159,6 +161,7 @@ export function FriendsPage() {
             }
         } catch (err) {
             console.error('Error sending friend request:', err);
+            // Display the error message from the API response
             alert(`Failed to send friend request: ${err.message}`);
         }
     };
@@ -174,6 +177,7 @@ export function FriendsPage() {
             }
         } catch (err) {
             console.error('Error accepting friend request:', err);
+            // Display the error message from the API response
             alert(`Failed to accept friend request: ${err.message}`);
         }
     };
@@ -189,6 +193,7 @@ export function FriendsPage() {
             }
         } catch (err) {
             console.error('Error rejecting friend request:', err);
+            // Display the error message from the API response
             alert(`Failed to reject friend request: ${err.message}`);
         }
     };
