@@ -4,6 +4,7 @@ import { useSwipeable } from 'react-swipeable';
 import { BottomNav } from '../components/site_layout/BottomNav';
 import ApiService from '../services/api';
 import AppHeader from '../components/site_layout/AppHeader';
+import { getUserId } from '../services/userApi';
 
 export function LeaderboardPage() {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ export function LeaderboardPage() {
   const [error, setError] = useState(null);
   const [isSortedByXP, setIsSortedByXP] = useState(true);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
+  const [showFriendsOnly, setShowFriendsOnly] = useState(false);
 
   const getRandomColor = () => {
     const colors = [
@@ -55,24 +57,46 @@ export function LeaderboardPage() {
   const fetchLeaderboard = async () => {
     try {
       setLoading(true);
-      const response = await ApiService.getAllUsers();
       
-      if (response.status === 200 && response.users) {
-        // Add a random color to each user
-        const withColor = response.users.map(user => ({ 
-          ...user, 
-          color: getRandomColor() 
-        }));
-        setUsers(withColor);
+      let userData = [];
+      
+      if (showFriendsOnly) {
+        // Get user ID and fetch friends data
+        const userId = await getUserId();
+        const response = await ApiService.getFriends(userId);
         
-        // Initial sort based on current sort setting
-        sortUsers(withColor);
+        if (response.status === 200) {
+          // Use only accepted friends
+          userData = response.friends || [];
+        } else {
+          setError('Failed to load friends data');
+          return;
+        }
       } else {
-        setError('Failed to load users data');
+        // Fetch all users
+        const response = await ApiService.getAllUsers();
+        
+        if (response.status === 200 && response.users) {
+          userData = response.users;
+        } else {
+          setError('Failed to load users data');
+          return;
+        }
       }
+      
+      // Add random colors to users
+      const withColor = userData.map(user => ({ 
+        ...user, 
+        color: getRandomColor() 
+      }));
+      
+      setUsers(withColor);
+      
+      // Sort users based on current sort setting
+      sortUsers(withColor);
     } catch (err) {
       console.error('Error fetching leaderboard:', err);
-      setError('Failed to load leaderboard');
+      setError(`Failed to load ${showFriendsOnly ? 'friends' : 'leaderboard'}`);
     } finally {
       setLoading(false);
     }
@@ -92,6 +116,11 @@ export function LeaderboardPage() {
     fetchLeaderboard();
   }, []);
 
+  // Re-fetch when toggle changes between friends/everyone
+  useEffect(() => {
+    fetchLeaderboard();
+  }, [showFriendsOnly]);
+
   // Re-sort when the sort option changes
   useEffect(() => {
     if (users.length > 0) {
@@ -104,6 +133,10 @@ export function LeaderboardPage() {
       setIsSortedByXP(byXP);
     }
     setShowSortDropdown(false);
+  };
+
+  const handleToggleChange = () => {
+    setShowFriendsOnly(prev => !prev);
   };
 
   // Close dropdown when clicking outside
@@ -145,15 +178,16 @@ export function LeaderboardPage() {
       {/* Header */}
       <AppHeader title="Leaderboard" />
 
-      {/* Sort Dropdown - Left Aligned */}
-      <div className="px-4 py-2 bg-gray-100 shadow-md z-10">
+      {/* Sort Dropdown and Toggle Switch Row */}
+      <div className="px-4 py-2 bg-gray-100 shadow-md z-10 flex justify-between items-center">
+        {/* Sort Dropdown - Left Aligned */}
         <div className="relative inline-block text-left">
           <button
             onClick={(e) => {
               e.stopPropagation();
               setShowSortDropdown(!showSortDropdown);
             }}
-            className="bg-cyan-700 hover:bg-cyan-600 text-white px-4 py-2 rounded text-lg font-medium flex items-center gap-2"
+            className="bg-cyan-700 hover:bg-cyan-600 text-white px-4 py-2 rounded text-sm font-medium flex items-center gap-2"
           >
             <span>Sort by: {isSortedByXP ? 'XP' : 'Streak'}</span>
             <svg 
@@ -197,6 +231,28 @@ export function LeaderboardPage() {
             </div>
           )}
         </div>
+        
+        {/* Toggle Switch - Right Aligned */}
+        <div className="flex items-center">
+          <span className={`mr-2 text-sm ${!showFriendsOnly ? 'font-medium text-cyan-700' : 'text-gray-600'}`}>
+            Everyone
+          </span>
+          
+          <div 
+            onClick={handleToggleChange}
+            className="relative inline-block w-12 h-6 cursor-pointer"
+          >
+            <div className={`w-12 h-6 rounded-full transition-colors duration-200 ease-in-out ${showFriendsOnly ? 'bg-cyan-600' : 'bg-gray-400'}`}>
+              <div 
+                className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full shadow transition-transform duration-200 ease-in-out ${showFriendsOnly ? 'transform translate-x-6' : ''}`}
+              ></div>
+            </div>
+          </div>
+          
+          <span className={`ml-2 text-sm ${showFriendsOnly ? 'font-medium text-cyan-700' : 'text-gray-600'}`}>
+            Friends
+          </span>
+        </div>
       </div>
 
       {/* Scrollable Content */}
@@ -205,12 +261,16 @@ export function LeaderboardPage() {
         {error && <p className="text-red-500">{error}</p>}
 
         {!loading && sortedUsers.length === 0 && (
-          <p className="text-gray-500">No users to display.</p>
+          <p className="text-gray-500">
+            {showFriendsOnly 
+              ? "No friends to display. Add some friends to see them on the leaderboard!" 
+              : "No users to display."}
+          </p>
         )}
 
         {sortedUsers.map((user, index) => (
           <div
-            key={user.userId}
+            key={user.id || user.userId}
             className="flex items-center bg-white shadow-md rounded-lg p-3 mb-2"
           >
             <div className="w-8 text-center text-lg font-semibold text-gray-700 mr-3">
