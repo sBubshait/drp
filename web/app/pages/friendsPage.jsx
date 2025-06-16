@@ -16,31 +16,31 @@ export function FriendsPage() {
     const [error, setError] = useState(null);
     const [currentUserId, setCurrentUserId] = useState(null);
 
+    async function fetchFriendsData() {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const userId = await getUserId();
+            setCurrentUserId(userId);
+            const response = await ApiService.getFriends(userId);
+
+            if (response.status === 200) {
+                setFriends(response.friends || []);
+                setPendingRequests(response.requests || []);
+            } else {
+                setError(response.message || 'Failed to load friends');
+            }
+        } catch (err) {
+            console.error('Error fetching friends:', err);
+            setError('Error loading friends data. Please try again later.');
+        } finally {
+            setLoading(false);
+        }
+    }
+
     // Fetch friends and pending requests
     useEffect(() => {
-        async function fetchFriendsData() {
-            try {
-                setLoading(true);
-                setError(null);
-                
-                const userId = await getUserId();
-                setCurrentUserId(userId);
-                const response = await ApiService.getFriends(userId);
-                
-                if (response.status === 200) {
-                    setFriends(response.friends || []);
-                    setPendingRequests(response.requests || []);
-                } else {
-                    setError(response.message || 'Failed to load friends');
-                }
-            } catch (err) {
-                console.error('Error fetching friends:', err);
-                setError('Error loading friends data. Please try again later.');
-            } finally {
-                setLoading(false);
-            }
-        }
-
         fetchFriendsData();
     }, []);
 
@@ -58,7 +58,7 @@ export function FriendsPage() {
                 }
             }
         }
-        
+
         fetchAllUsers();
     }, [searchQuery]);
 
@@ -70,10 +70,13 @@ export function FriendsPage() {
         try {
             const userId = await getUserId();
             const response = await ApiService.addFriend(userId, friendTag);
-            
+
             if (response.status === 200) {
                 // Show success notification (you could add a toast here)
                 console.log('Friend request sent successfully');
+
+                // Refetch friends data to update the UI
+                fetchFriendsData();
             }
         } catch (err) {
             console.error('Error sending friend request:', err);
@@ -84,7 +87,7 @@ export function FriendsPage() {
         try {
             const userId = await getUserId();
             const response = await ApiService.respondToFriend(userId, requesterId, 'accept');
-            
+
             if (response.status === 200) {
                 // Update UI after accepting friend request
                 // Move from pending to friends
@@ -103,7 +106,7 @@ export function FriendsPage() {
         try {
             const userId = await getUserId();
             const response = await ApiService.respondToFriend(userId, requesterId, 'ignore');
-            
+
             if (response.status === 200) {
                 // Remove from pending requests
                 setPendingRequests(pendingRequests.filter(req => req.id !== requesterId));
@@ -118,7 +121,7 @@ export function FriendsPage() {
             <AppHeader title={"Friends"} />
             <div className="container mx-auto py-6">
                 <UserSearchBar onSearch={handleSearch} />
-                
+
                 {loading ? (
                     <div className="flex justify-center mt-8">
                         <p className="text-gray-500">Loading friends data...</p>
@@ -129,13 +132,16 @@ export function FriendsPage() {
                     </div>
                 ) : (
                     <div className="mt-6 px-4">
-                        <PendingRequestsSection 
+                        <PendingRequestsSection
                             requests={pendingRequests}
                             onAccept={handleAcceptRequest}
                             onReject={handleRejectRequest}
                         />
-                        <MyFriendsSection friends={friends} />
-                        <AllUsersSection 
+                        <MyFriendsSection
+                            friends={friends}
+                            searchQuery={searchQuery}
+                        />
+                        <AllUsersSection
                             users={allUsers}
                             searchQuery={searchQuery}
                             currentUserId={currentUserId}
