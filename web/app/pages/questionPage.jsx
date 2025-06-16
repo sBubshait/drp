@@ -138,13 +138,14 @@ export function QuestionPage() {
         setIsAnimating(false);
       }, 150);
     } else {
-      // After all questions, navigate to the next article
+      // After all questions, check if article is completed
       if (fract == 1) {
-        // user has completed the article
+        // User has completed the article
         incrementXp(100);
         
-        // If streak is completed, we'll pass this info to the article page
+        // If streak is completed, pass the info directly to article page
         if (streakCompleted) {
+          console.log("Streak completed, passing to article page");
           navigate(`/article`, {
             state: {
               targetArticleId: location.state?.nextArticleId,
@@ -159,9 +160,8 @@ export function QuestionPage() {
         }
       }
 
-      // Check if we have information about the next article
+      // Regular navigation to next article (no streak completed)
       if (location.state?.nextArticleId) {
-        // Navigate back to ArticlePageRewrite with the index of the next article
         navigate(`/article`, {
           state: {
             targetArticleId: location.state.nextArticleId,
@@ -171,7 +171,6 @@ export function QuestionPage() {
           }
         });
       } else {
-        // No next article, just go back to the main article page
         navigate(`/article`);
       }
     }
@@ -259,6 +258,31 @@ export function QuestionPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [loading, segments.length, currentIndex, nextArticleId, isAnimating]);
 
+  // Add a useEffect to handle checking for streak completion when fract changes to 1
+  useEffect(() => {
+    // Only proceed if:
+    // 1. This is a streak article
+    // 2. All segments are answered (fract is 1)
+    // 3. streakCompleted is currently false (we haven't already processed it)
+    if (streakArticle && fract === 1 && !streakCompleted) {
+      // Complete the streak on the server
+      completeStreak().then(response => {
+        if (response.status === 200) {
+          // Get updated user data to show current streak count
+          getMyData().then(userData => {
+            setStreakCompleted(true);
+            setDisplayedStreak(userData.streak);
+            console.log("Streak completed! Current streak:", userData.streak);
+          }).catch(error => {
+            console.error('Error fetching user data after streak completion:', error);
+          });
+        }
+      }).catch(error => {
+        console.error('Error completing streak:', error);
+      });
+    }
+  }, [fract, streakArticle, streakCompleted]);
+
   // Loading state
   if (loading) {
     return (
@@ -342,7 +366,8 @@ export function QuestionPage() {
             ContentComponent ? (<ContentComponent content={currentSegment}
               interactCallback={(segmentId) => {
                 interactWithSegment(segmentId);
-                setAnsweredSegments(answeredSegments + segmentId);
+                // Fix: use functional update to properly handle state updates with arrays
+                setAnsweredSegments(prev => [...prev, segmentId]);
                 incrementXp(10);
               }}
             />) :

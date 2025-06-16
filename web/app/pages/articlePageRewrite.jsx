@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import { useNavigate, useLocation } from 'react-router';
 import VerticalVideoPlayer from "../components/site_layout/videoPlayer.jsx";
@@ -39,12 +39,8 @@ export function ArticlePageRewrite() {
     // Add a state to control visibility of both menus
     const [showMenus, setShowMenus] = useState(false);
 
-    // Streak state
+    // Enhanced streak state
     const [streakStatus, setStreakStatus] = useState(0);
-
-    // Add streak completion state
-    const [streakCompleted, setStreakCompleted] = useState(false);
-    const [displayedStreak, setDisplayedStreak] = useState(null);
 
     // Available filter options
     const filterOptions = ['Technology', 'Environment', 'Global Politics', 'Economics', 'Social Issues'];
@@ -52,24 +48,18 @@ export function ArticlePageRewrite() {
     // Initialize tip state and fetch streak condition
     useEffect(() => {
         initTip();
-        getStreakCond().then((resp) => { setStreakStatus(resp.id) });
+        fetchStreakStatus();
     }, []);
 
-    // Handle incoming streak completion data
-    useEffect(() => {
-        if (location.state?.streakCompleted && location.state?.displayedStreak) {
-            setStreakCompleted(true);
-            setDisplayedStreak(location.state.displayedStreak);
-
-            // Reset after showing animation (after 5 seconds)
-            const timer = setTimeout(() => {
-                setStreakCompleted(false);
-                setDisplayedStreak(null);
-            }, 5000);
-
-            return () => clearTimeout(timer);
+    // Separate function to fetch streak status
+    const fetchStreakStatus = async () => {
+        try {
+            const resp = await getStreakCond();
+            setStreakStatus(resp.id);
+        } catch (error) {
+            console.error("Error fetching streak status:", error);
         }
-    }, [location.state]);
+    };
 
     const initTip = () => {
         const tipDismissed = localStorage.getItem('tipDismissed');
@@ -451,12 +441,13 @@ export function ArticlePageRewrite() {
     return (
         <div {...handlers} className="w-full bg-gray-200 flex flex-col min-h-screen overflow-hidden relative">
             {/* Header */}
-            <AppHeader articleId={currentArticle.id} />
+            <AppHeader articleId={currentArticle?.id} />
 
-            {/* Streak Tip - Always show the streak tip */}
-            <StreakBeginTip streakStatus={streakStatus} />
+            <div className="relative">
+                <StreakBeginTip streakStatus={streakStatus} />
+            </div>
 
-            {/* Filter, Sort, and Toggle Button Row */}
+            {/* Filters and toggle button row - only show if not in streak completed state */}
             <div className="flex items-center gap-4 px-6 py-2">
                 <div className="flex-1">
                     {showMenus && (
@@ -477,7 +468,6 @@ export function ArticlePageRewrite() {
                     )}
                 </div>
 
-                {/* Toggle Menus Button */}
                 <button
                     onClick={() => setShowMenus((prev) => !prev)}
                     className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-xl flex items-center justify-center"
@@ -494,46 +484,38 @@ export function ArticlePageRewrite() {
                         </svg>
                     )}
                 </button>
-
-
             </div>
 
-            {/* Main Content Area */}
-            {streakCompleted ? (
-                <StreakCompletedPage streakNo={displayedStreak} />
-            ) : (
-                <div
-                    className={`flex-1 flex flex-col justify-center items-center relative transition-all duration-300 ease-out ${isAnimating ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'
-                        }`}
-                >
-                    {isVideoArticle ? (
-                        /* Video Article Layout - Full Screen */
-                        <div className="w-full h-full relative">
-                            {/* Video Player - Takes full available space */}
-                            <div className="w-full h-full p-4">
-                                <VerticalVideoPlayer
-                                    videoUrl={currentArticle.content}
-                                    categories={articleCategories}
-                                />
-                            </div>
+            {/* Regular article content */}
+            <div className={`flex-1 flex flex-col justify-center items-center relative transition-all duration-300 ease-out ${isAnimating ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'
+                }`}>
+                {isVideoArticle ? (
+                    /* Video Article Layout - Full Screen */
+                    <div className="w-full h-full relative">
+                        {/* Video Player - Takes full available space */}
+                        <div className="w-full h-full p-4">
+                            <VerticalVideoPlayer
+                                videoUrl={currentArticle.content}
+                                categories={articleCategories}
+                            />
                         </div>
-                    ) : (
-                        <div className="flex flex-col items-center">
-                            <ArticlePreview article={currentArticle} categories={articleCategories} />
-                        </div>
-                    )}
-                </div>
-            )}
+                    </div>
+                ) : (
+                    <div className="flex flex-col items-center">
+                        <ArticlePreview article={currentArticle} categories={articleCategories} />
+                    </div>
+                )}
+            </div>
 
-            {/* Tip Box - Positioned absolutely over content */}
             <ArticleTip
                 showTip={showTip}
                 onClose={handleCloseTip}
-                segmentsCount={currentArticle.segments?.length || 0}
-                isVideoArticle={isVideoArticle}
+                segmentsCount={currentArticle?.segments?.length || 0}
+                isVideoArticle={currentArticle?.type === 'video'}
                 categories={articleCategories}
             />
 
+            {/* Always show bottom nav */}
             <BottomNav />
         </div>
     );
