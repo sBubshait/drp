@@ -1,9 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-export default function CollapsibleContainer({ title, children, initiallyOpen = false, count = null }) {
+export default function CollapsibleContainer({ title, children, initiallyOpen = false, count = null, forceOpen }) {
   const [isOpen, setIsOpen] = useState(initiallyOpen);
   const contentRef = useRef(null);
   const [contentHeight, setContentHeight] = useState(initiallyOpen ? 'auto' : 0);
+  
+  // Force open/closed based on prop if provided
+  useEffect(() => {
+    if (forceOpen !== undefined) {
+      setIsOpen(forceOpen);
+    }
+  }, [forceOpen]);
   
   useEffect(() => {
     if (isOpen) {
@@ -34,7 +41,9 @@ export default function CollapsibleContainer({ title, children, initiallyOpen = 
   }, [isOpen]);
 
   const toggleOpen = () => {
-    setIsOpen(!isOpen);
+    if (forceOpen === undefined) {
+      setIsOpen(!isOpen);
+    }
   };
 
   return (

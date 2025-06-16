@@ -1,6 +1,21 @@
 import React from 'react';
 
-export default function FriendItem({ user, isPending = false, onAccept, onReject }) {
+export default function FriendItem({ 
+  user, 
+  isPending = false, 
+  showAddButton = false, 
+  isAlreadyFriend = false,
+  isPendingRequest = false,
+  onAccept, 
+  onReject, 
+  onAdd 
+}) {
+  // Determine button state and text
+  const addButtonDisabled = isAlreadyFriend || isPendingRequest;
+  const addButtonText = isAlreadyFriend ? "Already Friends" : 
+                         isPendingRequest ? "Request Pending" : 
+                         "Add Friend";
+  
   return (
     <div className="flex items-center justify-between py-3 px-4 border-b border-gray-200 last:border-0">
       <div className="flex items-center">
@@ -28,6 +43,20 @@ export default function FriendItem({ user, isPending = false, onAccept, onReject
             Decline
           </button>
         </div>
+      )}
+      
+      {showAddButton && (
+        <button 
+          onClick={() => !addButtonDisabled && onAdd(user.tag)}
+          className={`py-1 px-3 rounded text-sm ${
+            addButtonDisabled 
+              ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+              : 'bg-cyan-600 hover:bg-cyan-700 text-white'
+          }`}
+          disabled={addButtonDisabled}
+        >
+          {addButtonText}
+        </button>
       )}
     </div>
   );

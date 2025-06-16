@@ -280,6 +280,40 @@ static async respondToFriend(userId, requesterId, action) {
   
   return data;
 }
+
+/**
+ * Get all users
+ * @returns {Promise<object>} - Response containing all users
+ */
+static async getAllUsers() {
+  const endpoint = '/users/all';
+  const data = await this.request(endpoint);
+  
+  if (data.status !== 200) {
+    throw new Error(`Failed to fetch users: ${data.status} - ${data.message}`);
+  }
+  
+  return data;
+}
+
+/**
+ * Send a friend request
+ * @param {number} userId - ID of the user sending the request
+ * @param {string} friendTag - Tag of the user to add as friend
+ * @returns {Promise<object>} - Status response
+ */
+static async addFriend(userId, friendTag) {
+  const endpoint = `/users/addFriend?userId=${userId}&friendTag=${friendTag}`;
+  const data = await this.request(endpoint, {
+    method: 'POST'
+  });
+  
+  if (data.status !== 200) {
+    throw new Error(`Failed to send friend request: ${data.status} - ${data.message}`);
+  }
+  
+  return data;
+}
 }
 
 /**

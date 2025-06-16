@@ -3,6 +3,7 @@ import AppHeader from "../components/site_layout/AppHeader";
 import UserSearchBar from "../components/friends/UserSearchBar";
 import PendingRequestsSection from "../components/friends/PendingRequestsSection";
 import MyFriendsSection from "../components/friends/MyFriendsSection";
+import AllUsersSection from "../components/friends/AllUsersSection";
 import ApiService from "../services/api";
 import { getUserId } from "../services/userApi";
 
@@ -10,8 +11,10 @@ export function FriendsPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [friends, setFriends] = useState([]);
     const [pendingRequests, setPendingRequests] = useState([]);
+    const [allUsers, setAllUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [currentUserId, setCurrentUserId] = useState(null);
 
     // Fetch friends and pending requests
     useEffect(() => {
@@ -21,10 +24,10 @@ export function FriendsPage() {
                 setError(null);
                 
                 const userId = await getUserId();
+                setCurrentUserId(userId);
                 const response = await ApiService.getFriends(userId);
                 
                 if (response.status === 200) {
-                    // Set friends data using the expected response format
                     setFriends(response.friends || []);
                     setPendingRequests(response.requests || []);
                 } else {
@@ -41,10 +44,40 @@ export function FriendsPage() {
         fetchFriendsData();
     }, []);
 
+    // Fetch all users when search query changes
+    useEffect(() => {
+        async function fetchAllUsers() {
+            if (searchQuery && searchQuery.replace(/^@/, '').length > 0) {
+                try {
+                    const response = await ApiService.getAllUsers();
+                    if (response.status === 200) {
+                        setAllUsers(response.users || []);
+                    }
+                } catch (err) {
+                    console.error('Error fetching users:', err);
+                }
+            }
+        }
+        
+        fetchAllUsers();
+    }, [searchQuery]);
+
     const handleSearch = (query) => {
         setSearchQuery(query);
-        // You can implement the actual search functionality here
-        console.log("Searching for:", query);
+    };
+
+    const handleAddFriend = async (friendTag) => {
+        try {
+            const userId = await getUserId();
+            const response = await ApiService.addFriend(userId, friendTag);
+            
+            if (response.status === 200) {
+                // Show success notification (you could add a toast here)
+                console.log('Friend request sent successfully');
+            }
+        } catch (err) {
+            console.error('Error sending friend request:', err);
+        }
     };
 
     const handleAcceptRequest = async (requesterId) => {
@@ -102,13 +135,14 @@ export function FriendsPage() {
                             onReject={handleRejectRequest}
                         />
                         <MyFriendsSection friends={friends} />
-                    </div>
-                )}
-                
-                {searchQuery && (
-                    <div className="mt-8 px-4">
-                        <p className="text-gray-600">Searching for: {searchQuery}</p>
-                        {/* Search results would go here */}
+                        <AllUsersSection 
+                            users={allUsers}
+                            searchQuery={searchQuery}
+                            currentUserId={currentUserId}
+                            friends={friends}
+                            pendingRequests={pendingRequests}
+                            onAdd={handleAddFriend}
+                        />
                     </div>
                 )}
             </div>
