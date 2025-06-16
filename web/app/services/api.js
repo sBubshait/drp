@@ -2,37 +2,43 @@ import { API_URL } from '../config.js';
 import { getUserId } from './userApi.js';
 
 class ApiService {
+  // Set API base URL
+  static API_BASE = API_URL;
+
   /**
-   * Generic request method that handles all HTTP requests
-   * @param {string} endpoint - API endpoint (without base URL)
-   * @param {object} options - Fetch options (method, headers, body, etc.)
-   * @returns {Promise<any>} - Parsed JSON response
+   * Get headers for API requests
+   * @returns {object} - Headers object
+   */
+  static getHeaders() {
+    return {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    };
+  }
+
+  /**
+   * Base request method for all API calls
+   * @param {string} endpoint - API endpoint
+   * @param {object} options - Fetch options
+   * @returns {Promise<object>} - Parsed JSON response
    */
   static async request(endpoint, options = {}) {
-    const url = `${API_URL}${endpoint}`;
+    const url = `${this.API_BASE}${endpoint}`;
     
-    const defaultOptions = {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      ...options
-    };
-
     try {
-      
-      const response = await fetch(url, defaultOptions);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
-      }
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          ...this.getHeaders(),
+          ...(options.headers || {})
+        }
+      });
       
       const data = await response.json();
-      
       return data;
     } catch (error) {
-      console.error(`API request failed for ${endpoint}:`, error);
-      throw new ApiError(error.message, endpoint, options);
+      console.error(`API error for ${endpoint}:`, error);
+      throw new ApiError(`Request failed: ${error.message}`, endpoint, options);
     }
   }
 
@@ -255,27 +261,7 @@ static async getFriends(userId) {
   const data = await this.request(endpoint);
   
   if (data.status !== 200) {
-    throw new Error(`Failed to fetch friends: ${data.status} - ${data.message}`);
-  }
-  
-  return data;
-}
-
-/**
- * Respond to a friend request (accept or ignore)
- * @param {number} userId - ID of the user responding to the request
- * @param {number} requesterId - ID of the user who sent the request
- * @param {string} action - Action to take: 'accept' or 'ignore'
- * @returns {Promise<object>} - Status response
- */
-static async respondToFriend(userId, requesterId, action) {
-  const endpoint = `/users/respondToFriend?userId=${userId}&requesterId=${requesterId}&action=${action}`;
-  const data = await this.request(endpoint, {
-    method: 'POST'
-  });
-  
-  if (data.status !== 200) {
-    throw new Error(`Failed to respond to friend request: ${data.status} - ${data.message}`);
+    throw new ApiError(data.message || "Failed to fetch friends", endpoint, { userId });
   }
   
   return data;
@@ -297,6 +283,27 @@ static async getAllUsers() {
 }
 
 /**
+ * Respond to a friend request (accept or ignore)
+ * @param {number} userId - ID of the user responding to the request
+ * @param {number} requesterId - ID of the user who sent the request
+ * @param {string} action - Action to take: 'accept' or 'ignore'
+ * @returns {Promise<object>} - Status response
+ */
+static async respondToFriend(userId, requesterId, action) {
+  const endpoint = `/users/respondToFriend?userId=${userId}&requesterId=${requesterId}&action=${action}`;
+  const data = await this.request(endpoint, {
+    method: 'POST'
+  });
+  
+  if (data.status !== 200) {
+    throw new ApiError(data.message || "Failed to respond to friend request", endpoint, 
+      { userId, requesterId, action });
+  }
+  
+  return data;
+}
+
+/**
  * Send a friend request
  * @param {number} userId - ID of the user sending the request
  * @param {string} friendTag - Tag of the user to add as friend
@@ -309,7 +316,8 @@ static async addFriend(userId, friendTag) {
   });
   
   if (data.status !== 200) {
-    throw new Error(`Failed to send friend request: ${data.status} - ${data.message}`);
+    throw new ApiError(data.message || "Failed to send friend request", endpoint, 
+      { userId, friendTag });
   }
   
   return data;

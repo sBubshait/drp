@@ -6,6 +6,7 @@ import MyFriendsSection from "../components/friends/MyFriendsSection";
 import AllUsersSection from "../components/friends/AllUsersSection";
 import ApiService from "../services/api";
 import { getUserId } from "../services/userApi";
+import UserTagDisplay from '../components/friends/UserTagDisplay';
 
 export function FriendsPage() {
     const [searchQuery, setSearchQuery] = useState('');
@@ -138,6 +139,8 @@ export function FriendsPage() {
             }
         } catch (err) {
             console.error('Error refreshing friends data:', err);
+            // Display the error message from the API response
+            alert(`Failed to refresh friends data: ${err.message}`);
         }
     };
 
@@ -158,6 +161,8 @@ export function FriendsPage() {
             }
         } catch (err) {
             console.error('Error sending friend request:', err);
+            // Display the error message from the API response
+            alert(`Failed to send friend request: ${err.message}`);
         }
     };
 
@@ -172,6 +177,8 @@ export function FriendsPage() {
             }
         } catch (err) {
             console.error('Error accepting friend request:', err);
+            // Display the error message from the API response
+            alert(`Failed to accept friend request: ${err.message}`);
         }
     };
 
@@ -186,13 +193,20 @@ export function FriendsPage() {
             }
         } catch (err) {
             console.error('Error rejecting friend request:', err);
+            // Display the error message from the API response
+            alert(`Failed to reject friend request: ${err.message}`);
         }
     };
 
     return (
         <div className="min-h-screen bg-gray-50">
             <AppHeader title={"Friends"} />
-            <div className="container mx-auto py-6">
+            
+            <div className="flex justify-end px-4 py-2 mt-2">
+                <UserTagDisplay userId={currentUserId} />
+            </div>
+            
+            <div className="container mx-auto py-2">
                 <UserSearchBar onSearch={handleSearch} />
                 
                 {loading ? (
