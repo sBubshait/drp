@@ -31,6 +31,9 @@ export default function AllUsersSection({
   // Check if a user is already a friend or has a pending request
   const isAlreadyFriend = (userId) => friends.some(friend => friend.id === userId);
   const isPendingRequest = (userId) => pendingRequests.some(request => request.id === userId);
+  
+  // Check if a user has sent us a friend request
+  const hasIncomingRequest = (userId) => pendingRequests.some(request => request.id === userId);
 
   return (
     <CollapsibleContainer 
@@ -55,6 +58,7 @@ export default function AllUsersSection({
             showAddButton={true}
             isAlreadyFriend={isAlreadyFriend(user.id)}
             isPendingRequest={isPendingRequest(user.id)}
+            hasIncomingRequest={hasIncomingRequest(user.id)}
             onAdd={() => onAdd(user.tag)}
           />
         ))

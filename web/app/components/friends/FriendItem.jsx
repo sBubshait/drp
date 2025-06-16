@@ -6,14 +6,16 @@ export default function FriendItem({
   showAddButton = false, 
   isAlreadyFriend = false,
   isPendingRequest = false,
+  hasIncomingRequest = false,
   onAccept, 
   onReject, 
   onAdd 
 }) {
   // Determine button state and text
-  const addButtonDisabled = isAlreadyFriend || isPendingRequest;
+  const addButtonDisabled = isAlreadyFriend || isPendingRequest || hasIncomingRequest;
   const addButtonText = isAlreadyFriend ? "Already Friends" : 
                          isPendingRequest ? "Request Pending" : 
+                         hasIncomingRequest ? "Incoming" : 
                          "Add Friend";
   
   // Extract two capital letters from the tag
@@ -58,7 +60,7 @@ export default function FriendItem({
             onClick={() => onAccept(user.id)}
             className="bg-cyan-600 hover:bg-cyan-700 text-white py-1 px-3 rounded text-sm"
           >
-            Friend
+            Accept
           </button>
           <button 
             onClick={() => onReject(user.id)}
