@@ -47,7 +47,6 @@ export default function PollContent({ content, interactCallback }) {
         
         // Only update state if poll data has actually changed
         if (!pollDataIsEqual(currentPollData, incomingPollData)) {
-          console.log('Poll data updated:', incomingPollData.totalResponses, 'total responses');
           setResponseCounts(incomingPollData.responseCounts);
           setTotalResponses(incomingPollData.totalResponses);
         }

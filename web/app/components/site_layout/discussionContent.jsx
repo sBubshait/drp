@@ -54,7 +54,6 @@ export default function DiscussionContent({ content, interactCallback }) {
         // Only update state if responses have actually changed
         setResponses(currentResponses => {
           if (!responsesAreEqual(currentResponses, newResponses)) {
-            console.log('Responses updated:', newResponses.length, 'responses');
             return newResponses;
           }
           return currentResponses;
@@ -101,7 +100,6 @@ export default function DiscussionContent({ content, interactCallback }) {
       // Find and set user's response if it exists
       if (savedResponseId) {
         const userResponse = data.responses.find(response => response.id == savedResponseId);
-        console.log('User response:', userResponse);
         if (userResponse) {
           setUserInput(userResponse.content);
         }
@@ -163,7 +161,6 @@ export default function DiscussionContent({ content, interactCallback }) {
 
   const handleBackToEdit = () => {
     setHasSubmitted(false);
-    console.log(hasSubmitted)
   };
 
   const handleBackToArticle = () => {

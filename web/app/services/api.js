@@ -71,9 +71,23 @@ class ApiService {
     }
 
     const endpoint = `/users/addXP?userId=${userId}&amount=${amount}`;
-    return this.request(endpoint, {
+    const response = await this.request(endpoint, {
       method: 'POST'
     });
+    
+    // If successful, update localStorage immediately
+    if (response && response.status === 200) {
+      // Get current XP from localStorage
+      const currentXp = parseInt(localStorage.getItem('userXp') || '0', 10);
+      // Update with new amount
+      const newXp = currentXp + amount;
+      localStorage.setItem('userXp', newXp.toString());
+      
+      // Dispatch a custom event to notify listeners about XP change
+      window.dispatchEvent(new CustomEvent('xpUpdated', { detail: { xp: newXp } }));
+    }
+    
+    return response;
   }
 
   /**

@@ -59,6 +59,7 @@ export function QuestionPage() {
   function incrementXp(amount) {
     ApiService.incrementXp(amount).then(() => {
       console.log(`Incremented XP by ${amount}`);
+      // XpDisplay now updates automatically via the event system and localStorage
     }).catch(error => {
       console.error('Error incrementing XP:', error);
     });
