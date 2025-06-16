@@ -4,10 +4,10 @@ import FriendItem from './FriendItem';
 
 export default function PendingRequestsSection({ requests, onAccept, onReject }) {
   return (
-    <CollapsibleContainer title="Pending Friend Requests" count={requests.length} initiallyOpen={requests.length > 0}>
+    <CollapsibleContainer title="Incoming Friend Requests" count={requests.length} initiallyOpen={requests.length > 0}>
       {requests.length === 0 ? (
         <div className="py-4 px-4 text-center text-gray-500">
-          No pending friend requests
+          No incoming friend requests
         </div>
       ) : (
         requests.map(request => (

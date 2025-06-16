@@ -58,13 +58,13 @@ export default function FriendItem({
             onClick={() => onAccept(user.id)}
             className="bg-cyan-600 hover:bg-cyan-700 text-white py-1 px-3 rounded text-sm"
           >
-            Accept
+            Friend
           </button>
           <button 
             onClick={() => onReject(user.id)}
             className="bg-gray-300 hover:bg-gray-400 text-gray-800 py-1 px-3 rounded text-sm"
           >
-            Decline
+            Dismiss
           </button>
         </div>
       )}
