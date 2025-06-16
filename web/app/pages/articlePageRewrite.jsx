@@ -507,14 +507,6 @@ export function ArticlePageRewrite() {
                 )}
             </div>
 
-            <ArticleTip
-                showTip={showTip}
-                onClose={handleCloseTip}
-                segmentsCount={currentArticle?.segments?.length || 0}
-                isVideoArticle={currentArticle?.type === 'video'}
-                categories={articleCategories}
-            />
-
             {/* Always show bottom nav */}
             <BottomNav />
         </div>
