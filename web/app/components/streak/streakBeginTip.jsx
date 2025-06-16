@@ -4,21 +4,23 @@ export default function StreakBeginTip({ className, streakStatus }) {
   if (streakStatus == 0) return null;
 
   return (
-    <div className={className}>
-      <div className="flex items-end mb-4">
-        {/* Flame fixed width/height container, aligned bottom */}
-        <div className="flex-shrink-0 w-14 h-14 flex justify-center items-end">
-          <Flame className="scale-60 mb-2" />
-        </div>
+    <div className="absolute bottom-6 left-6 right-6 z-20">
+      <div className="bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200 rounded-xl shadow-lg p-4 backdrop-blur-sm bg-opacity-95">
+        <div className="flex items-center gap-4">
+          {/* Flame container */}
+          <div className="flex-shrink-0 w-12 h-12 flex justify-center items-center">
+            <Flame className="scale-75" />
+          </div>
 
-        {/* Text container flex-grow, stacked vertically */}
-        <div className="flex flex-col">
-          <p className="text-2xl text-red-600 font-bold leading-tight">
-            {streakStatus === 1
-              ? <p> Ready to start your streak? <br /> Complete an article today! </p>
-              : <p> Keep your streak alive! <br /> Don't miss today's article. </p>
-            }
-          </p>
+          {/* Text container */}
+          <div className="flex-1">
+            <p className="text-lg text-red-700 font-bold leading-tight">
+              {streakStatus === 1
+                ? "Ready to start your streak? Complete an article today!"
+                : "Keep your streak alive! Don't miss today's article."
+              }
+            </p>
+          </div>
         </div>
       </div>
     </div>

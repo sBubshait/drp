@@ -448,12 +448,7 @@ export function ArticlePage() {
       </div>
 
       {/* Streak Tip */}
-      {isVideoArticle ? (
-        <div></div>) : (
-        <div className="flex flex-col items-center">
-          <StreakBeginTip streakStatus={streakStatus} />
-        </div>
-      )}
+      {isVideoArticle && <StreakBeginTip streakStatus={streakStatus} />}
 
       {/* Main Content Area */}
       {noMatchingArticles ? (
