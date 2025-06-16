@@ -76,11 +76,17 @@ export function ArticlePageRewrite() {
     // Helper function to check if article matches ALL selected filters
     const articleMatchesFilter = (article) => {
         if (selectedFilters.length === 0) return true; // No filters = show all
-
+        
         const categories = calculateArticleCategories(article);
-
+        
+        // Normalize categories by trimming whitespace
+        const normalizedCategories = categories.map(cat => cat.trim());
+        
         // Article must match ALL selected filters
-        return selectedFilters.every(filter => categories.includes(filter));
+        return selectedFilters.every(filter => 
+            normalizedCategories.includes(filter) || 
+            normalizedCategories.includes(filter.trim())
+        );
     };
 
     // Fetch all articles on component mount
@@ -362,7 +368,7 @@ export function ArticlePageRewrite() {
         return (
             <div className="w-full bg-gray-200 flex flex-col min-h-screen overflow-hidden relative">
                 <AppHeader />
-
+                
                 {/* Filter Section */}
                 <div className="flex items-center gap-4 px-6 py-2">
                     <div className="flex-1">
@@ -383,7 +389,7 @@ export function ArticlePageRewrite() {
                             />
                         )}
                     </div>
-
+                    
                     {/* Toggle Menus Button */}
                     <button
                         onClick={() => setShowMenus((prev) => !prev)}
@@ -397,28 +403,19 @@ export function ArticlePageRewrite() {
                         ) : (
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M1.458 12C2.732 7.943 6.523 5 12 5c5.477 0 9.268 2.943 10.542 7-1.274 4.057-5.065 7-10.542 7-5.477 0-9.268-2.943-10.542-7z" />
-                                <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth={2} fill="none" />
-                            </svg>
+                            <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth={2} fill="none" />
+                        </svg>
                         )}
                     </button>
                 </div>
-
+                
+                {/* Use the simplified NoMatchingArticles component */}
                 <NoMatchingArticles
                     selectedSort={selectedSort}
                     selectedFilters={selectedFilters}
                     onResetFilters={handleClearFilters}
-                    filterOptions={filterOptions}
-                    showFilterMenu={showFilterMenu}
-                    setShowFilterMenu={setShowFilterMenu}
-                    handleFilterToggle={handleFilterToggle}
-                    handleClearFilters={handleClearFilters}
-                    getFilterDisplayText={getFilterDisplayText}
-                    setSelectedSort={setSelectedSort}
-                    showSortMenu={showSortMenu}
-                    setShowSortMenu={setShowSortMenu}
-                    onSortChange={handleSortChange}
                 />
-
+                
                 <BottomNav />
             </div>
         );
