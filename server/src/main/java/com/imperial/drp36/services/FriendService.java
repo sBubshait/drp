@@ -21,35 +21,31 @@ public class FriendService {
   @Autowired
   private UserRepository userRepository;
 
-  public boolean addFriend(Long userId, String friendTag) {
-    try {
-      // Find friend by tag
-      Optional<User> friendOptional = userRepository.findByTag(friendTag);
-      if (!friendOptional.isPresent()) {
-        return false;
-      }
-
-      User friend = friendOptional.get();
-
-      // Can't add yourself
-      if (friend.getId().equals(userId)) {
-        return false;
-      }
-
-      // Check if user already has this person as friend
-      if (friendRepository.existsByUserIdAndFriendId(userId, friend.getId())) {
-        return false;
-      }
-
-      // Create one-way friendship with pending status (User 1 -> User 2)
-      // This represents: User 1 has User 2 as friend, but User 2 hasn't responded yet
-      Friend friendship = new Friend(userId, friend.getId(), "pending");
-      friendRepository.save(friendship);
-
-      return true;
-    } catch (Exception e) {
-      return false;
+  public String addFriend(Long userId, String friendTag) {
+    // Find friend by tag
+    Optional<User> friendOptional = userRepository.findByTag(friendTag);
+    if (!friendOptional.isPresent()) {
+      return "User with tag '" + friendTag + "' not found";
     }
+
+    User friend = friendOptional.get();
+
+    // Can't add yourself
+    if (friend.getId().equals(userId)) {
+      return "Cannot add yourself as a friend";
+    }
+
+    // Check if user already has this person as friend
+    if (friendRepository.existsByUserIdAndFriendId(userId, friend.getId())) {
+      return "User is already a friend!";
+    }
+
+    // Create one-way friendship with pending status (User 1 -> User 2)
+    // This represents: User 1 has User 2 as friend, but User 2 hasn't responded yet
+    Friend friendship = new Friend(userId, friend.getId(), "pending");
+    friendRepository.save(friendship);
+
+    return "SUCCESS";
   }
 
   public FriendsResponse getFriends(Long userId) {

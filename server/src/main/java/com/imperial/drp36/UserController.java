@@ -248,13 +248,13 @@ public class UserController {
       @RequestParam String friendTag) {
 
     try {
-      boolean success = friendService.addFriend(userId, friendTag);
+      String message = friendService.addFriend(userId, friendTag);
 
-      if (success) {
+      if ("SUCCESS".equals(message)) {
         return ResponseEntity.ok(new StatusResponse(200, "Friend request sent successfully"));
       } else {
         return ResponseEntity.badRequest()
-            .body(new StatusResponse(400, "Unable to send friend request"));
+            .body(new StatusResponse(400, message));
       }
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
