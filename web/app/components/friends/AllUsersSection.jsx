@@ -12,8 +12,12 @@ export default function AllUsersSection({
 }) {
   // Filter users based on search query if one exists
   const filteredUsers = users.filter(user => {
-    // Don't include the current user
-    if (user.id === currentUserId) return false;
+    // Explicitly ensure we don't include the current user in the list
+    // Convert both to strings to handle potential type differences
+    if (String(user.id) === String(currentUserId) || 
+        String(user.userId) === String(currentUserId)) {
+      return false;
+    }
     
     // If there's a search query, filter by tag
     if (searchQuery && searchQuery.replace(/^@/, '').length > 0) {
@@ -29,11 +33,31 @@ export default function AllUsersSection({
   const isSearching = searchQuery && searchQuery.replace(/^@/, '').length > 0;
   
   // Check if a user is already a friend or has a pending request
-  const isAlreadyFriend = (userId) => friends.some(friend => friend.id === userId);
-  const isPendingRequest = (userId) => pendingRequests.some(request => request.id === userId);
+  const isAlreadyFriend = (userId) => friends.some(friend => 
+    String(friend.id) === String(userId) || String(friend.userId) === String(userId)
+  );
+  
+  // Check if we sent a pending request to this user
+  const isPendingRequest = (userId) => pendingRequests.some(request => 
+    String(request.id) === String(userId) || String(request.userId) === String(userId)
+  );
   
   // Check if a user has sent us a friend request
-  const hasIncomingRequest = (userId) => pendingRequests.some(request => request.id === userId);
+  const hasIncomingRequest = (userId) => pendingRequests.some(request => 
+    String(request.id) === String(userId) || String(request.userId) === String(userId)
+  );
+
+  // Additional safety check before adding a friend
+  const handleAddFriend = (friendTag) => {
+    // Don't allow adding if this is somehow the current user
+    if (filteredUsers.find(u => u.tag === friendTag && 
+        (String(u.id) === String(currentUserId) || String(u.userId) === String(currentUserId)))) {
+      alert("You cannot add yourself as a friend");
+      return;
+    }
+    
+    onAdd(friendTag);
+  };
 
   return (
     <CollapsibleContainer 
@@ -52,14 +76,14 @@ export default function AllUsersSection({
       ) : (
         filteredUsers.map(user => (
           <FriendItem 
-            key={user.id}
+            key={user.id || user.userId}
             user={user}
             isPending={false}
             showAddButton={true}
-            isAlreadyFriend={isAlreadyFriend(user.id)}
-            isPendingRequest={isPendingRequest(user.id)}
-            hasIncomingRequest={hasIncomingRequest(user.id)}
-            onAdd={() => onAdd(user.tag)}
+            isAlreadyFriend={isAlreadyFriend(user.id || user.userId)}
+            isPendingRequest={isPendingRequest(user.id || user.userId)}
+            hasIncomingRequest={hasIncomingRequest(user.id || user.userId)}
+            onAdd={() => handleAddFriend(user.tag)}
           />
         ))
       )}
