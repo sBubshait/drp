@@ -1,12 +1,24 @@
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 
 export function BottomNav() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const pathname = location.pathname;
+  
+  // Check if current route matches patterns
+  const isFeedActive = pathname.startsWith('/articles');
+  const isLeaderboardActive = pathname === '/leaderboard';
+  const isFriendsActive = pathname === '/friends';
+  
   return (
     <div className="w-full fixed bg-white flex justify-around overflow-hidden relative border-t border-gray-300 shadow-md py-3">
         <button
         onClick={() => navigate('/articles/1')}
-        className="flex flex-col items-center text-gray-700 hover:text-blue-600"
+        className={`flex flex-col items-center rounded-lg px-3 py-1 ${
+          isFeedActive 
+            ? 'text-blue-600 bg-blue-100' 
+            : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+        }`}
         >
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-file-arrow-down" viewBox="0 0 16 16">
             <path d="M8 5a.5.5 0 0 1 .5.5v3.793l1.146-1.147a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 1 1 .708-.708L7.5 9.293V5.5A.5.5 0 0 1 8 5"/>
@@ -17,7 +29,11 @@ export function BottomNav() {
 
         <button
         onClick={() => navigate('/leaderboard')}
-        className="flex flex-col items-center text-gray-700 hover:text-blue-600"
+        className={`flex flex-col items-center rounded-lg px-3 py-1 ${
+          isLeaderboardActive 
+            ? 'text-blue-600 bg-blue-100' 
+            : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+        }`}
         >
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-trophy" viewBox="0 0 16 16">
             <path d="M2.5.5A.5.5 0 0 1 3 0h10a.5.5 0 0 1 .5.5q0 .807-.034 1.536a3 3 0 1 1-1.133 5.89c-.79 1.865-1.878 2.777-2.833 
@@ -32,7 +48,11 @@ export function BottomNav() {
 
         <button
         onClick={() => navigate('/friends')}
-        className="flex flex-col items-center text-gray-700 hover:text-blue-600"
+        className={`flex flex-col items-center rounded-lg px-3 py-1 ${
+          isFriendsActive 
+            ? 'text-blue-600 bg-blue-100' 
+            : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+        }`}
         >
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-people" viewBox="0 0 16 16">
             <path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1zm-7.978-1L7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11
