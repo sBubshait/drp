@@ -39,7 +39,7 @@ export default function AllUsersSection({
     <CollapsibleContainer 
       title="All Users" 
       count={filteredUsers.length} 
-      initiallyOpen={isSearching}
+      initiallyOpen={false}
       // Only force open when actively searching
       forceOpen={isSearching ? true : undefined}
     >

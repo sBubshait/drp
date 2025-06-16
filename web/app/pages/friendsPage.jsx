@@ -16,51 +16,57 @@ export function FriendsPage() {
     const [error, setError] = useState(null);
     const [currentUserId, setCurrentUserId] = useState(null);
 
-    async function fetchFriendsData() {
+    // Fetch friends, pending requests, and all users
+    useEffect(() => {
+        async function fetchInitialData() {
+            try {
+                setLoading(true);
+                setError(null);
+                
+                const userId = await getUserId();
+                setCurrentUserId(userId);
+                
+                // Fetch friends and requests
+                const friendsResponse = await ApiService.getFriends(userId);
+                
+                // Fetch all users at the same time
+                const usersResponse = await ApiService.getAllUsers();
+                
+                if (friendsResponse.status === 200) {
+                    setFriends(friendsResponse.friends || []);
+                    setPendingRequests(friendsResponse.requests || []);
+                } else {
+                    setError(friendsResponse.message || 'Failed to load friends');
+                }
+                
+                if (usersResponse.status === 200) {
+                    setAllUsers(usersResponse.users || []);
+                }
+            } catch (err) {
+                console.error('Error fetching initial data:', err);
+                setError('Error loading data. Please try again later.');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        fetchInitialData();
+    }, []);
+    
+    // Separate function to refetch only friends data (used after adding a friend)
+    const fetchFriendsData = async () => {
         try {
-            setLoading(true);
-            setError(null);
-
             const userId = await getUserId();
-            setCurrentUserId(userId);
             const response = await ApiService.getFriends(userId);
-
+            
             if (response.status === 200) {
                 setFriends(response.friends || []);
                 setPendingRequests(response.requests || []);
-            } else {
-                setError(response.message || 'Failed to load friends');
             }
         } catch (err) {
-            console.error('Error fetching friends:', err);
-            setError('Error loading friends data. Please try again later.');
-        } finally {
-            setLoading(false);
+            console.error('Error refreshing friends data:', err);
         }
-    }
-
-    // Fetch friends and pending requests
-    useEffect(() => {
-        fetchFriendsData();
-    }, []);
-
-    // Fetch all users when search query changes
-    useEffect(() => {
-        async function fetchAllUsers() {
-            if (searchQuery && searchQuery.replace(/^@/, '').length > 0) {
-                try {
-                    const response = await ApiService.getAllUsers();
-                    if (response.status === 200) {
-                        setAllUsers(response.users || []);
-                    }
-                } catch (err) {
-                    console.error('Error fetching users:', err);
-                }
-            }
-        }
-
-        fetchAllUsers();
-    }, [searchQuery]);
+    };
 
     const handleSearch = (query) => {
         setSearchQuery(query);
@@ -70,11 +76,11 @@ export function FriendsPage() {
         try {
             const userId = await getUserId();
             const response = await ApiService.addFriend(userId, friendTag);
-
+            
             if (response.status === 200) {
                 // Show success notification (you could add a toast here)
                 console.log('Friend request sent successfully');
-
+                
                 // Refetch friends data to update the UI
                 fetchFriendsData();
             }
@@ -87,7 +93,7 @@ export function FriendsPage() {
         try {
             const userId = await getUserId();
             const response = await ApiService.respondToFriend(userId, requesterId, 'accept');
-
+            
             if (response.status === 200) {
                 // Update UI after accepting friend request
                 // Move from pending to friends
@@ -106,7 +112,7 @@ export function FriendsPage() {
         try {
             const userId = await getUserId();
             const response = await ApiService.respondToFriend(userId, requesterId, 'ignore');
-
+            
             if (response.status === 200) {
                 // Remove from pending requests
                 setPendingRequests(pendingRequests.filter(req => req.id !== requesterId));
@@ -121,7 +127,7 @@ export function FriendsPage() {
             <AppHeader title={"Friends"} />
             <div className="container mx-auto py-6">
                 <UserSearchBar onSearch={handleSearch} />
-
+                
                 {loading ? (
                     <div className="flex justify-center mt-8">
                         <p className="text-gray-500">Loading friends data...</p>
@@ -132,7 +138,7 @@ export function FriendsPage() {
                     </div>
                 ) : (
                     <div className="mt-6 px-4">
-                        <PendingRequestsSection
+                        <PendingRequestsSection 
                             requests={pendingRequests}
                             onAccept={handleAcceptRequest}
                             onReject={handleRejectRequest}
@@ -141,7 +147,7 @@ export function FriendsPage() {
                             friends={friends}
                             searchQuery={searchQuery}
                         />
-                        <AllUsersSection
+                        <AllUsersSection 
                             users={allUsers}
                             searchQuery={searchQuery}
                             currentUserId={currentUserId}
