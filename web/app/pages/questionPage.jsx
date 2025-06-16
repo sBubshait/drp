@@ -138,28 +138,53 @@ export function QuestionPage() {
         setIsAnimating(false);
       }, 150);
     } else {
-
+      // Handle streak completion first if this is a streak article and all segments are answered
       if (streakArticle && fract == 1 && !streakCompleted) {
-
-        // Streak completion code (should probably be a function)
+        // First set flags
         setStreakArticle(false);
         setStreakCompleted(true);
         incrementXp(500);
 
-        getMyData().then((dat) => {
-          setDisplayedStreak(dat.streak);
-          setTimeout(() => { setDisplayedStreak(dat.streak + 1) }, 400)
+        // Get user data, then setup animation with better delays
+        getMyData().then((userData) => {
+          // Delay setting the initial streak value to give component time to render
+          setTimeout(() => {
+            // Set the current streak value first
+            setDisplayedStreak(userData.streak);
+            
+            // Add a longer delay before showing the increment (1.5 seconds)
+            // This gives users time to see the initial number
+            setTimeout(() => {
+              setDisplayedStreak(userData.streak + 1);
+            }, 1500);
+          }, 800);
+          
+          // Call completeStreak after setting up the animation
           completeStreak();
         });
-
-      } else if (nextArticleId) {
+        
+        // Don't navigate away yet - return to prevent further code execution
+        return;
+      } else {
+        // Regular completion without streak or after showing streak
         if (fract == 1) {
-          // user has completed the article
+          // User has completed the article
           incrementXp(100);
         }
-        navigate(`/articles/${nextArticleId}`);
-      } else {
-        navigate(`/articles/${articleId}`);
+
+        // Navigate to the next article if available - removed delay
+        if (location.state?.nextArticleId) {
+          navigate(`/article`, {
+            state: {
+              targetArticleId: location.state.nextArticleId,
+              targetArticleIndex: location.state.nextArticleIndex,
+              currentSort: location.state?.currentSort,
+              currentFilters: location.state?.currentFilters
+            }
+          });
+        } else {
+          navigate(`/article`);
+        }
       }
     }
   };
@@ -174,7 +199,15 @@ export function QuestionPage() {
         setIsAnimating(false);
       }, 150);
     } else {
-      navigate(`/articles/${articleId}`);
+      // Navigate back to the original article the user was viewing
+      navigate(`/article`, {
+        state: {
+          targetArticleId: location.state?.articleId,
+          targetArticleIndex: location.state?.originalArticleIndex,
+          currentSort: location.state?.currentSort,
+          currentFilters: location.state?.currentFilters
+        }
+      });
     }
   };
 
@@ -238,6 +271,7 @@ export function QuestionPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [loading, segments.length, currentIndex, nextArticleId, isAnimating]);
 
+
   // Loading state
   if (loading) {
     return (
@@ -271,10 +305,17 @@ export function QuestionPage() {
       <div className="w-full bg-gray-200 flex flex-col min-h-screen items-center justify-center">
         <p className="text-gray-600">No questions found for this article.</p>
         <button
-          onClick={() => navigate(`/articles/${articleId}`)}
+          onClick={() => navigate(`/article`, {
+            state: {
+              targetArticleId: location.state?.articleId,
+              targetArticleIndex: location.state?.originalArticleIndex,
+              currentSort: location.state?.currentSort,
+              currentFilters: location.state?.currentFilters
+            }
+          })}
           className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
-          Go to Article
+          Back to Article
         </button>
       </div>
     );
@@ -314,7 +355,8 @@ export function QuestionPage() {
             ContentComponent ? (<ContentComponent content={currentSegment}
               interactCallback={(segmentId) => {
                 interactWithSegment(segmentId);
-                setAnsweredSegments(answeredSegments + segmentId);
+                // Fix: use functional update to properly handle state updates with arrays
+                setAnsweredSegments(prev => [...prev, segmentId]);
                 incrementXp(10);
               }}
             />) :

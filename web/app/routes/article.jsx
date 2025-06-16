@@ -1,4 +1,4 @@
-import { ArticlePage } from "../article/articlePage";
+import { ArticlePageRewrite } from "../pages/articlePageRewrite";
 
 export function meta() {
     return [
@@ -8,5 +8,5 @@ export function meta() {
 }
 
 export default function Article() {
-    return <ArticlePage />;
+    return <ArticlePageRewrite />;
 }

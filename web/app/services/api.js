@@ -336,6 +336,21 @@ static async addFriend(userId, friendTag) {
   
   return data;
 }
+
+/**
+ * Get all articles
+ * @returns {Promise<object>} - Response containing all articles
+ */
+static async getAllArticles() {
+  const endpoint = '/getAllArticles';
+  const data = await this.request(endpoint);
+  
+  if (data.status !== 200) {
+    throw new Error(`Failed to fetch all articles: ${data.status}`);
+  }
+  
+  return data;
+}
 }
 
 /**

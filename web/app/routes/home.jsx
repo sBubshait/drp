@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { ArticlePage } from "../article/articlePage";
+import { ArticlePageRewrite } from "../pages/articlePageRewrite";
 import TutorialPage from "../pages/tutorialPage";
 
 export function meta() {
   return [
-    { title: "Article Summary - Climate Change" },
-    { name: "description", content: "Read about climate change and test your understanding" },
+    { title: "Article Summary" },
+    { name: "description", content: "Read articles and test your understanding" },
   ];
 }
 
@@ -19,7 +19,7 @@ export default function Home() {
   return showTutorial ? (
     <TutorialPage onSwipeUp={handleSwipeUp} />
   ) : (
-    <ArticlePage />
+    <ArticlePageRewrite />
   );
 }
 

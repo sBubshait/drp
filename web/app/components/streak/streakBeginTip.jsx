@@ -4,7 +4,7 @@ export default function StreakBeginTip({ className, streakStatus }) {
   if (streakStatus == 0) return null;
 
   return (
-    <div className="absolute bottom-6 left-6 right-6 z-20">
+    <div className="absolute top-36 left-6 right-6 z-20">
       <div className="bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200 rounded-xl shadow-lg p-4 backdrop-blur-sm bg-opacity-95">
         <div className="flex items-center gap-4">
           {/* Flame container */}

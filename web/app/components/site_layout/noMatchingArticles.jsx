@@ -8,13 +8,13 @@ export default function NoMatchingArticles({
   setShowFilterMenu, 
   handleFilterToggle,
   handleClearFilters,
-  onGoToFirstArticle,
+  onResetFilters,
   getFilterDisplayText,
   selectedSort,
   setSelectedSort,
   showSortMenu,
   setShowSortMenu,
-  onResetFilters
+  onSortChange
 }) {
   const getFilterDescription = () => {
     if (selectedFilters.length === 0) return 'any filters';
@@ -44,6 +44,7 @@ export default function NoMatchingArticles({
         setSelectedSort={setSelectedSort}
         showSortMenu={showSortMenu}
         setShowSortMenu={setShowSortMenu}
+        onSortChange={onSortChange}
       />
 
       {/* No Matching Articles Content */}
