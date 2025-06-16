@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSwipeable } from 'react-swipeable';
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 import VerticalVideoPlayer from "../components/site_layout/videoPlayer.jsx";
 import ArticlePreview from '../components/site_layout/articlePreview.jsx';
 import AppHeader from '../components/site_layout/AppHeader.jsx';
@@ -19,6 +19,7 @@ import { BottomNav } from '../components/site_layout/BottomNav.jsx';
 
 export function ArticlePageRewrite() {
     const navigate = useNavigate();
+    const location = useLocation();
 
     // State for all articles and current index
     const [allArticles, setAllArticles] = useState([]);
@@ -124,7 +125,6 @@ export function ArticlePageRewrite() {
 
         // Update filtered articles
         setFilteredArticles(filtered);
-        console.log('Filtered Articles:', filtered);
 
         // Reset current index when filters or sort changes
         setCurrentIndex(0);
@@ -250,19 +250,23 @@ export function ArticlePageRewrite() {
     // Navigation function for swipe to questions
     const goToQuestions = () => {
         if (isAnimating || filteredArticles.length === 0) return;
-
+        
         const currentArticle = filteredArticles[currentIndex];
         if (!currentArticle) return;
-
+        
         swipeRight(currentArticle.id);
-
+        
+        // Pass complete context for returning to the correct article
         navigate(`/articles/${currentArticle.id}/questions`, {
             state: {
                 segments: currentArticle.segments,
                 nextArticleId: currentIndex < filteredArticles.length - 1 ? filteredArticles[currentIndex + 1].id : null,
+                nextArticleIndex: currentIndex < filteredArticles.length - 1 ? currentIndex + 1 : null,
                 articleId: currentArticle.id,
                 articleTitle: currentArticle.content,
-                initStreak: streakStatus > 0
+                initStreak: streakStatus > 0,
+                // Add this to track which article index we came from
+                originalArticleIndex: currentIndex
             }
         });
     };
@@ -283,6 +287,26 @@ export function ArticlePageRewrite() {
         preventScrollOnSwipe: true,
         trackMouse: true
     });
+
+    // Add this effect to handle incoming navigation with a target article
+    useEffect(() => {
+        // Check if we're coming from questions page with a target article
+        if (location.state?.targetArticleId && filteredArticles.length > 0) {
+            // If we have a direct index, use it
+            if (location.state.targetArticleIndex !== undefined && 
+                location.state.targetArticleIndex < filteredArticles.length) {
+                setCurrentIndex(location.state.targetArticleIndex);
+            } else {
+                // Otherwise, find the article by ID
+                const targetIndex = filteredArticles.findIndex(
+                    article => article.id === location.state.targetArticleId
+                );
+                if (targetIndex !== -1) {
+                    setCurrentIndex(targetIndex);
+                }
+            }
+        }
+    }, [filteredArticles, location.state]);
 
     if (loading) {
         return (

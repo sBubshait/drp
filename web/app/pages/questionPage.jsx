@@ -138,14 +138,23 @@ export function QuestionPage() {
         setIsAnimating(false);
       }, 150);
     } else {
-      // After all questions, navigate to base /article route
-      if (nextArticleId) {
-        if (fract == 1) {
-          // user has completed the article
-          incrementXp(100);
-        }
-        navigate(`/article`);
+      // After all questions, navigate to the next article
+      if (fract == 1) {
+        // user has completed the article
+        incrementXp(100);
+      }
+
+      // Check if we have information about the next article
+      if (location.state?.nextArticleId) {
+        // Navigate back to ArticlePageRewrite with the index of the next article
+        navigate(`/article`, {
+          state: {
+            targetArticleId: location.state.nextArticleId,
+            targetArticleIndex: location.state.nextArticleIndex
+          }
+        });
       } else {
+        // No next article, just go back to the main article page
         navigate(`/article`);
       }
     }
@@ -161,9 +170,14 @@ export function QuestionPage() {
         setIsAnimating(false);
       }, 150);
     } else {
-      // Navigate to the base /article route instead of /articles/[id]
-      // This will ensure we use the ArticlePageRewrite
-      navigate(`/article`);
+      // Navigate back to the original article the user was viewing
+      navigate(`/article`, {
+        state: {
+          targetArticleId: location.state?.articleId,
+          // If we have the original index, pass it along for more precise positioning
+          targetArticleIndex: location.state?.originalArticleIndex
+        }
+      });
     }
   };
 
