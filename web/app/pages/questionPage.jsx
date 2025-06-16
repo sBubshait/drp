@@ -174,8 +174,9 @@ export function QuestionPage() {
       navigate(`/article`, {
         state: {
           targetArticleId: location.state?.articleId,
-          // If we have the original index, pass it along for more precise positioning
-          targetArticleIndex: location.state?.originalArticleIndex
+          targetArticleIndex: location.state?.originalArticleIndex,
+          currentSort: location.state?.currentSort,
+          currentFilters: location.state?.currentFilters
         }
       });
     }
@@ -277,7 +278,9 @@ export function QuestionPage() {
           onClick={() => navigate(`/article`, {
             state: {
               targetArticleId: location.state?.articleId,
-              targetArticleIndex: location.state?.originalArticleIndex
+              targetArticleIndex: location.state?.originalArticleIndex,
+              currentSort: location.state?.currentSort,
+              currentFilters: location.state?.currentFilters
             }
           })}
           className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"

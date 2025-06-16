@@ -265,8 +265,10 @@ export function ArticlePageRewrite() {
                 articleId: currentArticle.id,
                 articleTitle: currentArticle.content,
                 initStreak: streakStatus > 0,
-                // Add this to track which article index we came from
-                originalArticleIndex: currentIndex
+                originalArticleIndex: currentIndex,
+                // Add sort information
+                currentSort: selectedSort,
+                currentFilters: selectedFilters
             }
         });
     };
@@ -292,21 +294,35 @@ export function ArticlePageRewrite() {
     useEffect(() => {
         // Check if we're coming from questions page with a target article
         if (location.state?.targetArticleId && filteredArticles.length > 0) {
-            // If we have a direct index, use it
-            if (location.state.targetArticleIndex !== undefined && 
-                location.state.targetArticleIndex < filteredArticles.length) {
-                setCurrentIndex(location.state.targetArticleIndex);
-            } else {
-                // Otherwise, find the article by ID
-                const targetIndex = filteredArticles.findIndex(
-                    article => article.id === location.state.targetArticleId
-                );
-                if (targetIndex !== -1) {
-                    setCurrentIndex(targetIndex);
+            // First, restore sort settings if they were provided
+            if (location.state.currentSort && location.state.currentSort !== selectedSort) {
+                setSelectedSort(location.state.currentSort);
+                
+                // If filters were also saved, restore them
+                if (location.state.currentFilters) {
+                    setSelectedFilters(location.state.currentFilters);
                 }
+                
+                // This will trigger a re-filter and re-sort through the useEffect
+                // We'll return early and let the next effect cycle handle finding the article
+                return;
+            }
+
+            // Always prioritize finding by ID first
+            const targetIndex = filteredArticles.findIndex(
+                article => String(article.id) === String(location.state.targetArticleId)
+            );
+            
+            if (targetIndex !== -1) {
+                // Found by ID, use this index
+                setCurrentIndex(targetIndex);
+            } else if (location.state.targetArticleIndex !== undefined && 
+                      location.state.targetArticleIndex < filteredArticles.length) {
+                // Fallback to index-based lookup only if ID lookup fails
+                setCurrentIndex(location.state.targetArticleIndex);
             }
         }
-    }, [filteredArticles, location.state]);
+    }, [filteredArticles, location.state, selectedSort]);
 
     if (loading) {
         return (
