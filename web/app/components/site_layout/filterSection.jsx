@@ -1,3 +1,4 @@
+import React from 'react';
 import SortBySection from './sortBySection.jsx';
 
 export default function FilterSection({
@@ -12,7 +13,8 @@ export default function FilterSection({
   selectedSort,
   setSelectedSort,
   showSortMenu,
-  setShowSortMenu
+  setShowSortMenu,
+  onSortChange
 }) {
   return (
     <div className="bg-gray-200 px-6">
@@ -77,6 +79,7 @@ export default function FilterSection({
           setSelectedSort={setSelectedSort}
           showSortMenu={showSortMenu}
           setShowSortMenu={setShowSortMenu}
+          onSortChange={onSortChange}
         />
       </div>
     </div>
