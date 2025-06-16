@@ -142,6 +142,21 @@ export function QuestionPage() {
       if (fract == 1) {
         // user has completed the article
         incrementXp(100);
+        
+        // If streak is completed, we'll pass this info to the article page
+        if (streakCompleted) {
+          navigate(`/article`, {
+            state: {
+              targetArticleId: location.state?.nextArticleId,
+              targetArticleIndex: location.state?.nextArticleIndex,
+              currentSort: location.state?.currentSort,
+              currentFilters: location.state?.currentFilters,
+              streakCompleted: true,
+              displayedStreak: displayedStreak
+            }
+          });
+          return;
+        }
       }
 
       // Check if we have information about the next article
@@ -150,7 +165,9 @@ export function QuestionPage() {
         navigate(`/article`, {
           state: {
             targetArticleId: location.state.nextArticleId,
-            targetArticleIndex: location.state.nextArticleIndex
+            targetArticleIndex: location.state.nextArticleIndex,
+            currentSort: location.state?.currentSort,
+            currentFilters: location.state?.currentFilters
           }
         });
       } else {

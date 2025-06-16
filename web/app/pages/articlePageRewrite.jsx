@@ -10,12 +10,9 @@ import ArticleTip from '../components/site_layout/ArticleTip.jsx';
 import ApiService from '../services/api.js';
 import { calculateArticleCategories } from '../utils/categoryUtils.js';
 import StreakBeginTip from '../components/streak/streakBeginTip.jsx';
+import { StreakCompletedPage } from '../components/streak/streakCompletedPage.jsx';
 import { getStreakCond, swipeRight } from '../services/other.js';
 import { BottomNav } from '../components/site_layout/BottomNav.jsx';
-
-
-// Replace instances of ArticleSortBySection with SortBySection (if needed)
-// Remove the useNavigation={false} prop from all components
 
 export function ArticlePageRewrite() {
     const navigate = useNavigate();
@@ -45,6 +42,10 @@ export function ArticlePageRewrite() {
     // Streak state
     const [streakStatus, setStreakStatus] = useState(0);
 
+    // Add streak completion state
+    const [streakCompleted, setStreakCompleted] = useState(false);
+    const [displayedStreak, setDisplayedStreak] = useState(null);
+
     // Available filter options
     const filterOptions = ['Technology', 'Environment', 'Global Politics', 'Economics', 'Social Issues'];
 
@@ -53,6 +54,22 @@ export function ArticlePageRewrite() {
         initTip();
         getStreakCond().then((resp) => { setStreakStatus(resp.id) });
     }, []);
+
+    // Handle incoming streak completion data
+    useEffect(() => {
+        if (location.state?.streakCompleted && location.state?.displayedStreak) {
+            setStreakCompleted(true);
+            setDisplayedStreak(location.state.displayedStreak);
+
+            // Reset after showing animation (after 5 seconds)
+            const timer = setTimeout(() => {
+                setStreakCompleted(false);
+                setDisplayedStreak(null);
+            }, 5000);
+
+            return () => clearTimeout(timer);
+        }
+    }, [location.state]);
 
     const initTip = () => {
         const tipDismissed = localStorage.getItem('tipDismissed');
@@ -185,20 +202,19 @@ export function ArticlePageRewrite() {
         return Math.round(totalInteractions / daysDifference);
     };
 
-
-    // Handle sort change without navigation
+    // Modified handleSortChange function to reset current index and apply animation
     const handleSortChange = (sortOption) => {
         // Only proceed if there's an actual change
         if (sortOption !== selectedSort) {
             // Show animation to indicate change
             setIsAnimating(true);
-            
+
             // Set the new sort option
             setSelectedSort(sortOption);
-            
+
             // Reset to the first article in the new sorted list
             setCurrentIndex(0);
-            
+
             // End animation after a short delay
             setTimeout(() => {
                 setIsAnimating(false);
@@ -250,12 +266,12 @@ export function ArticlePageRewrite() {
     // Navigation function for swipe to questions
     const goToQuestions = () => {
         if (isAnimating || filteredArticles.length === 0) return;
-        
+
         const currentArticle = filteredArticles[currentIndex];
         if (!currentArticle) return;
-        
+
         swipeRight(currentArticle.id);
-        
+
         // Pass complete context for returning to the correct article
         navigate(`/articles/${currentArticle.id}/questions`, {
             state: {
@@ -297,12 +313,12 @@ export function ArticlePageRewrite() {
             // First, restore sort settings if they were provided
             if (location.state.currentSort && location.state.currentSort !== selectedSort) {
                 setSelectedSort(location.state.currentSort);
-                
+
                 // If filters were also saved, restore them
                 if (location.state.currentFilters) {
                     setSelectedFilters(location.state.currentFilters);
                 }
-                
+
                 // This will trigger a re-filter and re-sort through the useEffect
                 // We'll return early and let the next effect cycle handle finding the article
                 return;
@@ -312,12 +328,12 @@ export function ArticlePageRewrite() {
             const targetIndex = filteredArticles.findIndex(
                 article => String(article.id) === String(location.state.targetArticleId)
             );
-            
+
             if (targetIndex !== -1) {
                 // Found by ID, use this index
                 setCurrentIndex(targetIndex);
-            } else if (location.state.targetArticleIndex !== undefined && 
-                      location.state.targetArticleIndex < filteredArticles.length) {
+            } else if (location.state.targetArticleIndex !== undefined &&
+                location.state.targetArticleIndex < filteredArticles.length) {
                 // Fallback to index-based lookup only if ID lookup fails
                 setCurrentIndex(location.state.targetArticleIndex);
             }
@@ -411,7 +427,6 @@ export function ArticlePageRewrite() {
                     showSortMenu={showSortMenu}
                     setShowSortMenu={setShowSortMenu}
                     onSortChange={handleSortChange}
-                    useNavigation={false}
                 />
 
                 <BottomNav />
@@ -437,6 +452,9 @@ export function ArticlePageRewrite() {
         <div {...handlers} className="w-full bg-gray-200 flex flex-col min-h-screen overflow-hidden relative">
             {/* Header */}
             <AppHeader articleId={currentArticle.id} />
+
+            {/* Streak Tip - Always show the streak tip */}
+            <StreakBeginTip streakStatus={streakStatus} />
 
             {/* Filter, Sort, and Toggle Button Row */}
             <div className="flex items-center gap-4 px-6 py-2">
@@ -476,32 +494,36 @@ export function ArticlePageRewrite() {
                         </svg>
                     )}
                 </button>
-            </div>
 
-            {isVideoArticle && <StreakBeginTip streakStatus={streakStatus} />}
+
+            </div>
 
             {/* Main Content Area */}
-            <div
-                className={`flex-1 flex flex-col justify-center items-center relative transition-all duration-300 ease-out ${isAnimating ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'
-                    }`}
-            >
-                {isVideoArticle ? (
-                    /* Video Article Layout - Full Screen */
-                    <div className="w-full h-full relative">
-                        {/* Video Player - Takes full available space */}
-                        <div className="w-full h-full p-4">
-                            <VerticalVideoPlayer
-                                videoUrl={currentArticle.content}
-                                categories={articleCategories}
-                            />
+            {streakCompleted ? (
+                <StreakCompletedPage streakNo={displayedStreak} />
+            ) : (
+                <div
+                    className={`flex-1 flex flex-col justify-center items-center relative transition-all duration-300 ease-out ${isAnimating ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'
+                        }`}
+                >
+                    {isVideoArticle ? (
+                        /* Video Article Layout - Full Screen */
+                        <div className="w-full h-full relative">
+                            {/* Video Player - Takes full available space */}
+                            <div className="w-full h-full p-4">
+                                <VerticalVideoPlayer
+                                    videoUrl={currentArticle.content}
+                                    categories={articleCategories}
+                                />
+                            </div>
                         </div>
-                    </div>
-                ) : (
-                    <div className="flex flex-col items-center">
-                        <ArticlePreview article={currentArticle} categories={articleCategories} />
-                    </div>
-                )}
-            </div>
+                    ) : (
+                        <div className="flex flex-col items-center">
+                            <ArticlePreview article={currentArticle} categories={articleCategories} />
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* Tip Box - Positioned absolutely over content */}
             <ArticleTip
