@@ -7,6 +7,7 @@ import AllUsersSection from "../components/friends/AllUsersSection";
 import ApiService from "../services/api";
 import { getUserId } from "../services/userApi";
 import UserTagDisplay from '../components/friends/UserTagDisplay';
+import { BottomNav } from '../components/site_layout/BottomNav';
 
 export function FriendsPage() {
     const [searchQuery, setSearchQuery] = useState('');
@@ -199,16 +200,20 @@ export function FriendsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="h-screen w-full bg-gray-50 flex flex-col overflow-hidden">
             <AppHeader title={"Friends"} />
             
-            <div className="flex justify-end px-4 py-2 mt-2">
+            {/* Fixed elements outside of scrollable area */}
+            <div className="flex justify-end px-4 py-2">
                 <UserTagDisplay userId={currentUserId} />
             </div>
             
-            <div className="container mx-auto py-2">
+            <div className="px-4 py-2">
                 <UserSearchBar onSearch={handleSearch} />
-                
+            </div>
+            
+            {/* Scrollable content area */}
+            <div className="flex-1 overflow-y-auto px-4">
                 {loading ? (
                     <div className="flex justify-center mt-8">
                         <p className="text-gray-500">Loading friends data...</p>
@@ -218,7 +223,7 @@ export function FriendsPage() {
                         <p className="text-red-500">{error}</p>
                     </div>
                 ) : (
-                    <div className="mt-6 px-4">
+                    <div className="pb-6">
                         <PendingRequestsSection 
                             requests={pendingRequests}
                             onAccept={handleAcceptRequest}
@@ -239,6 +244,7 @@ export function FriendsPage() {
                     </div>
                 )}
             </div>
+            <BottomNav />
         </div>
     );
 }
