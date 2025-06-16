@@ -7,6 +7,5 @@ export default [
   route("articles/:id", "routes/article.$id.jsx"),
   route("articles/:id/questions", "routes/article.$id.questions.jsx"),
   route("gapfill", "routes/gapfill.jsx"),
-  route("leaderboard", "routes/leaderboard.jsx"),
-  route("friends", "routes/friends.jsx"),
+  route("leaderboard", "routes/leaderboard.jsx")
 ];
