@@ -48,7 +48,22 @@ const CoinIcon = () => (
 
 export default function XpDisplay({ articleId, segmentId }) {
   const [xp, setXp] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
 
+  // Function to fetch XP from server
+  const fetchXp = async () => {
+    try {
+      const xpData = await ApiService.getUserXp();
+      if (xpData && xpData.xp !== undefined) {
+        setXp(xpData.xp);
+        localStorage.setItem('userXp', xpData.xp.toString());
+      }
+    } catch (error) {
+      console.error('Error fetching user XP:', error);
+    }
+  };
+
+  // Initial load + server sync on article/segment change
   useEffect(() => {
     // Load XP from localStorage first for immediate display
     const storedXp = localStorage.getItem('userXp');
@@ -56,27 +71,49 @@ export default function XpDisplay({ articleId, segmentId }) {
       setXp(parseInt(storedXp, 10));
     }
 
-    // Then fetch the latest XP from the server whenever articleId or segmentId changes
-    const fetchXp = async () => {
-      try {
-        const xpData = await ApiService.getUserXp();
-        if (xpData && xpData.xp !== undefined) {
-          setXp(xpData.xp);
-          localStorage.setItem('userXp', xpData.xp.toString());
-        }
-      } catch (error) {
-        console.error('Error fetching user XP:', error);
-      }
+    // Then fetch the latest XP from the server
+    fetchXp();
+  }, [articleId, segmentId]);
+
+  // Listen for XP updates from anywhere in the app
+  useEffect(() => {
+    const handleXpUpdate = (event) => {
+      const newXp = event.detail.xp;
+
+      // Add animation class
+      setIsAnimating(true);
+
+      // Update the XP value
+      setXp(newXp);
+
+      // Remove animation class after animation completes
+      setTimeout(() => {
+        setIsAnimating(false);
+      }, 1000);
     };
 
-    fetchXp();
-  }, [articleId, segmentId]); // Re-fetch when these values change
+    // Add event listener
+    window.addEventListener('xpUpdated', handleXpUpdate);
+
+    // Remove event listener on cleanup
+    return () => {
+      window.removeEventListener('xpUpdated', handleXpUpdate);
+    };
+  }, []);
 
   return (
-    <div className="bg-gradient-to-r from-gray-700 to-gray-600 text-white py-2 px-4 rounded-xl shadow-lg border border-gray-500 hover:shadow-xl transition-all duration-200 hover:scale-105">
+    <div
+      className={`bg-gradient-to-r from-gray-700 to-gray-600 text-white py-2 px-4 rounded-xl shadow-lg border border-gray-500 hover:shadow-xl transition-all duration-200 hover:scale-105 ${
+        isAnimating ? 'animate-pulse' : ''
+      }`}
+    >
       <div className="flex items-center justify-between">
         <CoinIcon />
-        <span className="text-2xl font-bold text-amber-100 ml-4">
+        <span
+          className={`text-2xl font-bold text-amber-100 ml-4 ${
+            isAnimating ? 'scale-110 transition-transform' : ''
+          }`}
+        >
           {xp.toLocaleString()}
         </span>
       </div>
