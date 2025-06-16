@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router';
 import { useSwipeable } from 'react-swipeable';
 import { BottomNav } from '../components/site_layout/BottomNav';
+import ApiService from '../services/api';
 
 export function LeaderboardPage() {
   const navigate = useNavigate();
@@ -22,43 +23,90 @@ export function LeaderboardPage() {
     return colors[Math.floor(Math.random() * colors.length)];
   };
 
+  // Helper function to get initials from user tag
+  const getInitials = (tag) => {
+    if (!tag) return '??';
+    
+    // Find all capital letters in the tag
+    const capitals = tag.match(/[A-Z]/g) || [];
+    
+    if (capitals.length >= 2) {
+      // If there are at least 2 capitals, use the first two
+      return capitals.slice(0, 2).join('');
+    } else if (capitals.length === 1) {
+      // If there's only 1 capital, use it and the next letter
+      const capitalIndex = tag.indexOf(capitals[0]);
+      const nextIndex = capitalIndex + 1;
+      
+      if (nextIndex < tag.length) {
+        return capitals[0] + tag[nextIndex].toUpperCase();
+      } else {
+        // If capital is the last letter, use the first letter as well
+        return tag[0].toUpperCase() + capitals[0];
+      }
+    } else {
+      // If no capitals, use first two letters capitalized
+      return tag.slice(0, 2).toUpperCase();
+    }
+  };
+
   const fetchLeaderboard = async () => {
     try {
-      const response = [
-        { userId: 1, name: 'Alice Carter', streak: 3, xp: 89 },
-        { userId: 2, name: 'Benjamin Lee', streak: 14, xp: 77 },
-        { userId: 3, name: 'Clara Wilson', streak: 8, xp: 93 },
-        { userId: 4, name: 'Daniel Kim', streak: 9, xp: 84 },
-        { userId: 5, name: 'Eva Thompson', streak: 1, xp: 71 },
-        { userId: 6, name: 'Frank Martinez', streak: 17, xp: 95 },
-        { userId: 7, name: 'Grace Patel', streak: 1, xp: 68 },
-        { userId: 8, name: 'Henry Nguyen', streak: 34, xp: 82 },
-        { userId: 9, name: 'Isabella Lopez', streak: 7, xp: 90 },
-        { userId: 10, name: 'Jack Morgan', streak: 2, xp: 74 },
-      ];
-
-      const withColor = response.map(user => ({ ...user, color: getRandomColor() }));
-      setUsers(withColor);
-      setSortedUsers([...withColor].sort((a, b) => b.xp - a.xp));
+      setLoading(true);
+      const response = await ApiService.getAllUsers();
+      
+      if (response.status === 200 && response.users) {
+        // Add a random color to each user
+        const withColor = response.users.map(user => ({ 
+          ...user, 
+          color: getRandomColor() 
+        }));
+        setUsers(withColor);
+        
+        // Initial sort based on current sort setting
+        sortUsers(withColor);
+      } else {
+        setError('Failed to load users data');
+      }
     } catch (err) {
+      console.error('Error fetching leaderboard:', err);
       setError('Failed to load leaderboard');
     } finally {
       setLoading(false);
     }
   };
 
+  // Helper function to sort users and take top 10
+  const sortUsers = (userList) => {
+    const sorted = [...userList].sort((a, b) => 
+      isSortedByXP ? b.xp - a.xp : b.streak - a.streak
+    );
+    // Take only the top 10 users
+    setSortedUsers(sorted.slice(0, 10));
+  };
+
+  // Initial fetch on component mount
   useEffect(() => {
     fetchLeaderboard();
   }, []);
 
+  // Re-sort when the sort option changes
+  useEffect(() => {
+    if (users.length > 0) {
+      sortUsers(users);
+    }
+  }, [isSortedByXP]);
+
   const sortByXP = () => {
-    setIsSortedByXP(true);
-    setSortedUsers([...users].sort((a, b) => b.xp - a.xp));
+    if (!isSortedByXP) {
+      setIsSortedByXP(true);
+    }
   };
 
   const sortByStreak = () => {
-    setIsSortedByXP(false);
-    setSortedUsers([...users].sort((a, b) => b.streak - a.streak));
+    if (isSortedByXP) {
+      setIsSortedByXP(false);
+    }
   };
 
   const handlers = useSwipeable({
@@ -123,11 +171,11 @@ export function LeaderboardPage() {
             </div>
 
             <div className={`flex items-center justify-center w-10 h-10 rounded-full ${user.color} text-white font-bold text-sm`}>
-              {user.name?.charAt(0).toUpperCase() || '?'}
+              {getInitials(user.tag)}
             </div>
 
             <div className="ml-4 flex-1">
-              <p className="font-semibold text-gray-800">{user.name}</p>
+              <p className="font-semibold text-gray-800">{user.tag}</p>
               <p className="text-xs text-gray-500">streak: {user.streak} | xp: {user.xp}</p>
             </div>
 
@@ -135,7 +183,7 @@ export function LeaderboardPage() {
               {isSortedByXP 
                 ? <div className="text-cyan-600 font-bold"> {user.xp} xp </div>
                 : <div className="text-red-600 font-bold"> {user.streak} 🔥 </div>
-                }
+              }
             </div>
           </div>
         ))}
