@@ -1,7 +1,6 @@
 import {useEffect, useState} from 'react';
 
-export default function PollResults({ content }) {
-  const { options, responseCounts, totalResponses } = content;
+export default function PollResults({ options, responseCounts, totalResponses }) {
   const [animate, setAnimate] = useState(false);
   
   const getPercentage = (count) => {

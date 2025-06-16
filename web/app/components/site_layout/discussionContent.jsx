@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import ContextBox from "../common/contextBox.jsx";
 import PinkContainer from "../discussions/PinkContainer.jsx";
@@ -14,6 +14,9 @@ export default function DiscussionContent({ content, interactCallback }) {
   const [isLoadingResponses, setIsLoadingResponses] = useState(false);
   const [userResponseId, setUserResponseId] = useState(null);
   const navigate = useNavigate();
+  
+  // Ref to store the polling interval
+  const pollingIntervalRef = useRef(null);
 
   if (!content) {
     return (
@@ -25,6 +28,57 @@ export default function DiscussionContent({ content, interactCallback }) {
 
   const segmentId = content.id;
   const { id, context, prompt, totalResponses } = content;
+
+  // Helper function to compare response arrays
+  const responsesAreEqual = (responses1, responses2) => {
+    if (responses1.length !== responses2.length) return false;
+    
+    return responses1.every((response1, index) => {
+      const response2 = responses2[index];
+      return response1.id === response2.id && 
+             response1.content === response2.content &&
+             response1.createdAt === response2.createdAt;
+    });
+  };
+
+  // Function to fetch segment data and update responses if different
+  const pollSegmentData = async () => {
+    try {
+      const segmentData = await ApiService.getSegment(segmentId);
+      
+      // If this is a discussion segment, fetch the latest responses
+      if (segmentData.segment && segmentData.segment.type === 'discussion') {
+        const discussionData = await ApiService.getDiscussionResponses(id);
+        const newResponses = discussionData.responses || [];
+        
+        // Only update state if responses have actually changed
+        setResponses(currentResponses => {
+          if (!responsesAreEqual(currentResponses, newResponses)) {
+            console.log('Responses updated:', newResponses.length, 'responses');
+            return newResponses;
+          }
+          return currentResponses;
+        });
+      }
+    } catch (error) {
+      console.error('Error polling segment data:', error);
+      // Don't show error to user for polling failures
+    }
+  };
+
+  // Start polling when component mounts and stop when it unmounts
+  useEffect(() => {
+    // Start polling every 250ms
+    pollingIntervalRef.current = setInterval(pollSegmentData, 250);
+
+    // Cleanup function to clear interval
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+    };
+  }, [segmentId, id]); // Restart polling if segmentId or discussion id changes
 
   // Check localStorage on component mount
   useEffect(() => {
@@ -71,7 +125,7 @@ export default function DiscussionContent({ content, interactCallback }) {
 
     try {
       const response = await ApiService.submitDiscussionResponse(id, userInput);
-      const responseId = response.id || response.responseId; // Adjust based on your API response structure
+      const responseId = response.id || response.responseId;
 
       // Save to localStorage
       localStorage.setItem(`discussion_${id}_responseId`, responseId);
@@ -215,10 +269,28 @@ export default function DiscussionContent({ content, interactCallback }) {
                 <div className="h-96 space-y-3 p-3" id="responseContainer">
                   {responses
                     .sort((a, b) => {
-                      // Put user's response first, then others
+                      // Put user's response first
                       if (a.id == userResponseId) return -1;
                       if (b.id == userResponseId) return 1;
-                      return 0;
+                      
+                      // For other responses, sort in reverse chronological order (newest first)
+                      // Convert custom timestamp format [year, month, day, hour, minute, second, nanoseconds] to Date
+                      const getTimestamp = (createdAt) => {
+                        if (!Array.isArray(createdAt) || createdAt.length < 6) return 0;
+                        
+                        // Note: JavaScript months are 0-indexed, so subtract 1 from month
+                        return new Date(
+                          createdAt[0], // year
+                          createdAt[1] - 1, // month (subtract 1 for JS Date)
+                          createdAt[2], // day
+                          createdAt[3], // hour
+                          createdAt[4], // minute
+                          createdAt[5], // second
+                          Math.floor(createdAt[6] / 1000000) // convert nanoseconds to milliseconds
+                        ).getTime();
+                      };
+                      
+                      return getTimestamp(b.createdAt) - getTimestamp(a.createdAt);
                     })
                     .map((response, index) => (
                       <ResponseContainer

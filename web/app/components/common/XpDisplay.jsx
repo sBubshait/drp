@@ -1,6 +1,51 @@
 import { useEffect, useState } from 'react';
 import ApiService from '../../services/api';
 
+const CoinIcon = () => (
+  <svg
+    width="28"
+    height="28"
+    viewBox="0 0 24 24"
+    fill="none"
+    className="inline-block ml-2"
+  >
+    <circle
+      cx="12"
+      cy="12"
+      r="10"
+      fill="url(#goldGradient)"
+      stroke="#B45309"
+      strokeWidth="1"
+    />
+    <circle
+      cx="12"
+      cy="12"
+      r="7"
+      fill="none"
+      stroke="#F59E0B"
+      strokeWidth="0.5"
+      opacity="0.7"
+    />
+    <text
+      x="12"
+      y="16"
+      textAnchor="middle"
+      fill="#92400E"
+      fontSize="8"
+      fontWeight="bold"
+    >
+      XP
+    </text>
+    <defs>
+      <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#FDE047" />
+        <stop offset="50%" stopColor="#F59E0B" />
+        <stop offset="100%" stopColor="#D97706" />
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
 export default function XpDisplay({ articleId, segmentId }) {
   const [xp, setXp] = useState(0);
 
@@ -28,11 +73,13 @@ export default function XpDisplay({ articleId, segmentId }) {
   }, [articleId, segmentId]); // Re-fetch when these values change
 
   return (
-    <div className="bg-gray-700 text-white py-1 px-10 rounded-lg text-sm font-medium">
-      <span className="text-gray-200 font-bold">{xp}</span>
-      <span className="text-amber-400 text-xl" role="img" aria-label="XP coin">
-        🪙
-      </span>
+    <div className="bg-gradient-to-r from-gray-700 to-gray-600 text-white py-2 px-4 rounded-xl shadow-lg border border-gray-500 hover:shadow-xl transition-all duration-200 hover:scale-105">
+      <div className="flex items-center justify-between">
+        <CoinIcon />
+        <span className="text-2xl font-bold text-amber-100 ml-4">
+          {xp.toLocaleString()}
+        </span>
+      </div>
     </div>
   );
 }

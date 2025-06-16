@@ -35,10 +35,8 @@ public class UserController {
   @Autowired
   private UserRepository userRepository;
 
-
   @Autowired
   private FriendService friendService;
-
 
   @Tag(name = "Users")
   @PostMapping("/create")
@@ -51,8 +49,7 @@ public class UserController {
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body(
-            new IdStatusResponse(500, e.getMessage(), 0L)
-          );
+              new IdStatusResponse(500, e.getMessage(), 0L));
     }
   }
 
@@ -158,52 +155,19 @@ public class UserController {
     // User is continuing an existing streak
     return 2L;
   }
-  @Operation(
-      summary = "Add XP to User",
-      description = "Adds the specified amount of XP to a user's total XP"
-  )
+
+  @Operation(summary = "Add XP to User", description = "Adds the specified amount of XP to a user's total XP")
   @ApiResponses(value = {
-      @ApiResponse(
-          responseCode = "200",
-          description = "XP added successfully",
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(implementation = StatusResponse.class)
-          )
-      ),
-      @ApiResponse(
-          responseCode = "404",
-          description = "User not found",
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(implementation = StatusResponse.class)
-          )
-      ),
-      @ApiResponse(
-          responseCode = "400",
-          description = "Invalid XP amount",
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(implementation = StatusResponse.class)
-          )
-      )
+      @ApiResponse(responseCode = "200", description = "XP added successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StatusResponse.class))),
+      @ApiResponse(responseCode = "404", description = "User not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StatusResponse.class))),
+      @ApiResponse(responseCode = "400", description = "Invalid XP amount", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StatusResponse.class)))
   })
   @Tag(name = "Users")
   @PostMapping("/addXP")
   public ResponseEntity<StatusResponse> addXP(
-      @Parameter(
-          description = "ID of the user to add XP to",
-          required = true,
-          example = "1"
-      )
-      @RequestParam Long userId,
+      @Parameter(description = "ID of the user to add XP to", required = true, example = "1") @RequestParam Long userId,
 
-      @Parameter(
-          description = "Amount of XP to add (must be positive)",
-          required = true,
-          example = "10"
-      )
-      @RequestParam Integer amount) {
+      @Parameter(description = "Amount of XP to add (must be positive)", required = true, example = "10") @RequestParam Integer amount) {
 
     try {
       // Validate amount
@@ -225,8 +189,7 @@ public class UserController {
       userRepository.save(user);
 
       return ResponseEntity.ok(
-          new StatusResponse(200, "Successfully added " + amount + " XP to user " + userId)
-      );
+          new StatusResponse(200, "Successfully added " + amount + " XP to user " + userId));
 
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -234,27 +197,22 @@ public class UserController {
     }
   }
 
-  @Operation(
-      summary = "Add Friend",
-      description = "Send a friend request to another user using their tag"
-  )
+  @Operation(summary = "Add Friend", description = "Send a friend request to another user using their tag")
   @Tag(name = "Friends")
   @PostMapping("/addFriend")
   public ResponseEntity<StatusResponse> addFriend(
-      @Parameter(description = "ID of user sending the request", required = true)
-      @RequestParam Long userId,
+      @Parameter(description = "ID of user sending the request", required = true) @RequestParam Long userId,
 
-      @Parameter(description = "Tag of user to add as friend", required = true)
-      @RequestParam String friendTag) {
+      @Parameter(description = "Tag of user to add as friend", required = true) @RequestParam String friendTag) {
 
     try {
-      boolean success = friendService.addFriend(userId, friendTag);
+      String message = friendService.addFriend(userId, friendTag);
 
-      if (success) {
+      if ("SUCCESS".equals(message)) {
         return ResponseEntity.ok(new StatusResponse(200, "Friend request sent successfully"));
       } else {
         return ResponseEntity.badRequest()
-            .body(new StatusResponse(400, "Unable to send friend request"));
+            .body(new StatusResponse(400, message));
       }
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -262,15 +220,11 @@ public class UserController {
     }
   }
 
-  @Operation(
-      summary = "Get Friends",
-      description = "Get list of friends and pending friend requests"
-  )
+  @Operation(summary = "Get Friends", description = "Get list of friends and pending friend requests")
   @Tag(name = "Friends")
   @GetMapping("/getFriends")
   public ResponseEntity<FriendsResponse> getFriends(
-      @Parameter(description = "User ID", required = true)
-      @RequestParam Long userId) {
+      @Parameter(description = "User ID", required = true) @RequestParam Long userId) {
 
     try {
       FriendsResponse response = friendService.getFriends(userId);
@@ -281,21 +235,15 @@ public class UserController {
     }
   }
 
-  @Operation(
-      summary = "Respond to Friend Request",
-      description = "Accept or ignore a friend request"
-  )
+  @Operation(summary = "Respond to Friend Request", description = "Accept or ignore a friend request")
   @Tag(name = "Friends")
   @PostMapping("/respondToFriend")
   public ResponseEntity<StatusResponse> respondToFriendRequest(
-      @Parameter(description = "ID of user responding to request", required = true)
-      @RequestParam Long userId,
+      @Parameter(description = "ID of user responding to request", required = true) @RequestParam Long userId,
 
-      @Parameter(description = "ID of user who sent the request", required = true)
-      @RequestParam Long requesterId,
+      @Parameter(description = "ID of user who sent the request", required = true) @RequestParam Long requesterId,
 
-      @Parameter(description = "Action to take: 'accept' or 'ignore'", required = true)
-      @RequestParam String action) {
+      @Parameter(description = "Action to take: 'accept' or 'ignore'", required = true) @RequestParam String action) {
 
     try {
       boolean success = friendService.respondToFriendRequest(userId, requesterId, action);
