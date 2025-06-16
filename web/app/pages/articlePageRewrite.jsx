@@ -218,17 +218,31 @@ export function ArticlePageRewrite() {
         }
     };
 
-    // Handle filter toggle
+    // Update handleFilterToggle to prevent double filter application
     const handleFilterToggle = (filter) => {
         setSelectedFilters(prev => {
-            return prev.includes(filter)
+            // Create the new filters array
+            const newFilters = prev.includes(filter)
                 ? prev.filter(f => f !== filter) // Remove if already selected
                 : [...prev, filter]; // Add if not selected
+            
+            return newFilters;
         });
+        
+        // Don't close the filter menu when selecting a filter
+        // This allows users to select multiple filters
     };
 
-    // Handle clear all filters
+    // Update handleClearFilters to only clear filters without changing sort
     const handleClearFilters = () => {
+        setSelectedFilters([]);
+        // Don't reset sort unless explicitly requested
+        // setSelectedSort('Auto'); <- Remove this line
+        setShowFilterMenu(false);
+    };
+
+    // Add a separate function to reset everything
+    const handleResetAll = () => {
         setSelectedFilters([]);
         setSelectedSort('Auto');
         setShowFilterMenu(false);
@@ -413,7 +427,7 @@ export function ArticlePageRewrite() {
                 <NoMatchingArticles
                     selectedSort={selectedSort}
                     selectedFilters={selectedFilters}
-                    onResetFilters={handleClearFilters}
+                    onResetFilters={handleResetAll} // Use the full reset function here
                 />
                 
                 <BottomNav />
