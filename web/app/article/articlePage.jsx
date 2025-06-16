@@ -14,6 +14,7 @@ import StreakBeginTip from '../components/streak/streakBeginTip.jsx';
 import { getStreakCond, swipeRight } from '../services/other.js';
 import XpDisplay from '../components/common/XpDisplay.jsx';
 import { getNextArticleId } from '../utils/sortingUtils';
+import { BottomNav } from '../components/site_layout/BottomNav.jsx';
 
 export function ArticlePage() {
   const navigate = useNavigate();
@@ -488,6 +489,8 @@ export function ArticlePage() {
         isVideoArticle={isVideoArticle}
         categories={articleCategories}
       /> */}
+
+      <BottomNav />
     </div>
   );
 }
