@@ -14,6 +14,7 @@ export function LeaderboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isSortedByXP, setIsSortedByXP] = useState(true);
+  const [showSortDropdown, setShowSortDropdown] = useState(false);
 
   const getRandomColor = () => {
     const colors = [
@@ -98,17 +99,26 @@ export function LeaderboardPage() {
     }
   }, [isSortedByXP]);
 
-  const sortByXP = () => {
-    if (!isSortedByXP) {
-      setIsSortedByXP(true);
+  const handleSortChange = (byXP) => {
+    if (byXP !== isSortedByXP) {
+      setIsSortedByXP(byXP);
     }
+    setShowSortDropdown(false);
   };
 
-  const sortByStreak = () => {
-    if (isSortedByXP) {
-      setIsSortedByXP(false);
-    }
-  };
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (showSortDropdown) {
+        setShowSortDropdown(false);
+      }
+    };
+    
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [showSortDropdown]);
 
   const handlers = useSwipeable({
     onSwipedDown: () => window.scrollBy(0, -200),
@@ -135,20 +145,58 @@ export function LeaderboardPage() {
       {/* Header */}
       <AppHeader title="Leaderboard" />
 
-      {/* Sort Buttons */}
-      <div className="flex justify-center space-x-4 bg-gray-100 py-2 shadow-md z-0">
-        <button onClick={sortByXP}
-          className={`py-1 px-6 rounded-lg text-lg font-medium transition-colors ${
-            isSortedByXP ? 'bg-cyan-700 text-white cursor-not-allowed' : 'bg-cyan-600 text-white hover:bg-cyan-700 active:bg-cyan-800'
-          }`}>
-          Sort by XP
-        </button>
-        <button onClick={sortByStreak}
-          className={`py-1 px-6 rounded-lg text-lg font-medium transition-colors ${
-           (!isSortedByXP) ? 'bg-cyan-700 text-white cursor-not-allowed' : 'bg-cyan-600 text-white hover:bg-cyan-700 active:bg-cyan-800'
-          }`}>
-          Sort by Streak
-        </button>
+      {/* Sort Dropdown - Left Aligned */}
+      <div className="px-4 py-2 bg-gray-100 shadow-md z-10">
+        <div className="relative inline-block text-left">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowSortDropdown(!showSortDropdown);
+            }}
+            className="bg-cyan-700 hover:bg-cyan-600 text-white px-4 py-2 rounded text-lg font-medium flex items-center gap-2"
+          >
+            <span>Sort by: {isSortedByXP ? 'XP' : 'Streak'}</span>
+            <svg 
+              className="w-5 h-5" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M19 9l-7 7-7-7" 
+              />
+            </svg>
+          </button>
+          
+          {showSortDropdown && (
+            <div 
+              className="absolute left-0 mt-1 w-40 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="py-1">
+                <button
+                  onClick={() => handleSortChange(true)}
+                  className={`${
+                    isSortedByXP ? 'bg-cyan-50 text-cyan-700 font-medium' : 'text-gray-700'
+                  } block px-4 py-2 text-sm w-full text-left hover:bg-gray-100`}
+                >
+                  Sort by XP
+                </button>
+                <button
+                  onClick={() => handleSortChange(false)}
+                  className={`${
+                    !isSortedByXP ? 'bg-cyan-50 text-cyan-700 font-medium' : 'text-gray-700'
+                  } block px-4 py-2 text-sm w-full text-left hover:bg-gray-100`}
+                >
+                  Sort by Streak
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Scrollable Content */}
