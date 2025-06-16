@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router';
 import { useSwipeable } from 'react-swipeable';
 import { BottomNav } from '../components/site_layout/BottomNav';
 import ApiService from '../services/api';
+import AppHeader from '../components/site_layout/AppHeader';
 
 export function LeaderboardPage() {
   const navigate = useNavigate();
@@ -132,9 +133,7 @@ export function LeaderboardPage() {
   return (
     <div {...handlers} className="h-screen w-full bg-gray-100 flex flex-col">
       {/* Header */}
-      <div className="flex justify-between items-center bg-gray-800 text-white px-4 py-3 sticky top-0 z-10 h-20">
-        <h1 className="text-lg font-bold">Leaderboard</h1>
-      </div>
+      <AppHeader title="Leaderboard" />
 
       {/* Sort Buttons */}
       <div className="flex justify-center space-x-4 bg-gray-100 py-2 shadow-md z-0">
