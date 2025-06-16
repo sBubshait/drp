@@ -1,4 +1,4 @@
-import { FriendsPage } from "../pages/FriendsPage";
+import { FriendsPage } from "../pages/friendsPage";
 
 export function meta() {
     return [
