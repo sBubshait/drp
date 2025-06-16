@@ -34,7 +34,7 @@ export default function UserSearchBar({ onSearch }) {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto mt-4 px-4">
+    <div className="w-full max-w-2xl mx-auto mt-2 px-4">
       <div className="relative flex items-center">
         <div className="absolute left-0 pl-3 flex items-center pointer-events-none z-10">
           <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
