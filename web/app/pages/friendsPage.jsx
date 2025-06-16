@@ -21,21 +21,30 @@ export function FriendsPage() {
     // Ref to store the polling interval
     const pollingIntervalRef = useRef(null);
 
-    // Helper function to compare arrays of users by ID
+    // More efficient object-based comparison using Maps
     const usersAreEqual = useCallback((users1, users2) => {
         if (users1.length !== users2.length) return false;
         
-        const ids1 = new Set(users1.map(user => user.id));
-        const ids2 = new Set(users2.map(user => user.id));
+        // Create maps of users by ID with XP and streak info
+        const createUserMap = (users) => {
+            const map = new Map();
+            for (const user of users) {
+                const id = user.id || user.userId;
+                const xp = user.xp || user.userXp || 0;
+                const streak = user.streak || user.userStreak || 0;
+                map.set(id, `${xp}:${streak}`);
+            }
+            return map;
+        };
         
-        // Check if all IDs in users1 are in users2
-        for (const id of ids1) {
-            if (!ids2.has(id)) return false;
-        }
+        const map1 = createUserMap(users1);
+        const map2 = createUserMap(users2);
         
-        // Check if all IDs in users2 are in users1
-        for (const id of ids2) {
-            if (!ids1.has(id)) return false;
+        // Compare maps
+        if (map1.size !== map2.size) return false;
+        
+        for (const [id, value] of map1) {
+            if (!map2.has(id) || map2.get(id) !== value) return false;
         }
         
         return true;
@@ -87,13 +96,13 @@ export function FriendsPage() {
             const friendsResponse = await ApiService.getFriends(userId);
             
             if (friendsResponse.status === 200) {
-                // Update friends only if changed
+                // Update friends if list changed or any XP/streak changed
                 const newFriends = friendsResponse.friends || [];
                 if (!usersAreEqual(friends, newFriends)) {
                     setFriends(newFriends);
                 }
                 
-                // Update pending requests only if changed
+                // Update pending requests if list changed or any XP/streak changed
                 const newRequests = friendsResponse.requests || [];
                 if (!usersAreEqual(pendingRequests, newRequests)) {
                     setPendingRequests(newRequests);
