@@ -159,6 +159,7 @@ export function FriendsPage() {
             }
         } catch (err) {
             console.error('Error sending friend request:', err);
+            alert(`Failed to send friend request: ${err.message}`);
         }
     };
 
@@ -173,6 +174,7 @@ export function FriendsPage() {
             }
         } catch (err) {
             console.error('Error accepting friend request:', err);
+            alert(`Failed to accept friend request: ${err.message}`);
         }
     };
 
@@ -187,6 +189,7 @@ export function FriendsPage() {
             }
         } catch (err) {
             console.error('Error rejecting friend request:', err);
+            alert(`Failed to reject friend request: ${err.message}`);
         }
     };
 
