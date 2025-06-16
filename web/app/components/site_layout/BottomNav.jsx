@@ -6,14 +6,14 @@ export function BottomNav() {
   const pathname = location.pathname;
   
   // Check if current route matches patterns
-  const isFeedActive = pathname.startsWith('/articles');
+  const isFeedActive = pathname.startsWith('/article');
   const isLeaderboardActive = pathname === '/leaderboard';
   const isFriendsActive = pathname === '/friends';
   
   return (
     <div className="w-full fixed bg-white flex justify-around overflow-hidden relative border-t border-gray-300 shadow-md py-3">
         <button
-        onClick={() => navigate('/articles/1')}
+        onClick={() => navigate('/article')}
         className={`flex flex-col items-center rounded-lg px-3 py-1 ${
           isFeedActive 
             ? 'text-blue-600 bg-blue-100' 

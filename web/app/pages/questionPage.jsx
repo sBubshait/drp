@@ -138,28 +138,15 @@ export function QuestionPage() {
         setIsAnimating(false);
       }, 150);
     } else {
-
-      if (streakArticle && fract == 1 && !streakCompleted) {
-
-        // Streak completion code (should probably be a function)
-        setStreakArticle(false);
-        setStreakCompleted(true);
-        incrementXp(500);
-
-        getMyData().then((dat) => {
-          setDisplayedStreak(dat.streak);
-          setTimeout(() => { setDisplayedStreak(dat.streak + 1) }, 400)
-          completeStreak();
-        });
-
-      } else if (nextArticleId) {
+      // After all questions, navigate to base /article route
+      if (nextArticleId) {
         if (fract == 1) {
           // user has completed the article
           incrementXp(100);
         }
-        navigate(`/articles/${nextArticleId}`);
+        navigate(`/article`);
       } else {
-        navigate(`/articles/${articleId}`);
+        navigate(`/article`);
       }
     }
   };
@@ -174,7 +161,9 @@ export function QuestionPage() {
         setIsAnimating(false);
       }, 150);
     } else {
-      navigate(`/articles/${articleId}`);
+      // Navigate to the base /article route instead of /articles/[id]
+      // This will ensure we use the ArticlePageRewrite
+      navigate(`/article`);
     }
   };
 

@@ -8,7 +8,7 @@ export default function TutorialPage() {
 
 	const goToArticle = () => {
 		setSwipeUp(true);
-		setTimeout(() => navigate('/articles/1'), 500);
+		setTimeout(() => navigate('/article'), 500);
 	};
 
 	const handlers = useSwipeable({

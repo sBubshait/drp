@@ -13,21 +13,6 @@ import StreakBeginTip from '../components/streak/streakBeginTip.jsx';
 import { getStreakCond, swipeRight } from '../services/other.js';
 import { BottomNav } from '../components/site_layout/BottomNav.jsx';
 
-// Replace instances of CustomFilterSection with FilterSection
-<FilterSection
-  selectedFilters={selectedFilters}
-  filterOptions={filterOptions}
-  showFilterMenu={showFilterMenu}
-  setShowFilterMenu={setShowFilterMenu}
-  handleFilterToggle={handleFilterToggle}
-  handleClearFilters={handleClearFilters}
-  getFilterDisplayText={getFilterDisplayText}
-  selectedSort={selectedSort}
-  setSelectedSort={setSelectedSort}
-  showSortMenu={showSortMenu}
-  setShowSortMenu={setShowSortMenu}
-  onSortChange={handleSortChange}
-/>
 
 // Replace instances of ArticleSortBySection with SortBySection (if needed)
 // Remove the useNavigation={false} prop from all components
