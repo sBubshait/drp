@@ -244,6 +244,42 @@ static async getSources(segmentId) {
   
   return data;
 }
+
+/**
+ * Get friends and pending friend requests for a user
+ * @param {number} userId - User ID
+ * @returns {Promise<object>} - Friends response containing both accepted friends and pending requests
+ */
+static async getFriends(userId) {
+  const endpoint = `/users/getFriends?userId=${userId}`;
+  const data = await this.request(endpoint);
+  
+  if (data.status !== 200) {
+    throw new Error(`Failed to fetch friends: ${data.status} - ${data.message}`);
+  }
+  
+  return data;
+}
+
+/**
+ * Respond to a friend request (accept or ignore)
+ * @param {number} userId - ID of the user responding to the request
+ * @param {number} requesterId - ID of the user who sent the request
+ * @param {string} action - Action to take: 'accept' or 'ignore'
+ * @returns {Promise<object>} - Status response
+ */
+static async respondToFriend(userId, requesterId, action) {
+  const endpoint = `/users/respondToFriend?userId=${userId}&requesterId=${requesterId}&action=${action}`;
+  const data = await this.request(endpoint, {
+    method: 'POST'
+  });
+  
+  if (data.status !== 200) {
+    throw new Error(`Failed to respond to friend request: ${data.status} - ${data.message}`);
+  }
+  
+  return data;
+}
 }
 
 /**
