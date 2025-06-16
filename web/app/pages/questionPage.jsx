@@ -274,10 +274,15 @@ export function QuestionPage() {
       <div className="w-full bg-gray-200 flex flex-col min-h-screen items-center justify-center">
         <p className="text-gray-600">No questions found for this article.</p>
         <button
-          onClick={() => navigate(`/articles/${articleId}`)}
+          onClick={() => navigate(`/article`, {
+            state: {
+              targetArticleId: location.state?.articleId,
+              targetArticleIndex: location.state?.originalArticleIndex
+            }
+          })}
           className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
-          Go to Article
+          Back to Article
         </button>
       </div>
     );
