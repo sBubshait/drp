@@ -138,40 +138,53 @@ export function QuestionPage() {
         setIsAnimating(false);
       }, 150);
     } else {
-      // After all questions, check if article is completed
-      if (fract == 1) {
-        // User has completed the article
-        incrementXp(100);
+      // Handle streak completion first if this is a streak article and all segments are answered
+      if (streakArticle && fract == 1 && !streakCompleted) {
+        // First set flags
+        setStreakArticle(false);
+        setStreakCompleted(true);
+        incrementXp(500);
+
+        // Get user data, then setup animation with better delays
+        getMyData().then((userData) => {
+          // Delay setting the initial streak value to give component time to render
+          setTimeout(() => {
+            // Set the current streak value first
+            setDisplayedStreak(userData.streak);
+            
+            // Add a longer delay before showing the increment (1.5 seconds)
+            // This gives users time to see the initial number
+            setTimeout(() => {
+              setDisplayedStreak(userData.streak + 1);
+            }, 1500);
+          }, 800);
+          
+          // Call completeStreak after setting up the animation
+          completeStreak();
+        });
         
-        // If streak is completed, pass the info directly to article page
-        if (streakCompleted) {
-          console.log("Streak completed, passing to article page");
+        // Don't navigate away yet - return to prevent further code execution
+        return;
+      } else {
+        // Regular completion without streak or after showing streak
+        if (fract == 1) {
+          // User has completed the article
+          incrementXp(100);
+        }
+
+        // Navigate to the next article if available - removed delay
+        if (location.state?.nextArticleId) {
           navigate(`/article`, {
             state: {
-              targetArticleId: location.state?.nextArticleId,
-              targetArticleIndex: location.state?.nextArticleIndex,
+              targetArticleId: location.state.nextArticleId,
+              targetArticleIndex: location.state.nextArticleIndex,
               currentSort: location.state?.currentSort,
-              currentFilters: location.state?.currentFilters,
-              streakCompleted: true,
-              displayedStreak: displayedStreak
+              currentFilters: location.state?.currentFilters
             }
           });
-          return;
+        } else {
+          navigate(`/article`);
         }
-      }
-
-      // Regular navigation to next article (no streak completed)
-      if (location.state?.nextArticleId) {
-        navigate(`/article`, {
-          state: {
-            targetArticleId: location.state.nextArticleId,
-            targetArticleIndex: location.state.nextArticleIndex,
-            currentSort: location.state?.currentSort,
-            currentFilters: location.state?.currentFilters
-          }
-        });
-      } else {
-        navigate(`/article`);
       }
     }
   };
@@ -258,30 +271,6 @@ export function QuestionPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [loading, segments.length, currentIndex, nextArticleId, isAnimating]);
 
-  // Add a useEffect to handle checking for streak completion when fract changes to 1
-  useEffect(() => {
-    // Only proceed if:
-    // 1. This is a streak article
-    // 2. All segments are answered (fract is 1)
-    // 3. streakCompleted is currently false (we haven't already processed it)
-    if (streakArticle && fract === 1 && !streakCompleted) {
-      // Complete the streak on the server
-      completeStreak().then(response => {
-        if (response.status === 200) {
-          // Get updated user data to show current streak count
-          getMyData().then(userData => {
-            setStreakCompleted(true);
-            setDisplayedStreak(userData.streak);
-            console.log("Streak completed! Current streak:", userData.streak);
-          }).catch(error => {
-            console.error('Error fetching user data after streak completion:', error);
-          });
-        }
-      }).catch(error => {
-        console.error('Error completing streak:', error);
-      });
-    }
-  }, [fract, streakArticle, streakCompleted]);
 
   // Loading state
   if (loading) {
