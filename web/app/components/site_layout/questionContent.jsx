@@ -1,12 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ContextBox from "../question_elements/contextBox.jsx";
 import FeedbackBox from "../question_elements/feedbackBox.jsx";
 import ChoicesButtons from "../question_elements/choicesButtons.jsx";
-export default function QuestionContent({ content, interactCallback }) {
 
+export default function QuestionContent({ content, interactCallback }) {
   const [hasAnswered, setHasAnswered] = useState(false);
   const [feedbackTitle, setFeedbackTitle] = useState("");
   const [feedbackBody, setFeedbackBody] = useState("");
+
+  // Reset state when question ID changes
+  useEffect(() => {
+    // Reset feedback state when content ID changes (new question)
+    setHasAnswered(false);
+    setFeedbackTitle("");
+    setFeedbackBody("");
+  }, [content?.id]); // This effect runs whenever the question ID changes
 
   if (!content) {
     return (
