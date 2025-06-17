@@ -504,7 +504,7 @@ export function ArticlePageRewrite() {
                     /* Video Article Layout - Full Screen */
                     <div className="w-full h-full relative">
                         {/* Video Player - Takes full available space */}
-                        <div className="w-full h-full p-4">
+                        <div className="w-full h-full p-10">
                             <VerticalVideoPlayer
                                 videoUrl={currentArticle.content}
                                 categories={articleCategories}
