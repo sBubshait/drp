@@ -62,8 +62,8 @@ public FriendsResponse getFriends(Long userId) {
           friends.add(new User(
               user.getId(),
               user.getTag(),
-              user.getXp(),
               user.getStreak(),
+              user.getXp(),
               user.getLastComplete()
           ));
         }
@@ -81,8 +81,8 @@ public FriendsResponse getFriends(Long userId) {
           requests.add(new User(
               user.getId(),
               user.getTag(),
-              user.getXp(),
               user.getStreak(),
+              user.getXp(),
               request.getCreatedAt()
           ));
         }
