@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router';
 import { useSwipeable } from 'react-swipeable';
 import { BottomNav } from '../components/site_layout/BottomNav';
@@ -17,6 +17,9 @@ export function LeaderboardPage() {
   const [isSortedByXP, setIsSortedByXP] = useState(true);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [showFriendsOnly, setShowFriendsOnly] = useState(false);
+  
+  // Ref to store the polling interval
+  const pollingIntervalRef = useRef(null);
 
   const getRandomColor = () => {
     const colors = [
@@ -54,9 +57,38 @@ export function LeaderboardPage() {
     }
   };
 
-  const fetchLeaderboard = async () => {
+  // Helper function to compare users for changes
+  const usersAreEqual = useCallback((userList1, userList2) => {
+    if (userList1.length !== userList2.length) return false;
+    
+    // Create maps of users by ID with XP and streak info
+    const createUserMap = (users) => {
+      const map = new Map();
+      for (const user of users) {
+        const id = user.id || user.userId;
+        const xp = user.xp || 0;
+        const streak = user.streak || 0;
+        map.set(id, `${xp}:${streak}`);
+      }
+      return map;
+    };
+    
+    const map1 = createUserMap(userList1);
+    const map2 = createUserMap(userList2);
+    
+    // Compare maps
+    if (map1.size !== map2.size) return false;
+    
+    for (const [id, value] of map1) {
+      if (!map2.has(id) || map2.get(id) !== value) return false;
+    }
+    
+    return true;
+  }, []);
+
+  const fetchLeaderboard = async (isPolling = false) => {
     try {
-      setLoading(true);
+      if (!isPolling) setLoading(true);
       
       let userData = [];
       
@@ -69,7 +101,7 @@ export function LeaderboardPage() {
           // Use only accepted friends
           userData = response.friends || [];
         } else {
-          setError('Failed to load friends data');
+          if (!isPolling) setError('Failed to load friends data');
           return;
         }
       } else {
@@ -79,28 +111,40 @@ export function LeaderboardPage() {
         if (response.status === 200 && response.users) {
           userData = response.users;
         } else {
-          setError('Failed to load users data');
+          if (!isPolling) setError('Failed to load users data');
           return;
         }
       }
       
-      // Add random colors to users
-      const withColor = userData.map(user => ({ 
-        ...user, 
-        color: getRandomColor() 
-      }));
+      // Add random colors to users while preserving existing colors for unchanged users
+      const withColor = userData.map(user => {
+        // Find existing user with the same ID to keep their color
+        const existingUser = users.find(u => (u.id || u.userId) === (user.id || user.userId));
+        return { 
+          ...user, 
+          color: existingUser ? existingUser.color : getRandomColor() 
+        };
+      });
       
-      setUsers(withColor);
-      
-      // Sort users based on current sort setting
-      sortUsers(withColor);
+      if (!isPolling || !usersAreEqual(users, withColor)) {
+        setUsers(withColor);
+        // Sort users based on current sort setting
+        sortUsers(withColor);
+      }
     } catch (err) {
       console.error('Error fetching leaderboard:', err);
-      setError(`Failed to load ${showFriendsOnly ? 'friends' : 'leaderboard'}`);
+      if (!isPolling) {
+        setError(`Failed to load ${showFriendsOnly ? 'friends' : 'leaderboard'}`);
+      }
     } finally {
-      setLoading(false);
+      if (!isPolling) setLoading(false);
     }
   };
+
+  // Polling function - modified version of fetchLeaderboard
+  const pollLeaderboardData = useCallback(async () => {
+    await fetchLeaderboard(true);
+  }, [users, showFriendsOnly, isSortedByXP]);
 
   // Helper function to sort users and take top 10
   const sortUsers = (userList) => {
@@ -127,6 +171,20 @@ export function LeaderboardPage() {
       sortUsers(users);
     }
   }, [isSortedByXP]);
+
+  // Set up polling interval
+  useEffect(() => {
+    // Start polling every 1000ms
+    pollingIntervalRef.current = setInterval(pollLeaderboardData, 1000);
+    
+    // Cleanup on unmount
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+    };
+  }, [pollLeaderboardData]);
 
   const handleSortChange = (byXP) => {
     if (byXP !== isSortedByXP) {
@@ -276,7 +334,7 @@ export function LeaderboardPage() {
             <div className="w-8 text-center text-lg font-semibold text-gray-700 mr-3">
               {getRankIcon(index)}
             </div>
-
+            
             <div className={`flex items-center justify-center w-10 h-10 rounded-full ${user.color} text-white font-bold text-sm`}>
               {getInitials(user.tag)}
             </div>
